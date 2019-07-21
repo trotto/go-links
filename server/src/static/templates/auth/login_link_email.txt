@@ -1,0 +1,7 @@
+Thank you for requesting a Trotto login link!
+
+Click this link to log into Trotto: {{ login_url }}
+
+- Team Trotto
+
+If you did not request this email, you can ignore it or email help@trot.to.

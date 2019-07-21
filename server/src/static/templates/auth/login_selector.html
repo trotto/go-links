@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Trotto</title>
+        <meta name="viewport" content="width=device-width">
+        <meta name="description" content="">
+        <meta name="keywords" content="" />
+
+        <link rel="canonical" href="https://trot.to/">
+        <link rel="alternate" type="application/rss+xml" title="RSS" href="/feed.xml">
+        <link href="//fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
+        <link href="//fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" rel="stylesheet" type="text/css">
+
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+        <link rel="stylesheet" href="/_styles/main.css">
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <script>
+            window.requestEmailLogin = function() {
+                $.post({
+                    url: "/_/auth/login/email",
+                    data: JSON.stringify({email: $('#email-input').val()}),
+                    contentType: 'application/json'
+                })
+                  .done(function( data ) {
+                    $('#message').text(JSON.parse(data).message);
+                  });
+            };
+        </script>
+    </head>
+
+    <body>
+        <div class="container" style="margin-top: 10px;">
+            <div class="row">
+                <div class="col-md-8 col-md-offset-2">
+                    <div style="width: 100%; display: flex; justify-content: space-between;">
+                        <a class="unstyled-link" href="#/">
+                            <div style="display: flex; align-items: center;">
+                                <img src="/_images/snout.png" style="height: 1.6em;">
+                                <div style="margin-left: 7px; color: black; text-decoration: none; font-size: 1.6em; opacity: 0.7;">
+                                    <b>Trotto</b>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="container" id="link-form" style="padding-top:60px">
+          <div class="row">
+            <div class="col-md-8 col-md-offset-2 text-center">
+              <div style="width:100%;display:flex;flex-direction:column">
+                  <a data-test-id="google-signin-button" href="{{ google_auth_url }}">
+                    <img height="60" src="/_images/auth/google_signin_button.png" />
+                  </a>
+                  <p style="font-size:1.4rem;padding-top:10px">
+                    By signing in, you agree to Trotto's <a href="/_docs/terms" target="_blank">
+                    Terms of Service</a> and <a href="/_docs/privacy" target="_blank">Privacy Policy</a>.
+                  </p>
+              </div>
+            </div>
+            <div class="col-md-8 col-md-offset-2 text-center">
+              <div style="margin: 40px 0; display: flex; justify-content: center; align-items: center">
+                  <div style="width: 50px; height: 1px; background-color: black">
+                  </div>
+                  <div style="margin: 1px 10px 0">
+                      or
+                  </div>
+                  <div style="width: 50px; height: 1px; background-color: black">
+                  </div>
+              </div>
+            </div>
+            <div class="col-md-8 col-md-offset-2 text-center" style="font-size: 1.1em">
+              <div style="display: flex; flex-direction: column; align-items: center">
+                  <input
+                      id="email-input"
+                      type="email" class="form-control" placeholder="Enter your company email"
+                      style="width: 100%; max-width: 350px; padding: 5px 15px; height: auto; font-size: 1em; margin-bottom: 15px">
+                  <button onclick="requestEmailLogin()"
+                          id="link-submit-button" type="submit" class="btn btn-default"
+                          style="width: 100%; max-width: 350px; font-size: 1em; margin-bottom: 15px">
+                      Get sign in link
+                  </button>
+                  <p style="font-size:1.4rem">
+                    By signing in, you agree to Trotto's <a href="/_docs/terms" target="_blank">
+                    Terms of Service</a> and <a href="/_docs/privacy" target="_blank">Privacy Policy</a>.
+                  </p>
+                  <div id="message" class="text-center trotto-color" style="width: 100%; max-width: 350px; font-size: 0.9em">
+                  </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <script>
+            window.requestEmailLogin = function() {
+                $.post({
+                    url: "/_/auth/login/email",
+                    data: JSON.stringify({email: $('#email-input').val()}),
+                    contentType: 'application/json'
+                })
+                  .done(function( data ) {
+                    $('#message').text(JSON.parse(data).message);
+                  });
+            };
+
+            $("#email-input").keyup(function(event) {
+                if (event.keyCode === 13) {
+                    $("#link-submit-button").click();
+                }
+            });
+        </script>
+    </body>
+</html>

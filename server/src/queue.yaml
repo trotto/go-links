@@ -1,0 +1,15 @@
+queue:
+
+- name: outgoing-mail
+  rate: 20/s
+  retry_parameters:
+    min_backoff_seconds: 30
+    task_retry_limit: 3
+    task_age_limit: 1d
+
+- name: events
+  rate: 500/s
+  retry_parameters:
+    min_backoff_seconds: 30
+    task_retry_limit: 20
+    task_age_limit: 7d

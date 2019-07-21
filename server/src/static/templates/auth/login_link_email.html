@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>Trotto</title>
+        <style>
+            .wrapper {
+                width: 100%;
+                display: flex;
+            }
+
+            #header {
+                margin: 30px auto;
+                font-size: 1.5em;
+            }
+
+            #button {
+                background-color: #f27e8f;
+                color: white;
+                margin: 0 auto 30px;
+                padding: 20px 30px;
+                font-size: 1.5em;
+                border-radius: 10px;
+                text-decoration: none;
+            }
+
+            #signoff {
+                margin: 0 auto 30px;
+                font-size: 1.5em;
+            }
+
+            #footer {
+                margin: 0 auto 30px;
+                font-size: 1em;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="wrapper">
+            <div id="signoff">
+                Thank you for requesting a Trotto login link!
+            </div>
+        </div>
+        <div class="wrapper">
+            <a id="button" href="{{ login_url }}">
+                Click here to log in
+            </a>
+        </div>
+        <div class="wrapper">
+            <div id="signoff">
+                - Team Trotto
+            </div>
+        </div>
+        <div class="wrapper">
+            <div id="footer">
+                If you did not request this email, you can ignore it or email help@trot.to.
+            </div>
+        </div>
+    </body>
+</html>

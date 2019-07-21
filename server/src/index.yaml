@@ -1,0 +1,19 @@
+indexes:
+
+- kind: ShortLink
+  properties:
+  - name: organization
+  - name: owner
+  - name: created
+
+- kind: ShortLink
+  properties:
+  - name: organization
+  - name: owner
+  - name: created
+    direction: desc
+
+- kind: ShortLink
+  properties:
+  - name: organization
+  - name: shortpath_prefix
