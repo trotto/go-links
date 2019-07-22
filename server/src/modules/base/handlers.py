@@ -261,7 +261,16 @@ class LoginHandler(NoLoginRequiredHandler):
     redirect_to = self.request.get('redirect_to', None)
 
     if self.request.host.split(':')[0] not in ['trot.to', 'localhost']:
-      self.redirect(self.get_google_login_url(None, redirect_to))
+      # quick & dirty workaround for issue were session isn't set before redirect.
+      self.response.write("""<!doctype html>
+<html>
+  <head>
+    <title>Redirecting...</title>
+    <script>window.location.href="%s"</script>
+  </head>
+  <body></body>
+</html>""" % (self.get_google_login_url(None, redirect_to)))
+      return
 
     # only allow redirects back to our own URLs
     if redirect_to:
