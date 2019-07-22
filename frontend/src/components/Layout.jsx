@@ -69,7 +69,7 @@ export const MainLayout = React.createClass({
             <div className="row">
               <div className="col-md-4 col-md-offset-2" style={{paddingTop: '10px', paddingBottom: '10px'}}>
                 <div style={{display: 'flex', maxWidth: '400px', justifyContent: 'space-between'}}>
-                  <a style={{display: 'none', marginRight: '10px'}}
+                  <a style={{marginRight: '10px'}}
                      href="https://github.com/trotto/go-links"
                      target="_blank"
                   >
