@@ -1,3 +1,4 @@
+import logging
 import os
 
 import yaml
@@ -6,6 +7,10 @@ import env
 
 
 CONFIGS_PARENT_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../config')
+
+
+class MissingConfigError(Exception):
+  pass
 
 
 def get_secrets(error_if_missing=True):
@@ -45,3 +50,15 @@ def get_config():
     return {}
 
   return config
+
+
+def get_path_to_oauth_secrets():
+  production_path = os.path.join(os.path.dirname(__file__), '../config/client_secrets.json')
+
+  if not os.path.isfile(production_path):
+    if env.current_env_is_local():
+      return os.path.join(os.path.dirname(__file__), '../local/client_secrets_local_only.json')
+    else:
+      raise MissingConfigError('Missing `config/client_secrets.json` in non-local environment')
+
+  return production_path

@@ -16,6 +16,14 @@ def _write_secrets(updated_secrets):
     f.write('export TROTTO_APP_ID=%s' % (secrets['app_id']))
 
 
+def _check_for_client_secrets():
+  if not os.path.isfile(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'src/config/client_secrets.json')):
+    print('\nTo deploy to App Engine, you must include a src/config/client_secrets.json. For guidance, see'
+          ' https://github.com/trotto/go-links#obtain-oauth-client-credentials.')
+
+    sys.exit(1)
+
+
 if __name__ == "__main__":
   secrets = get_secrets(False) or {}
 
@@ -31,5 +39,7 @@ if __name__ == "__main__":
     secrets['app_id'] = raw_input("What's your App Engine app ID? ")
 
   _write_secrets(secrets)
+
+  _check_for_client_secrets()
 
   os.environ['TROTTO_APP_ID'] = secrets['app_id']

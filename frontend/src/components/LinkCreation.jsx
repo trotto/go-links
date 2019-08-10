@@ -5,7 +5,6 @@ import * as actions from '../actions';
 import * as getters from '../getters';
 import { browserHistory } from 'react-router';
 import {Map, List, Set, fromJS} from 'immutable';
-import {getServiceBaseUrl} from '../utils';
 import {ReduxManagedStateComponent} from './Abstract'
 
 

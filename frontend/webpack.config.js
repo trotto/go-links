@@ -47,6 +47,9 @@ if (JSON.stringify(process.env.NODE_ENV || 'development') == '"development"') {
   config.entry.push('webpack/hot/only-dev-server');
   config.devServer = {
     contentBase: __dirname + '/../server/src/static',
+    proxy: {
+      '/_/api': 'http://localhost:9095'
+    },
     hot: true,
     historyApiFallback: true,
     disableHostCheck: true

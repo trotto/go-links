@@ -1,8 +1,14 @@
 #!/bin/bash
 
+set -e
+
 python prepare_deploy.py
 
 sh install_deps.sh
+
+cd ../frontend
+sh build_bundle.sh
+cd ../server
 
 source src/config/.set_env_vars
 

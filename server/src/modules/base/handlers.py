@@ -17,13 +17,9 @@ from webapp2_extras import sessions
 from modules.base import authentication
 from modules.organizations.utils import get_organization_id_for_email
 from modules.users.helpers import get_or_create_user, send_login_email, validate_login_link, LoginEmailException, LoginLinkValidationError
-from shared_helpers.configs import get_secrets
-from shared_helpers.constants import TEST_ORGANIZATION_EMAIL_ADDRESSES
+from shared_helpers.configs import get_secrets, get_path_to_oauth_secrets
 from shared_helpers import env
 from shared_helpers import utils
-
-
-DEV_ORIGINS = ['http://localhost:5007']
 
 
 JINJA_ENVIRONMENT = jinja2.Environment(
@@ -89,7 +85,7 @@ class BaseHandler(webapp2.RequestHandler):
     self.session['redirect_to_after_oauth'] = str(redirect_to_after_oauth)
 
     # http://oauth2client.readthedocs.io/en/latest/source/oauth2client.client.html
-    flow = flow_from_clientsecrets(os.path.join(os.path.dirname(__file__), '../../config/client_secrets.json'),
+    flow = flow_from_clientsecrets(get_path_to_oauth_secrets(),
                                    scope='https://www.googleapis.com/auth/userinfo.email',
                                    redirect_uri=oauth_redirect_uri)
 
@@ -111,17 +107,6 @@ class BaseHandler(webapp2.RequestHandler):
         return
       elif not users.is_current_user_admin():
         self.abort(403)
-
-    if self.request.headers.get('Origin') in DEV_ORIGINS:
-      self.response.headers['Access-Control-Allow-Origin'] = self.request.headers.get('Origin')
-      self.response.headers['Access-Control-Allow-Headers'] = 'Content-Type,Cookie,X-CSRF'
-      self.response.headers['Access-Control-Allow-Methods'] = 'GET,POST,PUT'
-      self.response.headers['Access-Control-Allow-Credentials'] = 'true'
-
-    # special CORS handling, since cookies won't be sent in preflight request
-    if self.request.method == 'OPTIONS':
-      webapp2.RequestHandler.dispatch(self)
-      return
 
     self.is_local_env = not os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine/')
 
@@ -209,7 +194,7 @@ class OAuthCallbackHandler(NoLoginRequiredHandler):
     if self.session.get('pickled_oauth_flow'):
       flow = pickle.loads(self.session['pickled_oauth_flow'])
     else:
-      flow = flow_from_clientsecrets(os.path.join(os.path.dirname(__file__), '../../config/client_secrets.json'),
+      flow = flow_from_clientsecrets(get_path_to_oauth_secrets(),
                                      scope='https://www.googleapis.com/auth/userinfo.email',
                                      redirect_uri='https://trot.to/_/auth/oauth2_callback')
 

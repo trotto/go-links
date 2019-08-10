@@ -144,7 +144,7 @@ export function saveLink() {
   return function (dispatch, getState) {
     const currentState = getState().core;
 
-    var endpoint = getServiceBaseUrl('default') + '/_/api/links';
+    var endpoint = '/_/api/links';
 
     var fetchInit = {
       credentials: 'include',
@@ -165,7 +165,7 @@ export function saveLink() {
 export function updateLink(linkId, updates) {
 
   return function (dispatch, getState) {
-    var endpoint = getServiceBaseUrl('default') + '/_/api/links/' + linkId;
+    var endpoint = '/_/api/links/' + linkId;
 
     var fetchInit = {
       credentials: 'include',
@@ -195,7 +195,7 @@ export function receiveLinks(links) {
 export function fetchLinks() {
 
   return function (dispatch, getState) {
-    var endpoint = getServiceBaseUrl('default') + '/_/api/links';
+    var endpoint = '/_/api/links';
 
     var fetchInit = {
       credentials: 'include',
@@ -253,7 +253,7 @@ export function updateUserInfo(userInfo) {
 export function fetchUserInfo() {
 
   return function (dispatch, getState) {
-    var endpoint = getServiceBaseUrl('default') + '/_/api/users/me';
+    var endpoint = '/_/api/users/me';
 
     var fetchInit = {
       credentials: 'include',
@@ -277,7 +277,7 @@ export function fetchUserInfo() {
 export function updateUser(userData) {
 
   return function (dispatch, getState) {
-    var endpoint = getServiceBaseUrl('default') + '/_/api/users/me';
+    var endpoint = '/_/api/users/me';
 
     var fetchInit = {
       credentials: 'include',
