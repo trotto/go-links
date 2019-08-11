@@ -1,4 +1,5 @@
-var webpack = require('webpack');
+const path = require('path');
+const webpack = require('webpack');
 
 
 config = {
@@ -6,23 +7,17 @@ config = {
     './src/index.jsx'
   ],
   module: {
-    loaders: [
+    rules: [
       {
-        test: /\.jsx?$/,
+        test: /\.(js|jsx)$/,
+        loaders: ['react-hot-loader/webpack', 'babel-loader'],
         exclude: /node_modules/,
-        loader: 'react-hot!babel'
-      },
-      {
-        test: /\.html$/,
-        loader: 'html'},
-      {
-        test: /\.json$/,
-        loader: 'json-loader'
+        include: path.join(__dirname, 'src')
       }
     ]
   },
   resolve: {
-    extensions: ['', '.js', '.jsx']
+    extensions: ['.js', '.jsx']
   },
   output: {
     path: __dirname + '/../server/src/static/_scripts',
@@ -57,7 +52,6 @@ if (JSON.stringify(process.env.NODE_ENV || 'development') == '"development"') {
     historyApiFallback: true,
     disableHostCheck: true
   };
-  config.plugins.push(new webpack.HotModuleReplacementPlugin());
 }
 
 module.exports = config;
