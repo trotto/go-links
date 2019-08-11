@@ -1,11 +1,64 @@
 # go-links
 
+[![CircleCI](https://circleci.com/gh/trotto/go-links.svg?style=svg)](https://circleci.com/gh/trotto/go-links)
+
+Try out the latest build at [latest-master.trotto.dev](https://latest-master.trotto.dev). If you'd rather use
+a fully-managed instance of Trotto, check out [www.trot.to](https://www.trot.to).
+
 ----
 
 Don't hesitate to reach out to us through help@trot.to, a GitHub issue, or live chat
 at https://www.trot.to.
 
 ----
+
+## Local development
+
+You can bring up a local instance of Trotto within a few minutes.
+
+### Install the Google Cloud SDK
+
+Follow the instructions [here](https://cloud.google.com/sdk/docs/quickstarts) to install the Cloud SDK for Google
+Cloud Platform.
+
+Once you've installed the SDK, you should be able to successfully run `gcloud info`.
+
+### Clone this repository
+
+```
+git clone git@github.com:trotto/go-links.git
+cd go-links
+```
+
+### Start the backend server
+
+From the `server/` directory, run:
+
+```
+./install_deps.sh
+./run_local.sh
+```
+
+### Start the frontend development server
+
+In a separate terminal, from the `frontend/` directory, run:
+
+```
+npm install
+./start_dev_server.sh
+```
+
+Now, you can access the local instance at http://localhost:5007.
+
+### Making changes
+
+Most server-side and frontend changes should be picked up automatically, thanks to the App Engine dev server and
+[React Hot Loader](https://github.com/gaearon/react-hot-loader).
+
+### View the admin console
+
+Access the development admin console at http://localhost:8095. The admin console allows you to view the datastore,
+use an interactive console, and more.
 
 ## Deploying your own Trotto instance
 

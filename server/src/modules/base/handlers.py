@@ -308,9 +308,17 @@ class EmailLoginHandler(NoLoginRequiredHandler):
 
 
 def get_webapp2_config():
+  try:
+    sessions_secret = get_secrets()['sessions_secret']
+  except IOError:
+    if env.current_env_is_local():
+      sessions_secret = 'local-only-mock-sessions-secret'
+    else:
+      raise
+
   config = {}
   config['webapp2_extras.sessions'] = {
-    'secret_key': get_secrets()['sessions_secret'],
+    'secret_key': sessions_secret,
     'cookie_args': {
       'secure': os.getenv('SERVER_SOFTWARE', '').startswith('Google App Engine/')
     }
