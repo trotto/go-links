@@ -1,13 +1,9 @@
 import React from 'react';
 import { render } from 'react-dom'
 import {Provider} from 'react-redux';
-import { Router, Route, Redirect, IndexRoute, hashHistory } from 'react-router';
-import { syncHistoryWithStore, routerReducer } from 'react-router-redux'
 import {createStore, applyMiddleware, combineReducers} from 'redux';
 import reducer from './reducer';
-import {App} from './components/App';
-import {MainLayoutContainer} from './components/Layout';
-import {LinksTableContainer} from './components/LinkList';
+import TrottoRouter from './router';
 import {receiveSaveResult, updateNewLinkFieldWithString,
         setLinkCreationMessage, fetchUserInfo, receiveUserInfo} from './actions';
 import {INIT_STATE} from './init_state';
@@ -81,16 +77,9 @@ if (document.cookie.indexOf('session=') !== -1) {
   }
 })();
 
+
 render((
     <Provider store={store}>
-      <Router history={hashHistory}>
-        <Route component={App}>
-          <Route component={MainLayoutContainer}>
-            <Route path="/" component={null} />
-            <Route path="/create" component={null} />
-            <Route path="/directory" component={LinksTableContainer} />
-          </Route>
-        </Route>
-      </Router>
+      <TrottoRouter />
     </Provider>
 ), document.getElementById('app'));
