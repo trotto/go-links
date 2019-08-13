@@ -27,12 +27,30 @@ export const Butterbar = React.createClass({
         of <span style="color:black">trot.to/[keyword]</span>
     `;
 
-    const showInstallChromeButterbar = browser.name === 'chrome'
+    const OPEN_SOURCING_MESSAGE = `
+        We've open-sourced the core Trotto app! Contribute code and suggest
+        improvements <a href="https://github.com/trotto/go-links" target="_blank">here</a>.
+    `;
+
+    const NOTIFICATION_ID_TO_HTML = {
+      install_extension: CHROME_INSTALLATION_MESSAGE,
+      oss_announcement: OPEN_SOURCING_MESSAGE
+    };
+
+    var priorityNotificationId;
+
+    if (browser.name === 'chrome'
         && this.props.userInfo !== undefined
         && (this.props.userInfo && this.props.userInfo.getIn(['notifications', 'install_extension']) !== 'dismissed')
-        && !this.props.chromeExtensionInstalled;
+        && !this.props.chromeExtensionInstalled) {
+      priorityNotificationId = 'install_extension';
+    } else if (new Date().getTime() < 1566648000000
+        && this.props.userInfo
+        && this.props.userInfo.getIn(['notifications', 'oss_announcement']) !== 'dismissed') {
+      priorityNotificationId = 'oss_announcement';
+    }
 
-    if (!this.props.errorBarMessage && !showInstallChromeButterbar) {
+    if (!this.props.errorBarMessage && !priorityNotificationId) {
       return null;
     }
     
@@ -58,13 +76,13 @@ export const Butterbar = React.createClass({
               :
             <div>
               <span
-                  dangerouslySetInnerHTML={{__html: CHROME_INSTALLATION_MESSAGE}}
+                  dangerouslySetInnerHTML={{__html: NOTIFICATION_ID_TO_HTML[priorityNotificationId]}}
               />
               &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
               <span
                   style={{textDecoration: 'underline', cursor: 'pointer',
                           display: !this.props.userInfo ? 'none' : 'inline'}}
-                  onClick={this.props.dismissNotification.bind(this, 'install_extension')}
+                  onClick={this.props.dismissNotification.bind(this, priorityNotificationId)}
               >
                 Dismiss
               </span>
