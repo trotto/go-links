@@ -2,8 +2,11 @@
 
 [![CircleCI](https://circleci.com/gh/trotto/go-links.svg?style=svg)](https://circleci.com/gh/trotto/go-links)
 
+Reliable and battle-tested, this go links solution is used by companies all around the world daily as the
+core of [Trotto](https://www.trot.to).
+
 Try out the latest build at [latest-master.trotto.dev](https://latest-master.trotto.dev). If you'd rather use
-a fully-managed instance of Trotto, check out [www.trot.to](https://www.trot.to).
+the fully-managed instance of Trotto, check out [www.trot.to](https://www.trot.to).
 
 ----
 
@@ -11,6 +14,26 @@ Don't hesitate to reach out to us through help@trot.to, a GitHub issue, or live 
 at https://www.trot.to.
 
 ----
+
+## Features
+
+Trotto provides all the baseline functionality you'd expect from a go links solution, including the ability to
+create, use, and modify go links that are shared with your organization—and with nobody else.
+
+Trotto also includes powerful features above and beyond a basic go links implementation, including a searchable go
+links directory, a Chrome extension* that makes go links work instantly, and programmatic links, which are go links
+containing placeholders that map onto the destination URL (ex: `go/gh/%s` pointing to `https://github.com/my_org/%s`).
+
+For a full list of Trotto's features, check out https://www.trot.to/how-it-works.
+
+_* We're in the process of open-sourcing the Chrome extension as well. If you'd like to be involved in that,
+subscribe to [this issue](https://github.com/trotto/go-links/issues/4) or email us at help@trot.to._
+
+## Authentication
+
+At the moment, the open-source app solely supports authentication using a Google account,
+but we plan to add support for additional identity providers upon request. So if you need support
+for another provider, submit a GitHub issue, and we'll help you out!
 
 ## Local development
 
@@ -61,10 +84,6 @@ Access the development admin console at http://localhost:8095. The admin console
 use an interactive console, and more.
 
 ## Deploying your own Trotto instance
-
-_**Authentication**: At the moment, the open-source app solely supports authentication using a Google account,
-but we plan to add support for additional identity providers as requested. So if you need support
-for another provider, submit a GitHub issue, and we'll help you out!_
 
 You can deploy your own instance to [Google App Engine](https://cloud.google.com/appengine/) in
 around 15 minutes. If you have any trouble, contact us through any of the channels mentioned above,
