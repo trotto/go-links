@@ -1,4 +1,4 @@
-# go-links
+# Trotto Go Links
 
 [![CircleCI](https://circleci.com/gh/trotto/go-links.svg?style=svg)](https://circleci.com/gh/trotto/go-links)
 
