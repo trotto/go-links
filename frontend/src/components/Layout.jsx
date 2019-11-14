@@ -94,6 +94,11 @@ export const MainLayout = React.createClass({
               </div>
             </div>
             <div className="row">
+              <div id="features" className="col-md-10 col-md-offset-1 text-center" style={{paddingTop: '20px'}}>
+                <p>We <span role="img" aria-label="love love LOVE">❤️ ❤️ ❤️</span> feedback and feature requests. Add requests <a href="https://trello.com/invite/b/TVQdVwnU/71a24cb4c4e6c278c5e3c8fc21014fdc/trotto-go-links-feature-requets" target="_blank" rel="noopener noreferrer">here</a>.</p>
+              </div>
+            </div>
+            <div className="row">
               <div id="credits" className="col-md-10 col-md-offset-1 text-center" style={{paddingTop: '20px'}}>
                 <div>
                   Icons made
