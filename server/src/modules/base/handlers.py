@@ -76,7 +76,7 @@ class BaseHandler(webapp2.RequestHandler):
     if not oauth_redirect_uri:
       oauth_redirect_uri = '%s%s' % (
         'http://localhost:9095' if self.request.host.startswith('localhost')
-        else self.request.host_url.replace('http://', 'https://'),
+        else authentication.get_host_for_request(self.request),
         '/_/auth/oauth2_callback')
 
     if not redirect_to_after_oauth:

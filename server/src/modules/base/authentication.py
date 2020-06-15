@@ -13,3 +13,7 @@ def get_user_email(oauth_credentials):
     return None
 
   return user_info['email'].lower()
+
+
+def get_host_for_request(request):
+  return 'https://%s' % (request.headers.get('X-Upstream-Host') or request.host)
