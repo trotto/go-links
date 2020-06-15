@@ -43,7 +43,7 @@ class RedirectHandler(NoLoginRequiredHandler):
         self.force_to_original_url()
         return
 
-      self.render_login_selector_page(redirect_to_after_oauth=self.request.path_url)
+      self.redirect('/_/auth/login?%s' % urllib.urlencode({'redirect_to': self.request.path_qs}))
       return
 
     matching_shortlink, destination = get_shortlink(self.user_org, shortpath)

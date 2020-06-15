@@ -1,21 +1,16 @@
 import json
 import os
+import urllib
 
 import unittest
 
-from google.appengine.ext import ndb
 from google.appengine.ext import testbed
 
 from mock import patch, Mock
-import webapp2
-from webapp2_extras.appengine import sessions_ndb
 import webtest
 
-from modules.base import authentication
 from modules.base import handlers
 from modules.links import handlers as links_handlers
-from modules.links.models import ShortLink
-from modules.users.models import User
 
 class TestHandlers(unittest.TestCase):
 
@@ -57,3 +52,23 @@ class TestHandlers(unittest.TestCase):
     response = testapp.get('/_/api/links')
 
     self.assertIn('redirect_to', json.loads(response.body))
+
+  def test_login_endpoint__no_upstream_host_header(self):
+    response = self.testapp.get('/_/auth/login',
+                                headers={'Host': 'trot.to'})
+
+    expected_oauth_redirect_uri = urllib.urlencode({'redirect_uri': 'https://trot.to/_/auth/oauth2_callback'})
+
+    self.assertEqual(200, response.status_int)
+    self.assertIn(expected_oauth_redirect_uri, response.body)
+
+  def test_login_endpoint__upstream_host_header(self):
+    response = self.testapp.get('/_/auth/login',
+                                headers={'Host': 'trot.to',
+                                         'X-Upstream-Host': 'go.trot.to'})
+
+    expected_oauth_redirect_uri = urllib.urlencode({'redirect_uri': 'https://go.trot.to/_/auth/oauth2_callback'})
+
+    self.assertEqual(200, response.status_int)
+    self.assertIn(expected_oauth_redirect_uri, response.body)
+

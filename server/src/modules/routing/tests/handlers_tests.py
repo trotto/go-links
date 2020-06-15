@@ -41,8 +41,8 @@ class TestRedirectHandlerWithoutLogin(unittest.TestCase):
   def test_get__not_logged_in__normal_redirect_from_chrome_extension(self):
     response = self.testapp.get('/benefits?s=crx')
 
-    self.assertEqual(200, response.status_int)
-    self.assertIn('src="/_images/auth/google_signin_button.png"', response.body)
+    self.assertEqual(302, response.status_int)
+    self.assertEqual('http://localhost/_/auth/login?redirect_to=%2Fbenefits%3Fs%3Dcrx', response.location)
 
   def test_get__not_logged_in__http_bare_host_request_coming_from_chrome_extension(self):
     response = self.testapp.get('/benefits?s=crx&sc=http')
