@@ -46,11 +46,28 @@ Cloud Platform.
 
 Once you've installed the SDK, you should be able to successfully run `gcloud info`.
 
+With `gcloud` installed, also run:
+
+```
+gcloud components install app-engine-python
+```
+
 ### Clone this repository
 
 ```
 git clone git@github.com:trotto/go-links.git
 cd go-links
+```
+
+### Create a virtualenv
+
+Inside the `go-links/server` directory, create and enter a
+Python 2 [virtualenv](https://virtualenv.pypa.io/en/latest/installation/):
+
+```
+cd go-links/server
+virtualenv --python=/usr/bin/python2.7 .virtualenv/
+source .virtualenv/bin/activate
 ```
 
 ### Start the backend server
@@ -61,6 +78,9 @@ From the `server/` directory, run:
 ./install_deps.sh
 ./run_local.sh
 ```
+
+If you get an error like `dev_appserver.py: command not found`, be sure to install the Cloud SDK
+as [described above](#install-the-google-cloud-sdk).
 
 ### Start the frontend development server
 
@@ -133,7 +153,7 @@ gcloud auth login
 ### Create a virtualenv
 
 Inside the `go-links/server` directory, create and enter a
-Python 2 [virtualenv](https://virtualenv.pypa.io/en/latest/installation/):
+Python 2 [virtualenv](https://virtualenv.pypa.io/en/latest/installation.html):
 
 ```
 cd go-links/server
