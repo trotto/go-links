@@ -62,13 +62,15 @@ cd go-links
 ### Create a virtualenv
 
 Inside the `go-links/server` directory, create and enter a
-Python 2 [virtualenv](https://virtualenv.pypa.io/en/latest/installation/):
+Python 2 (at least 2.7.12) [virtualenv](https://virtualenv.pypa.io/en/latest/installation.html):
 
 ```
 cd go-links/server
 virtualenv --python=/usr/bin/python2.7 .virtualenv/
 source .virtualenv/bin/activate
 ```
+
+You can use `pyenv` as well.
 
 ### Start the backend server
 
@@ -153,13 +155,15 @@ gcloud auth login
 ### Create a virtualenv
 
 Inside the `go-links/server` directory, create and enter a
-Python 2 [virtualenv](https://virtualenv.pypa.io/en/latest/installation.html):
+Python 2 (at least 2.7.12) [virtualenv](https://virtualenv.pypa.io/en/latest/installation.html):
 
 ```
 cd go-links/server
 virtualenv --python=/usr/bin/python2.7 .virtualenv/
 source .virtualenv/bin/activate
 ```
+
+You can use `pyenv` as well.
 
 ### Install Python dependencies
 
