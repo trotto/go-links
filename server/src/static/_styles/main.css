@@ -39,6 +39,16 @@ input {
     background-color: #fdbe02;
 }
 
+.btn-muted {
+  color: #333;
+  background-color: #e6e6e6;
+  border-color: #adadad;
+}
+
+.btn-muted:hover {
+  opacity: 1;
+}
+
 .btn-small {
     padding: 3px 6px;
     fontSize: 14px;

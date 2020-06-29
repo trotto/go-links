@@ -203,3 +203,69 @@ class TestHandlers(unittest.TestCase):
     shortlink = models.ShortLink.get_by_id(7)
 
     self.assertEqual('http://drive.com', shortlink.destination_url)
+
+  @patch('shared_helpers.events.enqueue_event')
+  def test_delete_link__not_authorized(self, mock_enqueue_event):
+    models.ShortLink(id=7,
+                     organization='googs.com',
+                     owner='kay@googs.com',
+                     shortpath='there',
+                     destination_url='http://drive.com'
+                     ).put()
+
+    response = self.testapp.delete('/_/api/links/7',
+                                   headers={'TROTTO_USER_UNDER_TEST': 'jay@googs.com'},
+                                   expect_errors=True)
+
+    self.assertEqual(403, response.status_int)
+
+    shortlink = models.ShortLink.get_by_id(7)
+
+    self.assertIsNotNone(shortlink)
+
+    mock_enqueue_event.assert_not_called()
+
+  @patch('shared_helpers.events.enqueue_event')
+  def test_delete_link__link_does_not_exist(self, mock_enqueue_event):
+    models.ShortLink(id=7,
+                     organization='googs.com',
+                     owner='kay@googs.com',
+                     shortpath='there',
+                     destination_url='http://drive.com'
+                     ).put()
+
+    response = self.testapp.delete('/_/api/links/8',
+                                   headers={'TROTTO_USER_UNDER_TEST': 'kay@googs.com'},
+                                   expect_errors=True)
+
+    self.assertEqual(400, response.status_int)
+
+    mock_enqueue_event.assert_not_called()
+
+  @patch('modules.links.handlers.enqueue_event')
+  def test_delete_link__success(self, mock_enqueue_event):
+    test_shortlink = models.ShortLink(id=7,
+                                      organization='googs.com',
+                                      owner='kay@googs.com',
+                                      shortpath='there',
+                                      destination_url='http://drive.com')
+    test_shortlink.put()
+
+    response = self.testapp.delete('/_/api/links/7',
+                                   headers={'TROTTO_USER_UNDER_TEST': 'kay@googs.com'})
+
+    self.assertEqual(200, response.status_int)
+    self.assertEqual('{}', response.text)
+
+    shortlink = models.ShortLink.get_by_id(7)
+
+    self.assertEqual(None, shortlink)
+
+    mock_enqueue_event.assert_called_once_with('link.deleted',
+                                               'link',
+                                               {'shortpath': 'there',
+                                                'created': str(test_shortlink.created),
+                                                'oid': 7,
+                                                'visits_count': 0,
+                                                'owner': 'kay@googs.com',
+                                                'destination_url': 'http://drive.com'})

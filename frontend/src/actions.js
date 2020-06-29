@@ -184,6 +184,27 @@ export function updateLink(linkId, updates) {
 }
 
 
+export function deleteLink(linkId) {
+
+  return function (dispatch, getState) {
+    var endpoint = '/_/api/links/' + linkId;
+
+    var fetchInit = {
+      credentials: 'include',
+      method: 'DELETE',
+      headers: {}
+    };
+
+    dispatch({
+      type: 'DELETE_LINK',
+      linkId: linkId
+    });
+
+    enhancedFetch(endpoint, fetchInit, dispatch);
+  }
+}
+
+
 export function receiveLinks(links) {
   return {
     type: 'RECEIVE_LINKS',

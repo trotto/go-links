@@ -1,5 +1,4 @@
 import base64
-import httplib2
 import json
 import logging
 import pickle
@@ -14,6 +13,7 @@ from modules.base.handlers import UserRequiredHandler, NoLoginRequiredHandler, g
 from modules.organizations.utils import get_organization_id_for_email
 from modules.users import helpers as user_helpers
 from shared_helpers.encoding import convert_entity_to_dict
+from shared_helpers.events import enqueue_event
 
 
 class LinksHandler(UserRequiredHandler):
@@ -93,6 +93,20 @@ class LinksHandler(UserRequiredHandler):
         'error_type': 'error_bar'
       }))
       return
+
+  def delete(self, **kwargs):
+    if not self.existing_link:
+      self.abort(400)
+
+    logging.info('Deleting link: %s' % (convert_entity_to_dict(self.existing_link, self.ALLOWED_KEYS)))
+
+    self.existing_link.key.delete()
+
+    enqueue_event('link.deleted',
+                  'link',
+                  convert_entity_to_dict(self.existing_link, self.ALLOWED_KEYS, self.get_field_conversion_fns()))
+
+    self.response.write('{}')
 
 
 class PlayQueuedCreationHandler(NoLoginRequiredHandler):
