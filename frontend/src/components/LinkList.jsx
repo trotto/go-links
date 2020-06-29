@@ -4,6 +4,7 @@ import * as actions from '../actions';
 import { browserHistory } from 'react-router';
 import ReactTable from "react-table";
 import {Map, List, Set, fromJS} from 'immutable';
+import Modal from 'react-modal';
 import {getServiceBaseUrl} from '../utils'
 
 var validUrl = require('valid-url');
@@ -69,12 +70,12 @@ const EditableDestination = React.createClass({
     if (!this.props.draftDestination) {
       return false;
     }
-    
+
     if (this.props.draftDestination.indexOf('http://') !== 0
         && this.props.draftDestination.indexOf('https://') !== 0) {
       return false;
     }
-    
+
     return validUrl.isUri(this.props.draftDestination.replace(/%s/g, 'ss'));
   },
 
@@ -114,45 +115,58 @@ const EditableDestination = React.createClass({
     }
 
     return (
-        <div style={{display: 'flex', alignItems: 'center', cursor: this.props.editable ? 'pointer' : 'default'}}
-             onClick={!this.props.editable ? () => {} : this.setEditingLinkId.bind(this, this.props.id)}
-             onMouseOver={this.setMousedOver.bind(this, true)}
-             onMouseOut={this.setMousedOver.bind(this, false)}
-        >
-          <div style={{width: '25px', paddingRight: '5px', display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
-            {currentlyBeingEdited ?
-              <img src="/_images/icons/close.svg" height="16"
-                   style={{opacity: '0.7'}}
-                   onClick={this.setEditingLinkId.bind(this, null)}
+        <div style={{display: 'flex', width: '100%', justifyContent: 'space-between', alignItems: 'center'}}>
+          <div style={{display: 'flex', alignItems: 'center', cursor: this.props.editable ? 'pointer' : 'default',
+                       flexGrow: 1}}
+               onClick={!this.props.editable ? () => {} : this.setEditingLinkId.bind(this, this.props.id)}
+               onMouseOver={this.setMousedOver.bind(this, true)}
+               onMouseOut={this.setMousedOver.bind(this, false)}
+          >
+            <div style={{width: '25px', paddingRight: '5px', display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
+              {currentlyBeingEdited ?
+                <img src="/_images/icons/close.svg" height="16"
+                     style={{opacity: '0.7'}}
+                     onClick={this.setEditingLinkId.bind(this, null)}
+                />
+                  :
+                <img src={'/_images/icons/' + (this.state.mousedOver ? 'edit.svg' : 'edit_light.svg')} height="14"
+                     style={{visibility: this.props.editable ? 'visible' : 'hidden'}}
+                />
+              }
+            </div>
+            <div style={inputWrapperStyle}>
+              <input
+                id={'edit-input-' + this.props.id}
+                style={{flexGrow: '1', padding: '4px 7px 4px 2px',
+                        borderColor: 'transparent', backgroundColor: 'transparent',
+                        cursor: this.props.editable ? 'pointer' : 'default'}}
+                value={this.getDisplayUrl()}
+                disabled={!currentlyBeingEdited}
+                onChange={this.handleChange}
+                onKeyPress={this.handleKeyPress}
               />
-                :
-              <img src={'/_images/icons/' + (this.state.mousedOver ? 'edit.svg' : 'edit_light.svg')} height="14"
-                   style={{visibility: this.props.editable ? 'visible' : 'hidden'}}
-              />
-            }
+              {!currentlyBeingEdited ? null :
+                  <button
+                      className="btn btn-default"
+                      style={{padding: '3px 6px', fontSize: '14px'}}
+                      disabled={!this.draftDestinationIsValid()}
+                      onClick={e => {e.stopPropagation(); this.updateLink()}}
+                  >
+                    Save
+                  </button>
+              }
+            </div>
           </div>
-          <div style={inputWrapperStyle}>
-            <input
-              id={'edit-input-' + this.props.id}
-              style={{flexGrow: '1', padding: '4px 7px 4px 2px',
-                      borderColor: 'transparent', backgroundColor: 'transparent',
-                      cursor: this.props.editable ? 'pointer' : 'default'}}
-              value={this.getDisplayUrl()}
-              disabled={!currentlyBeingEdited}
-              onChange={this.handleChange}
-              onKeyPress={this.handleKeyPress}
-            />
-            {!currentlyBeingEdited ? null :
-                <button
-                    className="btn btn-default"
-                    style={{padding: '3px 6px', fontSize: '14px'}}
-                    disabled={!this.draftDestinationIsValid()}
-                    onClick={e => {e.stopPropagation(); this.updateLink()}}
-                >
-                  Save
-                </button>
-            }
-          </div>
+          {!this.props.deletable ? null :
+              <div style={{width: '25px', paddingLeft: '5px', display: 'flex',
+                           flexDirection: 'column', alignItems: 'center'}}
+              >
+                <img src={'/_images/icons/' + 'trash.svg'} height="14"
+                     style={{cursor: 'pointer'}}
+                     onClick={() => this.props.setLinkToDelete(this.props.link)}
+                />
+              </div>
+          }
         </div>
     );
   }
@@ -221,16 +235,102 @@ class CountCell extends React.Component {
 }
 
 
+const modalStyles = {
+  content: {
+    top: '50%',
+    left: '50%',
+    right: 'auto',
+    bottom: 'auto',
+    marginRight: '-50%',
+    transform: 'translate(-50%, -50%)'
+  }
+};
+
+
+const DeletionModal = React.createClass({
+  getInitialState: function () {
+     return {
+       confirmationText: '',
+     }
+   },
+
+  focus: function() {
+    this.confirmationInput.focus();
+  },
+
+  isConfirmed: function() {
+    return this.state.confirmationText.trim() === this.props.link.shortpath;
+  },
+
+  render: function() {
+    const deletionConfirmed = this.isConfirmed();
+    const deleteButtonStyles = deletionConfirmed ? {} : {backgroundColor: 'white'};
+
+    return (
+        <Modal
+           isOpen={true}
+           onAfterOpen={this.focus}
+           style={modalStyles}
+        >
+          <div style={{maxWidth: '600px', display: 'flex', flexDirection: 'column'}}>
+            <div>
+              <p>
+                Deleting a go link will delete the go link for everyone in your organization. No one on your
+                team will be able to use <span style={{fontWeight:'bold'}}>{this.props.link.shortpath}</span> until
+                it's re-created.
+              </p>
+              <p>
+                To confirm deletion, type <span style={{fontWeight:'bold'}}>{this.props.link.shortpath}</span> and
+                press Delete.
+              </p>
+            </div>
+            <input
+               ref={(input) => { this.confirmationInput = input; }}
+               className="form-control"
+               style={{width: '100%', margin: '10px 0 20px'}}
+               type="text" id="shortpath" placeholder={this.props.link.shortpath}
+               value={this.state.confirmationText}
+               onChange={(e) => this.setState({ confirmationText: e.target.value.trim() })}
+             />
+            <div style={{display: 'flex', width: '100%', justifyContent: 'space-between'}}>
+              <button
+                type="submit" className="btn btn-muted"
+                onClick={this.props.exit}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className={`btn ${deletionConfirmed ? 'btn-electric' : 'btn-disabled'}`}
+                style={deleteButtonStyles}
+                disabled={!deletionConfirmed}
+                onClick={() => { this.props.deleteLink(); this.props.exit(); }}
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </Modal>
+    )
+  }
+})
+
+
 export const LinksTable = React.createClass({
 
   getInitialState: function () {
      return {
-       currentlyEditingLinkId: null
+       currentlyEditingLinkId: null,
+       linkToDelete: null
      }
    },
 
   setEditingLinkId: function(linkId) {
     this.setState({currentlyEditingLinkId: linkId})
+  },
+
+  setLinkToDelete: function(linkToDelete) {
+    this.setState({ linkToDelete });
   },
 
   render: function() {
@@ -264,8 +364,11 @@ export const LinksTable = React.createClass({
                     key={row.original.oid + '-' + row.value}
                     destination={row.value}
                     id={row.original.oid}
+                    link={row.original}
                     editable={editable}
+                    deletable={editable}
                     setEditingLinkId={this.setEditingLinkId}
+                    setLinkToDelete={this.setLinkToDelete}
                     currentlyEditingLinkId={this.state.currentlyEditingLinkId}
           />
         }
@@ -349,6 +452,13 @@ export const LinksTable = React.createClass({
               </div>
             </div>
           </div>
+          {!this.state.linkToDelete ? null :
+              <DeletionModal
+                link={this.state.linkToDelete}
+                deleteLink={this.props.deleteLink.bind(this, this.state.linkToDelete.oid)}
+                exit={this.setState.bind(this, { linkToDelete: null })}
+              />
+          }
         </div>
     );
   }

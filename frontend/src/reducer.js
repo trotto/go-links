@@ -75,6 +75,9 @@ export default function (state = Map(), action) {
 
       return state.updateIn(['links', linkIndex], link => link.merge(action.linkData));
 
+    case 'DELETE_LINK':
+      return state.update('links', links => links.filter(link => link.get('oid') !== action.linkId));
+
     case 'LINK_CREATED_ON_THIS_PAGELOAD':
       return state.set('linkCreatedOnThisPageload', fromJS(action.linkData));
 

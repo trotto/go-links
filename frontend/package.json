@@ -29,6 +29,7 @@
     "react": "^15.6.2",
     "react-copy-to-clipboard": "^5.0.1",
     "react-dom": "15.4.2",
+    "react-modal": "^3.11.2",
     "react-redux": "^4.4.5",
     "react-router": "^3.2.0",
     "react-table": "^6.5.3",
