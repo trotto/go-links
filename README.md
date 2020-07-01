@@ -2,11 +2,13 @@
 
 [![CircleCI](https://circleci.com/gh/trotto/go-links.svg?style=svg)](https://circleci.com/gh/trotto/go-links)
 
-Reliable and battle-tested, this go links solution is used by companies all around the world daily as the
-core of [Trotto](https://www.trot.to).
+Reliable and battle-tested, this [go links](https://www.trot.to/go-links) solution is used by companies all around
+the world daily as the core of [Trotto](https://www.trot.to).
 
-Try out the latest build at [latest-master.trotto.dev](https://latest-master.trotto.dev). If you'd rather use
-the fully-managed instance of Trotto, check out [www.trot.to](https://www.trot.to).
+Try out the latest build at [latest-master.trotto.dev](https://latest-master.trotto.dev) and also check out the
+matching [open-source browser extension](https://github.com/trotto/browser-extension).
+
+If you'd rather use the fully-managed instance of Trotto, visit [www.trot.to](https://www.trot.to).
 
 ----
 
@@ -21,13 +23,11 @@ Trotto provides all the baseline functionality you'd expect from a go links solu
 create, use, and modify go links that are shared with your organization—and with nobody else.
 
 Trotto also includes powerful features above and beyond a basic go links implementation, including a searchable go
-links directory, a Chrome extension* that makes go links work instantly, and programmatic links, which are go links
-containing placeholders that map onto the destination URL (ex: `go/gh/%s` pointing to `https://github.com/my_org/%s`).
+links directory, a [browser extension](https://github.com/trotto/browser-extension) that makes go links work instantly,
+and programmatic links, which are go links containing placeholders that map onto the destination
+URL (ex: `go/gh/%s` pointing to `https://github.com/my_org/%s`).
 
 For a full list of Trotto's features, check out https://www.trot.to/how-it-works.
-
-_* We're in the process of open-sourcing the Chrome extension as well. If you'd like to be involved in that,
-subscribe to [this issue](https://github.com/trotto/go-links/issues/4) or email us at help@trot.to._
 
 ## Authentication
 
