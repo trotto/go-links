@@ -1,6 +1,7 @@
 const expect = require('expect');
 
 const {
+  testInstanceBase,
   testDomains
 } = require('../constants');
 const {
@@ -49,7 +50,7 @@ describe('links', () => {
   test('an unauthenticated user should be sent to signin when requesting a go link', async () => {
     const response = await goToPath(page, '/links');
 
-    expect(await page.url()).toEqual(`${process.env.TEST_INSTANCE_BASE}/_/auth/login?redirect_to=%2Flinks`);
+    expect((await page.url()).startsWith('https://accounts.google.com')).toBe(true);
     expect(response.status()).toEqual(200);
   });
 
@@ -119,7 +120,7 @@ describe('links', () => {
 
     await goToPath(page, `/${shortlink}`);
 
-    expect((await page.url()).startsWith('http://localhost:')).toBe(true);
+    expect((await page.url()).startsWith(testInstanceBase)).toBe(true);
 
     const linksResponse = await goToPath(page, '/_/api/links');
 
