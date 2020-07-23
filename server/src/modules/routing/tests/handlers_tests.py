@@ -9,9 +9,9 @@ from freezegun import freeze_time
 import webtest
 from webapp2_extras import securecookie
 
-from modules.base.handlers import get_secrets
 from modules.links.models import ShortLink
 from modules.routing import handlers
+from shared_helpers.configs import get_secrets
 
 class TestRedirectHandlerWithoutLogin(unittest.TestCase):
 

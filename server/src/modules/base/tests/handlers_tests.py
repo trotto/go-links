@@ -1,4 +1,5 @@
 import json
+import jwt
 import os
 import urllib
 
@@ -11,6 +12,7 @@ import webtest
 
 from modules.base import handlers
 from modules.links import handlers as links_handlers
+
 
 class TestHandlers(unittest.TestCase):
 
@@ -72,3 +74,57 @@ class TestHandlers(unittest.TestCase):
     self.assertEqual(200, response.status_int)
     self.assertIn(expected_oauth_redirect_uri, response.body)
 
+  @patch('modules.base.handlers.get_secrets', return_value={'testing': {'secret': 'a_test_secret',
+                                                                        'domains': ['example.com']}})
+  def test_login_via_test_token__no_token(self, _):
+    response = self.testapp.get('/_/auth/oauth2_callback')
+
+    self.assertEqual(302, response.status_int)
+
+  @patch('modules.base.handlers.get_secrets', return_value={})
+  def test_login_via_test_token__no_token__no_test_token_config(self, _):
+    response = self.testapp.get('/_/auth/oauth2_callback')
+
+    self.assertEqual(302, response.status_int)
+
+  @patch('modules.base.handlers.get_secrets', return_value={'testing': {'secret': 'a_test_secret',
+                                                                        'domains': ['example.com']}})
+  def test_login_via_test_token__invalid_token(self, _):
+    token = jwt.encode({'email': 'sam@example.com'}, 'some_secret', algorithm='HS256')
+
+    response = self.testapp.get('/_/auth/oauth2_callback?test_token=%s' % (token),
+                                expect_errors=True)
+
+    self.assertEqual(500, response.status_int)
+    self.assertEqual(None, response.headers.get('Set-Cookie'))
+
+  @patch('modules.base.handlers.get_secrets', return_value={})
+  def test_login_via_test_token__no_test_token_config(self, _):
+    token = jwt.encode({'email': 'sam@example.com'}, 'a_test_secret', algorithm='HS256')
+
+    response = self.testapp.get('/_/auth/oauth2_callback?test_token=%s' % (token),
+                                expect_errors=True)
+
+    self.assertEqual(500, response.status_int)
+    self.assertEqual(None, response.headers.get('Set-Cookie'))
+
+  @patch('modules.base.handlers.get_secrets', return_value={'testing': {'secret': 'a_test_secret',
+                                                                        'domains': ['example.com']}})
+  def test_login_via_test_token__valid_token_invalid_domain(self, _):
+    token = jwt.encode({'user_email': 'sam@googs.com'}, 'a_test_secret', algorithm='HS256')
+
+    response = self.testapp.get('/_/auth/oauth2_callback?test_token=%s' % (token),
+                                expect_errors=True)
+
+    self.assertEqual(500, response.status_int)
+    self.assertEqual(None, response.headers.get('Set-Cookie'))
+
+  @patch('modules.base.handlers.get_secrets', return_value={'testing': {'secret': 'a_test_secret',
+                                                                        'domains': ['example.com']}})
+  def test_login_via_test_token__success(self, _):
+    token = jwt.encode({'user_email': 'sam@example.com'}, 'a_test_secret', algorithm='HS256')
+
+    response = self.testapp.get('/_/auth/oauth2_callback?test_token=%s' % (token))
+
+    self.assertEqual(302, response.status_int)
+    self.assertEqual(True, response.headers.get('Set-Cookie').startswith('session='))

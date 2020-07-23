@@ -1,0 +1,17 @@
+{
+  "name": "e2e_tests",
+  "version": "1.0.0",
+  "scripts": {
+    "test": "jest",
+    "test:dev": "TEST_INSTANCE_BASE=http://localhost:9095 jest",
+    "test:dev:single": "TEST_INSTANCE_BASE=http://localhost:9095 jest -t",
+    "test:debug": "TEST_MODE=debug TEST_INSTANCE_BASE=http://localhost:9095 jest",
+    "test:debug:single": "TEST_MODE=debug TEST_INSTANCE_BASE=http://localhost:9095 jest -t"
+  },
+  "devDependencies": {
+    "jest": "^26.1.0",
+    "jsonwebtoken": "^8.5.1",
+    "playwright": "^1.1.1",
+    "yaml": "^1.10.0"
+  }
+}

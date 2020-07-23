@@ -1,6 +1,7 @@
 import base64
 import datetime
 import json
+import jwt
 import logging
 import os
 import httplib2
@@ -190,7 +191,26 @@ class UserRequiredHandler(BaseHandler):
 
 class OAuthCallbackHandler(NoLoginRequiredHandler):
 
+  def login_via_test_token(self):
+    # used only for end-to-end tests
+    if not self.request.get('test_token'):
+      return False
+
+    payload = jwt.decode(self.request.get('test_token'), get_secrets()['testing']['secret'], 'HS256')
+
+    if payload['user_email'].split('@')[1] not in get_secrets()['testing']['domains']:
+      raise Exception('Invalid test user %s, with test token: %s' % (payload['user_email'],
+                                                                     self.request.get('test_token')))
+
+    self.session['user_email'] = payload['user_email']
+
+    return True
+
   def get(self):
+    if self.login_via_test_token():
+      self.redirect('/')
+      return
+
     if self.session.get('pickled_oauth_flow'):
       flow = pickle.loads(self.session['pickled_oauth_flow'])
     else:
