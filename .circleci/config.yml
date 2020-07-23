@@ -4,6 +4,7 @@ run_e2e_tests: &run_e2e_tests
       working_directory: e2e_tests
       name: End-to-end tests
       command: |
+        source ~/.nvm/nvm.sh &&
         nvm install && nvm use &&
         yarn install && yarn test
 jobs:
