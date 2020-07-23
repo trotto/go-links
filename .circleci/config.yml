@@ -4,7 +4,7 @@ run_e2e_tests: &run_e2e_tests
       working_directory: e2e_tests
       name: End-to-end tests
       command: |
-        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash &&
+        source ~/.nvm/nvm.sh &&
         nvm install && nvm use &&
         yarn install && yarn test
 jobs:
@@ -14,6 +14,7 @@ jobs:
     steps:
       - checkout
       - run: sh .circleci/set_env_vars.sh
+      - run: curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
       # Download App Engine SDK
       # This is not necessary to deploy, its only necessary to run local tests importing the App Engine SDK
       - run: curl -o $HOME/google_appengine_1.9.64.zip https://storage.googleapis.com/appengine-sdks/featured/google_appengine_1.9.64.zip
