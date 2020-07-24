@@ -52,7 +52,7 @@ jobs:
       - run: gcloud config set project $GCLOUD_PROJECT
       - run: gcloud app deploy --no-promote --project $GCLOUD_PROJECT -q -v $NEW_TROTTO_VERSION_ID ${SERVER_SRC_ROOT}/app.yaml ${SERVER_SRC_ROOT}/index.yaml
       - <<: *run_e2e_tests
-      - run: gcloud app versions migrate $NEW_TROTTO_VERSION_ID
+      - run: gcloud app deploy --promote --project $GCLOUD_PROJECT -q -v $NEW_TROTTO_VERSION_ID ${SERVER_SRC_ROOT}/app.yaml ${SERVER_SRC_ROOT}/index.yaml
 # TODO: Split into build/test and deploy jobs (latter is the only job that needs gcloud/deployment creds).
 workflows:
   version: 2
