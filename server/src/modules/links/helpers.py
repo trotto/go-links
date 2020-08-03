@@ -1,15 +1,17 @@
 import datetime
 import re
-import urllib
-import urlparse
+from urllib.parse import urlparse, urlencode
 
 import validators
 from validators.utils import ValidationFailure
 
-import models
+from modules.data import get_models
 from modules.users.helpers import get_or_create_user
 from shared_helpers.encoding import convert_entity_to_dict
 from shared_helpers.events import enqueue_event
+
+
+models = get_models('links')
 
 
 class LinkCreationException(Exception):
@@ -25,7 +27,7 @@ def _matches_pattern(provided_shortpath, candidate_match):
 
   matching_formatting_args = []
 
-  for i in xrange(len(provided_shortpath_components)):
+  for i in range(len(provided_shortpath_components)):
     if candidate_match_components[i] == '%s':
       matching_formatting_args.append(provided_shortpath_components[i])
     elif candidate_match_components[i] != provided_shortpath_components[i]:
@@ -38,9 +40,7 @@ def derive_pattern_match(organization, shortpath):
   if '/' not in shortpath:  # paths without a second part can't be pattern-matching
     return None, None
 
-  prefix_matches = models.ShortLink.query(
-      models.ShortLink.organization == organization,
-      models.ShortLink.shortpath_prefix == shortpath.split('/')[0]).fetch(limit=None)
+  prefix_matches = models.ShortLink.get_by_prefix(organization, shortpath.split('/')[0])
 
   matching_shortlink = None
   matching_formatting_args = None
@@ -64,9 +64,9 @@ def derive_pattern_match(organization, shortpath):
 
 def _percent_encode_if_not_ascii_compatible(unicode_char):
   try:
-    return unicode_char.encode('ascii')
+    return unicode_char.encode('ascii').decode('ascii')
   except UnicodeEncodeError:
-    return urllib.urlencode({'': unicode_char.encode('utf8')})[1:]
+    return urlencode({'': unicode_char.encode('utf8')})[1:]
 
 
 def _encode_ascii_incompatible_chars(destination):
@@ -75,9 +75,7 @@ def _encode_ascii_incompatible_chars(destination):
 
 def get_shortlink(organization, shortpath):
   """Returns (shortlink_object, actual_destination)."""
-  perfect_match = models.ShortLink.query(
-      models.ShortLink.organization == organization,
-      models.ShortLink.shortpath == shortpath).get()
+  perfect_match = models.ShortLink.get_by_full_path(organization, shortpath)
 
   if perfect_match:
     return perfect_match, perfect_match.destination_url
@@ -137,8 +135,8 @@ def upsert_short_link(organization, creator, shortpath, destination, updated_lin
       raise LinkCreationException('That go link already exists. go/%s points to %s'
                                   % (shortpath, existing_link.destination_url))
 
-  # Note: urlparse.urlparse('128.90.0.1:8080/start').scheme returns '128.90.0.1'. Hence the additional checking.
-  destination_url_scheme = urlparse.urlparse(destination).scheme
+  # Note: urlparse('128.90.0.1:8080/start').scheme returns '128.90.0.1'. Hence the additional checking.
+  destination_url_scheme = urlparse(destination).scheme
   if (not destination_url_scheme
       or not destination_url_scheme.strip()
       or not destination.startswith(destination_url_scheme + '://')):
@@ -161,7 +159,7 @@ def upsert_short_link(organization, creator, shortpath, destination, updated_lin
   link.put()
 
   link_dict = convert_entity_to_dict(link, ['owner', 'shortpath', 'destination_url', 'organization'])
-  link_dict['id'] = link.key.id()
+  link_dict['id'] = link.get_id()
 
   enqueue_event('link.%s' % ('updated' if updated_link_object else 'created'),
                 'link',
@@ -172,8 +170,7 @@ def upsert_short_link(organization, creator, shortpath, destination, updated_lin
 def get_all_shortlinks_for_org(user_organization):
   shortlinks = []
 
-  # TODO: Handle more links (paginate).
-  for shortlink in models.ShortLink.query(models.ShortLink.organization == user_organization).fetch(limit=10000):
+  for shortlink in models.ShortLink.get_by_organization(user_organization):
     shortlinks.append(shortlink)
 
   return shortlinks

@@ -1,35 +1,22 @@
 import json
-import unittest
 
-from google.appengine.ext import testbed
-
-import webtest
-
-from modules.users.models import User
+from modules.data import get_models
 from modules.users import handlers
+from testing import TrottoTestCase
 
-class TestUserHandlers(unittest.TestCase):
 
-  def _set_up_gae_testbed(self):
-    self.testbed = testbed.Testbed()
-    self.testbed.activate()
+User = get_models('users').User
 
-    self.testbed.init_datastore_v3_stub()
-    self.testbed.init_memcache_stub()
-    self.testbed.init_taskqueue_stub()
 
-  def setUp(self):
-    self._set_up_gae_testbed()
+class TestUserHandlers(TrottoTestCase):
 
-    self.testapp = webtest.TestApp(handlers.app)
-
-  def tearDown(self):
-    self.testbed.deactivate()
+  blueprints_under_test = [handlers.routes]
 
   def test_user_info_endpoint(self):
     User(id=777,
          email='kay@googs.com',
-         domain_type='corporate').put()
+         domain_type='corporate',
+         notifications={'some_announcement': 'dismissed'}).put()
 
     User(id=8675,
          email='ray@googs.com',
@@ -42,7 +29,7 @@ class TestUserHandlers(unittest.TestCase):
                      {'email': 'kay@googs.com',
                       'role': None,
                       'admin': False,
-                      'notifications': {}})
+                      'notifications': {'some_announcement': 'dismissed'}})
 
     response = self.testapp.get('/_/api/users/me',
                                 headers={'TROTTO_USER_UNDER_TEST': 'ray@googs.com'})

@@ -47,13 +47,16 @@ export const NavBar = React.createClass({
         text: 'How It Works',
         destination: 'https://www.trot.to/how-it-works',
         openInNewTab: true
-      },
-      {
+      }
+    ];
+
+    if (this.props.userInfo !== undefined) {
+      navItems.push({
         text: !this.props.userInfo ? 'Sign In' : 'Sign Out',
         destination: getServiceBaseUrl('default') + '/_/auth/' + (!this.props.userInfo ? 'login' : 'logout'),
         title: !this.props.userInfo ? '' : 'Sign out of ' + this.props.userInfo.get('email')
-      }
-    ];
+      });
+    }
 
     if (this.props.links) {
       navItems.splice(0, 0, {

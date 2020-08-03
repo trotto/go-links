@@ -43,6 +43,10 @@ if (JSON.stringify(process.env.NODE_ENV || 'development') == '"development"') {
   config.devServer = {
     contentBase: __dirname + '/../server/src/static',
     proxy: {
+      '/': {
+        target: 'http://localhost:9095',
+        changeOrigin: true
+      },
       '/_/api': {
         target: 'http://localhost:9095',
         changeOrigin: true

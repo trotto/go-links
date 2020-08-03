@@ -7,7 +7,7 @@ import {getServiceBaseUrl} from './utils';
 const enhancedFetch = function(endpoint, fetchInit, dispatch) {
 
   if ((fetchInit.method || 'GET') !== 'GET') {
-    fetchInit.headers['X-CSRF'] = window._trotto.csrfToken;
+    fetchInit.headers['X-CSRFToken'] = window._trotto.csrfToken;
   }
 
   return fetch(endpoint, fetchInit)
@@ -65,12 +65,12 @@ export function clearNewLinkData() {
 
 
 export function setLinkCreationMessage(messageType, html, tootsLink) {
-  
+
   return function (dispatch, getState) {
     html = !getState().core.get('goSupportedInCurrentSession')
         ? html
         : html.replace('https://trot.to/', 'http://go/').replace('trot.to/', 'go/');
-    
+
     dispatch({
       type: 'SET_LINK_CREATION_MESSAGE',
       messageType,
@@ -283,14 +283,16 @@ export function fetchUserInfo() {
 
     return enhancedFetch(endpoint, fetchInit, dispatch)
       .then(json => {
-        
+
         if (json.redirect_to) {
           dispatch(receiveUserInfo(null));
         } else {
           dispatch(receiveUserInfo(json));
         }
       })
-      .catch(reason => {});
+      .catch(reason => {
+        dispatch(receiveUserInfo(null));
+      });
   }
 }
 

@@ -1,35 +1,50 @@
 version: 2
+install_node_tooling: &install_node_tooling
+  - run:
+      name: Install node tooling
+      command: |
+        sudo apt install apt-transport-https &&
+        curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add - &&
+        echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list &&
+        sudo apt update &&
+        sudo apt install yarn &&
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
+build_frontend: &build_frontend
+  - run:
+      name: Build frontend bundle
+      command: |
+        source ~/.nvm/nvm.sh &&
+        cd ${FRONTEND_ROOT} &&
+        nvm install && nvm use &&
+        npm install &&
+        sh build_bundle.sh
 run_e2e_tests: &run_e2e_tests
   - run:
-      working_directory: e2e_tests
       name: End-to-end tests
       command: |
         source ~/.nvm/nvm.sh &&
+        cd e2e_tests &&
         nvm install && nvm use &&
-        yarn install && yarn test
+        yarn install &&
+        yarn test
 jobs:
   build_and_deploy:
     docker:
-      - image: circleci/node:9.11.2-stretch-browsers
+      - image: circleci/python:3.7.8-stretch-browsers
     steps:
       - checkout
       - run: sh .circleci/set_env_vars.sh
-      - run: curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
-      # Download App Engine SDK
-      # This is not necessary to deploy, its only necessary to run local tests importing the App Engine SDK
-      - run: curl -o $HOME/google_appengine_1.9.64.zip https://storage.googleapis.com/appengine-sdks/featured/google_appengine_1.9.64.zip
-      - run: unzip -q -d $HOME $HOME/google_appengine_1.9.64.zip
       # install gcloud
-      - run: curl -o $HOME/google-cloud-sdk-221.0.0-linux-x86_64.tar.gz https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-221.0.0-linux-x86_64.tar.gz
-      - run: tar zxf $HOME/google-cloud-sdk-221.0.0-linux-x86_64.tar.gz -C $HOME
+      - run: curl -o $HOME/google-cloud-sdk-303.0.0-linux-x86_64.tar.gz https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-303.0.0-linux-x86_64.tar.gz
+      - run: tar zxf $HOME/google-cloud-sdk-303.0.0-linux-x86_64.tar.gz -C $HOME
       - run: CLOUDSDK_CORE_DISABLE_PROMPTS=1 $HOME/google-cloud-sdk/install.sh
       - run: echo 'source ${HOME}/google-cloud-sdk/path.bash.inc' >> $BASH_ENV
+      - run: gcloud components install cloud-datastore-emulator beta
+      - run: gcloud components update
       # install deps locally to enable unit testing
-      - run: sudo apt-get update
-      - run: sudo apt-get install python-dev  # per https://stackoverflow.com/a/21530768
       - run: curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
       - run: sudo python get-pip.py
-      - run: sudo pip install -r ${SERVER_CODE_ROOT}/requirements.txt
+      - run: sudo pip install -r ${SERVER_CODE_ROOT}/src/requirements.txt
       - run: sudo pip install -r ${SERVER_CODE_ROOT}/dev_requirements.txt
       # Retrieve our secrets from the CircleCI environment
       - run: echo $APP_SECRETS | base64 --decode > ${SERVER_SRC_ROOT}/config.zip
@@ -41,13 +56,9 @@ jobs:
       # - Storage Object Creator (to upload app files)
       # - Storage Object Viewer (to list app files)
       - run: echo $DEPLOYER_CLIENT_SECRETS | base64 --decode > ${HOME}/deployer_client_secrets.json
-      - run: mkdir -p ${SERVER_SRC_ROOT}/libs
-      - run: pip install -r ${SERVER_CODE_ROOT}/requirements.txt -t ${SERVER_SRC_ROOT}/libs
-      - run: node --version
-      - run: npm --version
-      - run: cd ${FRONTEND_ROOT} && npm install
-      - run: cd ${FRONTEND_ROOT} && sh build_bundle.sh
-      - run: cd ${SERVER_CODE_ROOT} && python run_tests.py --logging-level INFO
+      - run: cd ${SERVER_CODE_ROOT} && sh run_tests.sh
+      - <<: *install_node_tooling
+      - <<: *build_frontend
       - run: gcloud auth activate-service-account --key-file ${HOME}/deployer_client_secrets.json
       - run: gcloud config set project $GCLOUD_PROJECT
       - run: gcloud app deploy --no-promote --project $GCLOUD_PROJECT -q -v $NEW_TROTTO_VERSION_ID ${SERVER_SRC_ROOT}/app.yaml ${SERVER_SRC_ROOT}/index.yaml

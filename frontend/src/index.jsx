@@ -52,11 +52,7 @@ if (location.search.indexOf('r=') !== -1) {
 }
 
 
-if (document.cookie.indexOf('session=') !== -1) {
-  store.dispatch(fetchUserInfo());
-} else {
-  store.dispatch(receiveUserInfo(null));
-}
+store.dispatch(fetchUserInfo());
 
 // necessary because fragment is already used for nav... very hacky.
 (function() {

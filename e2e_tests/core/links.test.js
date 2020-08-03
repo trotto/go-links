@@ -120,7 +120,9 @@ describe('links', () => {
 
     await goToPath(page, `/${shortlink}`);
 
-    expect((await page.url()).startsWith(testInstanceBase)).toBe(true);
+    // TODO: Eliminate special handling for local environment.
+    const expectedPrefix = testInstanceBase === 'http://localhost:9095' ? 'http://localhost:5007': testInstanceBase;
+    expect((await page.url()).startsWith(expectedPrefix)).toBe(true);
 
     const linksResponse = await goToPath(page, '/_/api/links');
 
