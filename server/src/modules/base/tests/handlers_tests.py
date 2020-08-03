@@ -1,78 +1,34 @@
-import json
 import jwt
-import os
-import urllib
+from urllib.parse import urlencode
 
-import unittest
-
-from google.appengine.ext import testbed
-
-from mock import patch, Mock
-import webtest
+from mock import patch
 
 from modules.base import handlers
-from modules.links import handlers as links_handlers
+from testing import TrottoTestCase
 
 
-class TestHandlers(unittest.TestCase):
+class TestHandlers(TrottoTestCase):
 
-  def _set_up_gae_testbed(self):
-    self.testbed = testbed.Testbed()
-    self.testbed.activate()
-
-    self.testbed.init_datastore_v3_stub()
-    self.testbed.init_memcache_stub()
-    self.testbed.init_taskqueue_stub(root_path=os.path.join(os.path.dirname(__file__), '../../..'))
-
-  def setUp(self):
-    self._set_up_gae_testbed()
-
-    self.testapp = webtest.TestApp(handlers.app)
-
-  def tearDown(self):
-    self.testbed.deactivate()
-
-  @patch.object(handlers.BaseHandler, 'attempt_auth_by_user_header')
-  @patch('shared_helpers.env.current_env_is_local', return_value=True)
-  def test_login_via_user_header__is_local(self, mock_current_env_is_production, mock_attempt_auth_by_user_header):
-    self.testapp.get('/_/auth/logout')
-
-    self.assertTrue(mock_current_env_is_production.called)
-    self.assertTrue(mock_attempt_auth_by_user_header.called)
-
-  @patch.object(handlers.BaseHandler, 'attempt_auth_by_user_header')
-  @patch('shared_helpers.env.current_env_is_local', return_value=False)
-  def test_login_via_user_header__is_not_local(self, mock_current_env_is_local, mock_attempt_auth_by_user_header):
-    self.testapp.get('/_/auth/logout')
-
-    self.assertTrue(mock_current_env_is_local.called)
-    self.assertFalse(mock_attempt_auth_by_user_header.called)
-
-  def test_authentication__no_auth_provided(self):
-    testapp = webtest.TestApp(links_handlers.app)
-
-    response = testapp.get('/_/api/links')
-
-    self.assertIn('redirect_to', json.loads(response.body))
+  blueprints_under_test = [handlers.routes]
 
   def test_login_endpoint__no_upstream_host_header(self):
     response = self.testapp.get('/_/auth/login',
                                 headers={'Host': 'trot.to'})
 
-    expected_oauth_redirect_uri = urllib.urlencode({'redirect_uri': 'https://trot.to/_/auth/oauth2_callback'})
+    expected_oauth_redirect_uri = urlencode({'redirect_uri': 'https://trot.to/_/auth/oauth2_callback'})
 
-    self.assertEqual(200, response.status_int)
-    self.assertIn(expected_oauth_redirect_uri, response.body)
+    self.assertEqual(302, response.status_int)
+    self.assertIn(expected_oauth_redirect_uri, response.headers['Location'])
 
   def test_login_endpoint__upstream_host_header(self):
     response = self.testapp.get('/_/auth/login',
                                 headers={'Host': 'trot.to',
                                          'X-Upstream-Host': 'go.trot.to'})
 
-    expected_oauth_redirect_uri = urllib.urlencode({'redirect_uri': 'https://go.trot.to/_/auth/oauth2_callback'})
+    expected_oauth_redirect_uri = urlencode({'redirect_uri': 'https://go.trot.to/_/auth/oauth2_callback'})
 
-    self.assertEqual(200, response.status_int)
-    self.assertIn(expected_oauth_redirect_uri, response.body)
+    self.assertEqual(302, response.status_int)
+    self.assertIn(expected_oauth_redirect_uri, response.headers['Location'])
 
   @patch('modules.base.handlers.get_secrets', return_value={'testing': {'secret': 'a_test_secret',
                                                                         'domains': ['example.com']}})
@@ -92,7 +48,7 @@ class TestHandlers(unittest.TestCase):
   def test_login_via_test_token__invalid_token(self, _):
     token = jwt.encode({'email': 'sam@example.com'}, 'some_secret', algorithm='HS256')
 
-    response = self.testapp.get('/_/auth/oauth2_callback?test_token=%s' % (token),
+    response = self.testapp.get(f'/_/auth/oauth2_callback?test_token={token.decode("utf-8")}',
                                 expect_errors=True)
 
     self.assertEqual(500, response.status_int)
@@ -102,7 +58,7 @@ class TestHandlers(unittest.TestCase):
   def test_login_via_test_token__no_test_token_config(self, _):
     token = jwt.encode({'email': 'sam@example.com'}, 'a_test_secret', algorithm='HS256')
 
-    response = self.testapp.get('/_/auth/oauth2_callback?test_token=%s' % (token),
+    response = self.testapp.get(f'/_/auth/oauth2_callback?test_token={token.decode("utf-8")}',
                                 expect_errors=True)
 
     self.assertEqual(500, response.status_int)
@@ -113,7 +69,7 @@ class TestHandlers(unittest.TestCase):
   def test_login_via_test_token__valid_token_invalid_domain(self, _):
     token = jwt.encode({'user_email': 'sam@googs.com'}, 'a_test_secret', algorithm='HS256')
 
-    response = self.testapp.get('/_/auth/oauth2_callback?test_token=%s' % (token),
+    response = self.testapp.get(f'/_/auth/oauth2_callback?test_token={token.decode("utf-8")}',
                                 expect_errors=True)
 
     self.assertEqual(500, response.status_int)
@@ -124,7 +80,7 @@ class TestHandlers(unittest.TestCase):
   def test_login_via_test_token__success(self, _):
     token = jwt.encode({'user_email': 'sam@example.com'}, 'a_test_secret', algorithm='HS256')
 
-    response = self.testapp.get('/_/auth/oauth2_callback?test_token=%s' % (token))
+    response = self.testapp.get(f'/_/auth/oauth2_callback?test_token={token.decode("utf-8")}')
 
     self.assertEqual(302, response.status_int)
     self.assertEqual(True, response.headers.get('Set-Cookie').startswith('session='))

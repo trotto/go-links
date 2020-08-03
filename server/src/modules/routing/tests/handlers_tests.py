@@ -1,76 +1,40 @@
-import datetime
-import os
-import unittest
-
-from google.appengine.ext import ndb
-from google.appengine.ext import testbed
-
-from freezegun import freeze_time
-import webtest
-from webapp2_extras import securecookie
-
-from modules.links.models import ShortLink
+from modules.data import get_models
 from modules.routing import handlers
-from shared_helpers.configs import get_secrets
+from testing import TrottoTestCase
 
-class TestRedirectHandlerWithoutLogin(unittest.TestCase):
 
-  def _set_up_gae_testbed(self):
-    self.testbed = testbed.Testbed()
-    self.testbed.activate()
+ShortLink = get_models('links').ShortLink
 
-    self.testbed.init_datastore_v3_stub()
-    self.testbed.init_memcache_stub()
-    self.testbed.init_taskqueue_stub(root_path=os.path.join(os.path.dirname(__file__), '../../..'))
 
-  def setUp(self):
-    self._set_up_gae_testbed()
+class TestRedirectHandlerWithoutLogin(TrottoTestCase):
 
-    # see https://cloud.google.com/appengine/docs/standard/python/tools/handlertesting
-    self.testapp = webtest.TestApp(handlers.app)
+  blueprints_under_test = [handlers.routes]
 
-  def get_cookie_for_session(self, session_object):
-    sessions_secret = get_secrets().get('sessions_secret')
-    serializer = securecookie.SecureCookieSerializer(sessions_secret)
-
-    return serializer.serialize('session', {'_sid': session_object.key.id()})
-
-  def tearDown(self):
-    self.testbed.deactivate()
-
-  def test_get__not_logged_in__normal_redirect_from_chrome_extension(self):
+  def test_get__not_logged_in__normal_redirect_from_browser_extension(self):
     response = self.testapp.get('/benefits?s=crx')
 
     self.assertEqual(302, response.status_int)
     self.assertEqual('http://localhost/_/auth/login?redirect_to=%2Fbenefits%3Fs%3Dcrx', response.location)
 
-  def test_get__not_logged_in__http_bare_host_request_coming_from_chrome_extension(self):
+  def test_get__not_logged_in__http_bare_host_request_coming_from_browser_extension(self):
     response = self.testapp.get('/benefits?s=crx&sc=http')
 
     self.assertEqual(302, response.status_int)
     self.assertEqual('http://benefits?tr=ot', response.location)
 
-  def test_get__not_logged_in__https_bare_host_request_coming_from_chrome_extension(self):
+  def test_get__not_logged_in__https_bare_host_request_coming_from_browser_extension(self):
     response = self.testapp.get('/benefits?s=crx&sc=https')
 
     self.assertEqual(302, response.status_int)
     self.assertEqual('https://benefits?tr=ot', response.location)
 
 
-class TestRedirectHandler(unittest.TestCase):
-  def _set_up_gae_testbed(self):
-    self.testbed = testbed.Testbed()
-    self.testbed.activate()
+class TestRedirectHandler(TrottoTestCase):
 
-    self.testbed.init_datastore_v3_stub()
-    self.testbed.init_memcache_stub()
-    self.testbed.init_taskqueue_stub(root_path=os.path.join(os.path.dirname(__file__), '../../..'))
+  blueprints_under_test = [handlers.routes]
 
   def setUp(self):
-    self._set_up_gae_testbed()
-
-    # see https://cloud.google.com/appengine/docs/standard/python/tools/handlertesting
-    self.testapp = webtest.TestApp(handlers.app)
+    super().setUp()
 
     self._populate_shortlinks()
 
@@ -96,7 +60,6 @@ class TestRedirectHandler(unittest.TestCase):
                 shortpath_prefix='slack',
                 destination_url='http://slack.com'),
 
-
       ShortLink(organization='2.com',
                 owner='jay@2.com',
                 shortpath='drive',
@@ -104,7 +67,8 @@ class TestRedirectHandler(unittest.TestCase):
                 destination_url='http://drive3.com')
     ]
 
-    ndb.put_multi(test_shortlinks)
+    for link in test_shortlinks:
+      link.put()
 
   def test_redirect__logged_in__go_link_does_not_exist(self):
     response = self.testapp.get('/drive',
@@ -122,7 +86,6 @@ class TestRedirectHandler(unittest.TestCase):
 
     self.assertEqual('http://wiki.com', response.headers['Location'])
 
-  @freeze_time("2018-10-31")
   def test_redirect__logged_in__simple_go_link__using_extension(self):
     response = self.testapp.get('/wiki?s=crx',
                                 headers={'TROTTO_USER_UNDER_TEST': 'rex@1.com'})

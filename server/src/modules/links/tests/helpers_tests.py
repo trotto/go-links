@@ -4,29 +4,17 @@
 import os
 import unittest
 
-from google.appengine.ext import ndb
-from google.appengine.ext import testbed
-
 from mock import patch, call
 
+from modules.data import get_models
 from modules.links import helpers
-from modules.links import models
+from testing import TrottoTestCase
 
-class TestUtilityFunctions(unittest.TestCase):
 
-  def _set_up_gae_testbed(self):
-    self.testbed = testbed.Testbed()
-    self.testbed.activate()
+ShortLink = get_models('links').ShortLink
 
-    self.testbed.init_datastore_v3_stub()
-    self.testbed.init_memcache_stub()
-    self.testbed.init_taskqueue_stub()
 
-  def setUp(self):
-    self._set_up_gae_testbed()
-
-  def tearDown(self):
-    self.testbed.deactivate()
+class TestUtilityFunctions(TrottoTestCase):
 
   def test__encode_ascii_incompatible_chars__many_query_params(self):
     self.assertEqual(
@@ -59,101 +47,91 @@ class TestUtilityFunctions(unittest.TestCase):
       helpers._encode_ascii_incompatible_chars(u'https://github.com/search?utf8=%E2%9C%93&q=party+parrot&type='))
 
 
-class TestOtherFunctions(unittest.TestCase):
-
-  def _set_up_gae_testbed(self):
-    self.testbed = testbed.Testbed()
-    self.testbed.activate()
-
-    self.testbed.init_datastore_v3_stub()
-    self.testbed.init_memcache_stub()
-    self.testbed.init_taskqueue_stub(root_path=os.path.join(os.path.dirname(__file__), '../../..'))
+class TestOtherFunctions(TrottoTestCase):
 
   def setUp(self):
-    self._set_up_gae_testbed()
+    super().setUp()
 
     self._populate_test_links()
-
-  def tearDown(self):
-    self.testbed.deactivate()
 
   def _populate_test_links(self):
     test_shortlinks = [
 
       # company2 - go/drive
-      models.ShortLink(id=13,
-                       organization='2.com',
-                       owner='jay@2.com',
-                       shortpath='drive',
-                       shortpath_prefix='drive',
-                       destination_url='http://drive3.com'),
+      ShortLink(id=13,
+                organization='2.com',
+                owner='jay@2.com',
+                shortpath='drive',
+                shortpath_prefix='drive',
+                destination_url='http://drive3.com'),
 
       # company1 - go/drive
-      models.ShortLink(id=14,
-                       organization='1.com',
-                       owner='kay@1.com',
-                       shortpath='drive',
-                       shortpath_prefix='drive',
-                       destination_url='http://drive4.com'),
+      ShortLink(id=14,
+                organization='1.com',
+                owner='kay@1.com',
+                shortpath='drive',
+                shortpath_prefix='drive',
+                destination_url='http://drive4.com'),
 
       # company2 - go/drive/%s
-      models.ShortLink(id=15,
-                       organization='2.com',
-                       owner='jay@2.com',
-                       shortpath='drive/%s',
-                       shortpath_prefix='drive',
-                       destination_url='http://drive5.com/%s'),
+      ShortLink(id=15,
+                organization='2.com',
+                owner='jay@2.com',
+                shortpath='drive/%s',
+                shortpath_prefix='drive',
+                destination_url='http://drive5.com/%s'),
 
       # company1 - go/drive/%s
-      models.ShortLink(id=16,
-                       organization='1.com',
-                       owner='kay@1.com',
-                       shortpath='drive/%s',
-                       shortpath_prefix='drive',
-                       destination_url='http://drive6.com/%s'),
+      ShortLink(id=16,
+                organization='1.com',
+                owner='kay@1.com',
+                shortpath='drive/%s',
+                shortpath_prefix='drive',
+                destination_url='http://drive6.com/%s'),
 
       # company2 - go/paper/%s
-      models.ShortLink(id=114,
-                       organization='2.com',
-                       owner='jay@2.com',
-                       shortpath='paper/%s',
-                       shortpath_prefix='paper',
-                       destination_url='http://paper.com/%s'),
+      ShortLink(id=114,
+                organization='2.com',
+                owner='jay@2.com',
+                shortpath='paper/%s',
+                shortpath_prefix='paper',
+                destination_url='http://paper.com/%s'),
 
       # company1 - go/sfdc/%s
-      models.ShortLink(id=115,
-                       organization='1.com',
-                       owner='jay@1.com',
-                       shortpath='sfdc/%s',
-                       shortpath_prefix='sfdc',
-                       destination_url='http://sfdc.com/%s'),
+      ShortLink(id=115,
+                organization='1.com',
+                owner='jay@1.com',
+                shortpath='sfdc/%s',
+                shortpath_prefix='sfdc',
+                destination_url='http://sfdc.com/%s'),
 
       # company1 - go/looker/%s/%s
-      models.ShortLink(id=116,
-                       organization='1.com',
-                       owner='jay@1.com',
-                       shortpath='looker/%s/%s',
-                       shortpath_prefix='looker',
-                       destination_url='http://looker.com/%s/search/%s'),
+      ShortLink(id=116,
+                organization='1.com',
+                owner='jay@1.com',
+                shortpath='looker/%s/%s',
+                shortpath_prefix='looker',
+                destination_url='http://looker.com/%s/search/%s'),
     ]
 
-    ndb.put_multi(test_shortlinks)
+    for link in test_shortlinks:
+      link.put()
 
   def test_derive_pattern_match__one_level_shortlink(self):
     self.assertEqual((None, None),
                      helpers.derive_pattern_match('1.com', 'notes'))
 
   def test_derive_pattern_match__same_shortlink_different_companies(self):
-    self.assertEqual((models.ShortLink.get_by_id(15), 'http://drive5.com/roadmap'),
+    self.assertEqual((ShortLink.get_by_id(15), 'http://drive5.com/roadmap'),
                      helpers.derive_pattern_match('2.com', 'drive/roadmap'))
 
-    self.assertEqual((models.ShortLink.get_by_id(15), 'http://drive5.com/roadmap'),
+    self.assertEqual((ShortLink.get_by_id(15), 'http://drive5.com/roadmap'),
                      helpers.derive_pattern_match('2.com', 'drive/roadmap'))
 
-    self.assertEqual((models.ShortLink.get_by_id(16), 'http://drive6.com/roadmap'),
+    self.assertEqual((ShortLink.get_by_id(16), 'http://drive6.com/roadmap'),
                      helpers.derive_pattern_match('1.com', 'drive/roadmap'))
 
-    self.assertEqual((models.ShortLink.get_by_id(16), 'http://drive6.com/roadmap'),
+    self.assertEqual((ShortLink.get_by_id(16), 'http://drive6.com/roadmap'),
                      helpers.derive_pattern_match('1.com', 'drive/roadmap'))
 
     self.assertEqual((None, None),
@@ -163,10 +141,10 @@ class TestOtherFunctions(unittest.TestCase):
     self.assertEqual((None, None),
                      helpers.derive_pattern_match('1.com', 'paper/kpis'))
 
-    self.assertEqual((models.ShortLink.get_by_id(114), 'http://paper.com/kpis'),
+    self.assertEqual((ShortLink.get_by_id(114), 'http://paper.com/kpis'),
                      helpers.derive_pattern_match('2.com', 'paper/kpis'))
   def test_derive_pattern_match__multi_level_pattern(self):
-    self.assertEqual((models.ShortLink.get_by_id(116), 'http://looker.com/1/search/sales'),
+    self.assertEqual((ShortLink.get_by_id(116), 'http://looker.com/1/search/sales'),
                      helpers.derive_pattern_match('1.com', 'looker/1/sales'))
 
     # no looker/%s shortlink exists:
@@ -178,11 +156,11 @@ class TestOtherFunctions(unittest.TestCase):
                      helpers.get_shortlink('1.com', 'slack'))
 
   def test_get_shortlink__simple_go_link(self):
-    self.assertEqual((models.ShortLink.get_by_id(14), 'http://drive4.com'),
+    self.assertEqual((ShortLink.get_by_id(14), 'http://drive4.com'),
                      helpers.get_shortlink('1.com', 'drive'))
 
   def test_get_shortlink__go_link_with_placeholder(self):
-    self.assertEqual((models.ShortLink.get_by_id(116), 'http://looker.com/7/search/users'),
+    self.assertEqual((ShortLink.get_by_id(116), 'http://looker.com/7/search/users'),
                      helpers.get_shortlink('1.com', 'looker/7/users'))
 
   def assert_entity_attributes(self, expected_attributes, entity):
@@ -205,7 +183,7 @@ class TestOtherFunctions(unittest.TestCase):
 
   @patch('modules.links.helpers.upsert_short_link', return_value='mock_return')
   def test_update_short_link(self, mock_upsert_short_link):
-    shortlink = models.ShortLink.get_by_id(115)
+    shortlink = ShortLink.get_by_id(115)
 
     shortlink.destination_url = 'http://sfdc1000.com/%s'
 
@@ -237,7 +215,7 @@ class TestOtherFunctions(unittest.TestCase):
   def test_get_all_shortlinks_for_org(self):
     ids_of_expected_shortlinks = [14, 16, 115, 116]
 
-    expected_shortlinks = [models.ShortLink.get_by_id(id) for id in ids_of_expected_shortlinks]
+    expected_shortlinks = [ShortLink.get_by_id(id) for id in ids_of_expected_shortlinks]
 
-    self.assertEqual(sorted(expected_shortlinks),
-                     sorted(helpers.get_all_shortlinks_for_org('1.com')))
+    self.assertEqual(sorted(expected_shortlinks, key=lambda link: link.id),
+                     sorted(helpers.get_all_shortlinks_for_org('1.com'), key=lambda link: link.id))
