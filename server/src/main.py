@@ -22,7 +22,7 @@ def init_app_without_routes(disable_csrf=False):
   app.secret_key = get_secrets()['sessions_secret']
 
   if get_database() == 'postgres':
-    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL') or get_secrets()['postgres']['url']
+    app.config['SQLALCHEMY_DATABASE_URI'] = get_secrets()['postgres']['url']
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     global db

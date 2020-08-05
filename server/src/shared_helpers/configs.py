@@ -13,6 +13,10 @@ class MissingConfigError(Exception):
 
 
 def get_secrets():
+  if os.getenv('DATABASE_URL') and os.getenv('FLASK_SECRET'):
+    return {'postgres': {'url': os.getenv('DATABASE_URL')},
+            'sessions_secret': os.getenv('FLASK_SECRET')}
+
   secrets_file_name = 'secrets.yaml'
 
   if not os.path.isfile(os.path.join(CONFIGS_PARENT_DIR, secrets_file_name)):
@@ -62,6 +66,10 @@ def get_path_to_oauth_secrets():
     if env.current_env_is_local():
       return os.path.join(os.path.dirname(__file__), '../local/client_secrets_local_only.json')
     else:
-      raise MissingConfigError('Missing `config/client_secrets.json` in non-local environment')
+      if os.getenv('GOOGLE_OAUTH_CLIENT_JSON'):
+        with open(production_path, 'w') as f:
+          f.write(os.getenv('GOOGLE_OAUTH_CLIENT_JSON'))
+      else:
+        raise MissingConfigError('Missing `config/client_secrets.json` in non-local environment')
 
   return production_path
