@@ -20,14 +20,11 @@ from datetime import datetime
 
 class BaseModel(object):
   id = int
-  oid = int
   created = datetime
   modified = datetime
 
   def __init__(self, **kwargs):
     self._set_attributes(kwargs)
-
-    self.oid = self.id
 
   def _set_attributes(self, kwds):
     cls = self.__class__

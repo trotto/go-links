@@ -361,9 +361,9 @@ export const LinksTable = React.createClass({
               (this.props.userInfo.get('admin') || row.original.owner === this.props.userInfo.get('email'));
 
           return <EditableDestinationContainer
-                    key={row.original.oid + '-' + row.value}
+                    key={row.original.id + '-' + row.value}
                     destination={row.value}
-                    id={row.original.oid}
+                    id={row.original.id}
                     link={row.original}
                     editable={editable}
                     deletable={editable}
@@ -455,7 +455,7 @@ export const LinksTable = React.createClass({
           {!this.state.linkToDelete ? null :
               <DeletionModal
                 link={this.state.linkToDelete}
-                deleteLink={this.props.deleteLink.bind(this, this.state.linkToDelete.oid)}
+                deleteLink={this.props.deleteLink.bind(this, this.state.linkToDelete.id)}
                 exit={this.setState.bind(this, { linkToDelete: null })}
               />
           }

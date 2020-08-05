@@ -1,4 +1,3 @@
-import logging
 import os
 
 import yaml
@@ -13,16 +12,20 @@ class MissingConfigError(Exception):
   pass
 
 
-def get_secrets(error_if_missing=True):
+def get_secrets():
   secrets_file_name = 'secrets.yaml'
+
+  if not os.path.isfile(os.path.join(CONFIGS_PARENT_DIR, secrets_file_name)):
+    secrets_file_name = 'app.yml'
+
   try:
     with open(os.path.join(CONFIGS_PARENT_DIR, secrets_file_name)) as secrets_file:
       secrets = yaml.load(secrets_file, Loader=yaml.SafeLoader)
-  except IOError:
-    if error_if_missing:
+  except (IOError, FileNotFoundError):
+    if not env.current_env_is_local():
       raise
 
-    secrets = {}
+    secrets = {'sessions_secret': 'placeholder'}
 
   return secrets
 

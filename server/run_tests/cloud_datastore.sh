@@ -17,4 +17,4 @@ export DATASTORE_EMULATOR_HOST_PATH=localhost:8082/datastore
 export DATASTORE_HOST=http://localhost:8082
 export DATASTORE_PROJECT_ID=trotto-test
 
-python run_tests.py $1 --logging-level INFO
+python run_tests/run_tests.py $1 --logging-level INFO

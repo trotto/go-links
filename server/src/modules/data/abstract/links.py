@@ -13,7 +13,7 @@ class ShortLink(BaseModel):
   visits_count_last_updated = datetime
 
   # TODO: Eliminate the need for this duplication with a better base class.
-  _properties = ['id', 'oid', 'created', 'modified',
+  _properties = ['id', 'created', 'modified',
                  'organization', 'owner', 'shortpath', 'shortpath_prefix',
                  'destination_url', 'visits_count', 'visits_count_last_updated']
 

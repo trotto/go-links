@@ -67,7 +67,7 @@ export default function (state = Map(), action) {
       return state.setIn(['editing', 'draftDestination'], action.draftDestination);
 
     case 'UPDATE_LOCAL_LINK':
-      const linkIndex = state.get('links', List()).findIndex(link => link.get('oid') === action.linkId);
+      const linkIndex = state.get('links', List()).findIndex(link => link.get('id') === action.linkId);
 
       if (linkIndex == -1) {
         return state.update('links', links => links.push(fromJS(action.linkData)));
@@ -76,7 +76,7 @@ export default function (state = Map(), action) {
       return state.updateIn(['links', linkIndex], link => link.merge(action.linkData));
 
     case 'DELETE_LINK':
-      return state.update('links', links => links.filter(link => link.get('oid') !== action.linkId));
+      return state.update('links', links => links.filter(link => link.get('id') !== action.linkId));
 
     case 'LINK_CREATED_ON_THIS_PAGELOAD':
       return state.set('linkCreatedOnThisPageload', fromJS(action.linkData));
