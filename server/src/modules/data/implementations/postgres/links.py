@@ -1,12 +1,22 @@
+import base64
 import datetime
 
 from main import db
 from modules.data.abstract import links
 
 
+def _get_link_key(organization, shortpath):
+  # go/17
+  return f'{base64.b64encode(bytes(organization, "utf-8"))}:{shortpath}'
+
+
 class ShortLink(db.Model, links.ShortLink):
 
   id = db.Column(db.Integer, primary_key=True)
+  key = db.Column(db.String(500),
+                  index=True,
+                  unique=True,
+                  nullable=False)
   created = db.Column(db.DateTime, default=datetime.datetime.utcnow)
   modified = db.Column(db.DateTime, default=datetime.datetime.utcnow)
   organization = db.Column(db.String(80),
@@ -38,8 +48,7 @@ class ShortLink(db.Model, links.ShortLink):
   @staticmethod
   def get_by_full_path(organization, shortpath):
     return ShortLink.query \
-        .filter(ShortLink.shortpath == shortpath) \
-        .filter(ShortLink.organization == organization) \
+        .filter(ShortLink.key == _get_link_key(organization, shortpath)) \
         .one_or_none()
 
   @staticmethod
@@ -50,6 +59,8 @@ class ShortLink(db.Model, links.ShortLink):
 
   def put(self):
     super().put()
+
+    self.key = _get_link_key(self.organization, self.shortpath)
 
     db.session.add(self)
     db.session.commit()
