@@ -1,3 +1,5 @@
 .idea/
 *.pyc
 test_circleci.sh
+app.yml
+client_secrets.json
