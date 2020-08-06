@@ -64,7 +64,6 @@ class ShortLink(links.ShortLink):
     datastore_client.put(entity)
 
     self.id = entity.id
-    self.oid = entity.id
 
   def delete(self):
     datastore_client.delete(datastore_client.key(SHORTLINK_KIND, self.id))

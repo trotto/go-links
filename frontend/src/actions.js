@@ -174,7 +174,7 @@ export function updateLink(linkId, updates) {
       headers: {'Content-Type': 'application/json'}
     };
 
-    const currentMatchingLink = getState().core.get('links', List()).find(link => link.get('oid') === linkId);
+    const currentMatchingLink = getState().core.get('links', List()).find(link => link.get('id') === linkId);
 
     dispatch(updateLocalLink(linkId, updates));
 

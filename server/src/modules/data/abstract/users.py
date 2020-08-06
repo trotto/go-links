@@ -12,17 +12,17 @@ class User(BaseModel):
   domain_type = str
   notifications = dict
 
+  is_authenticated = True  # as required by Flask-Login
+  is_active = True  # as required by Flask-Login
+  is_anonymous = False  # as required by Flask-Login
+
   # TODO: Eliminate the need for this duplication with a better base class.
-  _properties = ['id', 'oid', 'created', 'modified',
+  _properties = ['id', 'created', 'modified',
                  'email', 'organization', 'role', 'accepted_terms_at',
                  'domain_type', 'notifications']
 
   def __init__(self, **kwargs):
     super().__init__(**kwargs)
-
-    self.is_authenticated = True  # as required by Flask-Login
-    self.is_active = True  # as required by Flask-Login
-    self.is_anonymous = False  # as required by Flask-Login
 
     self.organization = get_organization_id_for_email(kwargs['email'])
 

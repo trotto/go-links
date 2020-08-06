@@ -87,8 +87,11 @@ def login_via_test_token():
 
 @routes.route('/_/auth/oauth2_callback')
 def oauth2_callback():
-  if login_via_test_token():
-    return redirect('/')
+  try:
+    if login_via_test_token():
+      return redirect('/')
+  except:
+    return 'error', 500
 
   flow = flow_from_clientsecrets(get_path_to_oauth_secrets(),
                                  scope='https://www.googleapis.com/auth/userinfo.email',
