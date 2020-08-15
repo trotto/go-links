@@ -1,4 +1,3 @@
-import datetime
 import re
 from urllib.parse import urlparse, urlencode
 
@@ -6,7 +5,7 @@ import validators
 from validators.utils import ValidationFailure
 
 from modules.data import get_models
-from modules.users.helpers import get_or_create_user
+from modules.organizations.utils import get_organization_id_for_email
 from shared_helpers.encoding import convert_entity_to_dict
 from shared_helpers.events import enqueue_event
 
@@ -84,8 +83,8 @@ def get_shortlink(organization, shortpath):
     return derive_pattern_match(organization, shortpath)
 
 
-def create_short_link(organization, creator, shortpath, destination):
-  return upsert_short_link(organization, creator, shortpath, destination, None)
+def create_short_link(organization, owner, shortpath, destination):
+  return upsert_short_link(organization, owner, shortpath, destination, None)
 
 
 def update_short_link(link_object):
@@ -94,15 +93,9 @@ def update_short_link(link_object):
                            link_object)
 
 
-def upsert_short_link(organization, creator, shortpath, destination, updated_link_object):
+def upsert_short_link(organization, owner, shortpath, destination, updated_link_object):
   shortpath = shortpath.strip().lower().strip('/')
   destination = _encode_ascii_incompatible_chars(destination.strip())
-
-  # TODO: Cache this.
-  user = get_or_create_user(creator, organization)
-  if not user.accepted_terms_at:
-    user.accepted_terms_at = datetime.datetime.utcnow()
-    user.put()
 
   if not shortpath:
     raise LinkCreationException('You must provide a path')
@@ -111,6 +104,9 @@ def upsert_short_link(organization, creator, shortpath, destination, updated_lin
 
   if shortpath != re.sub('[^0-9a-zA-Z\-\/%]', '', shortpath):
     raise LinkCreationException(PATH_RESTRICTIONS_ERROR)
+
+  if organization != get_organization_id_for_email(owner):
+    raise LinkCreationException("The go link's owner must be in the go link's organization")
 
   shortpath_parts = shortpath.split('/')
   if len(shortpath_parts) > 1:
@@ -150,7 +146,7 @@ def upsert_short_link(organization, creator, shortpath, destination, updated_lin
     link = updated_link_object
   else:
     link_kwargs = {'organization': organization,
-                   'owner': creator,
+                   'owner': owner,
                    'shortpath': shortpath,
                    'destination_url': destination,
                    'shortpath_prefix': shortpath.split('/')[0]}

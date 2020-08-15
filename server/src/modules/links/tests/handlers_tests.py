@@ -60,6 +60,30 @@ class TestHandlers(TrottoTestCase):
     self.assertEqual('favorites', shortlink.shortpath)
     self.assertEqual('http://example.com', shortlink.destination_url)
 
+  def test_create_link__owner_specified__current_user_is_not_admin(self):
+    response = self.testapp.post_json('/_/api/links',
+                                      {'shortpath': 'there',
+                                       'destination': 'http://example.com/there',
+                                       'owner': 'joe@googs.com'},
+                                      headers={'TROTTO_USER_UNDER_TEST': 'kay@googs.com'},
+                                      expect_errors=True)
+
+    self.assertEqual(403, response.status_int)
+
+    self.assertEqual(0, len(ShortLink._get_all()))
+
+  @patch('modules.users.helpers.is_user_admin', side_effect=lambda user: user.email == 'kay@googs.com')
+  def test_create_link__owner_specified__current_user_is_admin(self, _):
+    response = self.testapp.post_json('/_/api/links',
+                                      {'shortpath': 'there',
+                                       'destination': 'http://example.com/there',
+                                       'owner': 'joe@googs.com'},
+                                      headers={'TROTTO_USER_UNDER_TEST': 'kay@googs.com'})
+
+    self.assertEqual(201, response.status_int)
+
+    self.assertEqual('joe@googs.com', response.json['owner'])
+
   def test_get_shortlinks_for_user(self):
     modified_datetime = datetime.datetime.utcnow() + datetime.timedelta(days=2)
 
