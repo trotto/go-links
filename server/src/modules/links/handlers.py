@@ -68,9 +68,12 @@ def get_links():
 def post_link():
   object_data = request.json
 
+  if 'owner' in object_data and not user_helpers.is_user_admin(current_user):
+    return abort(403)
+
   try:
     new_link = helpers.create_short_link(current_user.organization,
-                                         current_user.email,
+                                         object_data.get('owner', current_user.email),
                                          object_data['shortpath'],
                                          object_data['destination'])
   except helpers.LinkCreationException as e:
@@ -78,9 +81,11 @@ def post_link():
       'error': str(e)
     })
 
+  logging.info(f'{current_user.email} created go link with ID {new_link.id}')
+
   return jsonify(
     convert_entity_to_dict(new_link, PUBLIC_KEYS, get_field_conversion_fns())
-  )
+  ), 201
 
 
 @routes.route('/_/api/links/<link_id>', methods=['PUT'])

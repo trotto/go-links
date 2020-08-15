@@ -200,6 +200,13 @@ class TestOtherFunctions(TrottoTestCase):
     self.assertEqual('That go link already exists. go/drive points to http://drive4.com',
                      str(cm.exception))
 
+  def test_create_shortlink__owner_does_not_match_org(self):
+    with self.assertRaises(helpers.LinkCreationException) as cm:
+      helpers.create_short_link('1.com', 'kay@g.com', 'drive', 'drive1000.com')
+
+    self.assertEqual("The go link's owner must be in the go link's organization",
+                     str(cm.exception))
+
   def test_create_shortlink__successful_go_link_creation_with_same_link_at_other_company(self):
     new_link = helpers.create_short_link('1.com', 'kay@1.com', 'paper/%s', 'paper2.com/search/%s')
 
