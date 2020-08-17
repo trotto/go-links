@@ -10,7 +10,7 @@ from oauth2client.client import FlowExchangeError
 from modules.base import authentication
 from modules.organizations.utils import get_organization_id_for_email
 from modules.users.helpers import get_or_create_user
-from shared_helpers.configs import get_secrets, get_path_to_oauth_secrets
+from shared_helpers.config import get_config, get_path_to_oauth_secrets
 from shared_helpers import utils
 
 
@@ -74,9 +74,9 @@ def login_via_test_token():
   if not request.args.get('test_token'):
     return False
 
-  payload = jwt.decode(request.args.get('test_token'), get_secrets()['testing']['secret'], 'HS256')
+  payload = jwt.decode(request.args.get('test_token'), get_config()['testing']['secret'], 'HS256')
 
-  if payload['user_email'].split('@')[1] not in get_secrets()['testing']['domains']:
+  if payload['user_email'].split('@')[1] not in get_config()['testing']['domains']:
     raise Exception('Invalid test user %s, with test token: %s' % (payload['user_email'],
                                                                    request.args.get('test_token')))
 

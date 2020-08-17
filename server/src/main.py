@@ -8,7 +8,7 @@ from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFProtect, generate_csrf
 
 from shared_helpers.env import get_database
-from shared_helpers.configs import get_secrets
+from shared_helpers.config import get_config
 
 JINJA_ENVIRONMENT = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.join(os.path.dirname(__file__), 'static')),
@@ -19,10 +19,10 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 def init_app_without_routes(disable_csrf=False):
   app = Flask(__name__)
 
-  app.secret_key = get_secrets()['sessions_secret']
+  app.secret_key = get_config()['sessions_secret']
 
   if get_database() == 'postgres':
-    app.config['SQLALCHEMY_DATABASE_URI'] = get_secrets()['postgres']['url']
+    app.config['SQLALCHEMY_DATABASE_URI'] = get_config()['postgres']['url']
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     global db

@@ -17,7 +17,7 @@ def send_email(data):
     mailgun_request_data['html'] = data['html']
 
   response = requests.post("https://api.mailgun.net/v3/mg.trot.to/messages",
-                           auth = ("api", configs.get_secrets()['mailgun']['general_use_api_key']),
+                           auth = ("api", configs.get_config()['mailgun']['general_use_api_key']),
                            data = mailgun_request_data)
 
   response.raise_for_status()

@@ -1,0 +1,73 @@
+import unittest
+
+from mock import patch, mock_open
+
+from shared_helpers import config
+
+
+class TestFunctions(unittest.TestCase):
+
+  @patch('os.path.isfile', return_value=True)
+  def test_get_path_to_oauth_secrets__production_file_exists(self, mock_isfile):
+    self.assertEqual('config/client_secrets.json',
+                     '/'.join(config.get_path_to_oauth_secrets().rsplit('/', 2)[-2:]))
+
+    self.assertTrue(mock_isfile.call_args[0][0].endswith('config/client_secrets.json'))
+
+  @patch('shared_helpers.env.current_env_is_local', return_value=True)
+  @patch('os.path.isfile', return_value=False)
+  def test_get_path_to_oauth_secrets__production_file_does_not_exist__local_env(self, mock_isfile, mock_is_local):
+    self.assertEqual('local/client_secrets_local_only.json',
+                     '/'.join(config.get_path_to_oauth_secrets().rsplit('/', 2)[-2:]))
+
+  @patch('shared_helpers.env.current_env_is_local', return_value=False)
+  @patch('os.path.isfile', return_value=False)
+  def test_get_path_to_oauth_secrets__production_file_does_not_exist__non_local_env(self, mock_isfile, mock_is_local):
+    self.assertRaises(config.MissingConfigError, config.get_path_to_oauth_secrets)
+
+  @patch('yaml.load', return_value={'mock': 'config'})
+  @patch('os.path.isfile', return_value=True)
+  @patch('os.getenv', return_value=None)
+  def test_get_config__config_from_secrets_yaml_file(self, _0, _1, _2):
+    with patch('builtins.open', mock_open(read_data='')) as mocked_open:
+      self.assertEqual({'mock': 'config'},
+                       config.get_config())
+
+      self.assertTrue(mocked_open.call_args[0][0].endswith('secrets.yaml'))
+
+  @patch('yaml.load', return_value={'mock': 'config'})
+  @patch('os.path.isfile', side_effect=lambda path: path.endswith('app.yml'))
+  @patch('os.getenv', return_value=None)
+  def test_get_config__config_from_app_yml_file(self, _0, mock_is_file, _2):
+    with patch('builtins.open', mock_open(read_data='')) as mocked_open:
+      self.assertEqual({'mock': 'config'},
+                       config.get_config())
+
+      self.assertTrue(mocked_open.call_args[0][0].endswith('app.yml'))
+      self.assertEqual(1, len(mock_is_file.call_args_list))
+      self.assertTrue(mock_is_file.call_args[0][0].endswith('secrets.yaml'))
+
+  @patch('os.path.isfile', return_value=False)
+  def test_get_config__config_from_multiple_env_vars(self, _):
+    def get_env(var_name):
+      return {'TROTTO_CONFIG': None,
+              'DATABASE_URL': 'pg_url',
+              'FLASK_SECRET': 'the_secret'
+              }[var_name]
+
+    with patch('os.getenv', side_effect=get_env):
+      self.assertEqual({'postgres': {'url': 'pg_url'},
+                        'sessions_secret': 'the_secret'},
+                       config.get_config())
+
+  @patch('os.path.isfile', return_value=False)
+  def test_get_config__config_from_single_env_var(self, _):
+    def get_env(var_name):
+      return {'TROTTO_CONFIG': 'YTogMQpiOiAy',
+              'DATABASE_URL': 'pg_url',
+              'FLASK_SECRET': 'the_secret'
+              }[var_name]
+
+    with patch('os.getenv', side_effect=get_env):
+      self.assertEqual({'a': 1, 'b': 2},
+                       config.get_config())

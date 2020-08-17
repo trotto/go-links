@@ -8,7 +8,10 @@
   "logo": "https://www.trot.to/img/logos/trotto.svg",
   "env": {
     "FLASK_SECRET": {
-      "description": "A secret used to sign session cookies and CSRF tokens. One way to generate this is with: python -c 'import os; import base64; print(base64.b64encode(os.urandom(32)))'"
+      "description": "A secret used to sign session cookies and CSRF tokens. See https://www.trot.to/docs/deploy/app-yml-config-file"
+    },
+    "TROTTO_CONFIG": {
+      "description": "A base64-encoded app.yml file. See https://www.trot.to/docs/deploy/app-yml-config-file"
     },
     "GOOGLE_OAUTH_CLIENT_JSON": {
       "description": "The JSON for a Google OAuth client"
