@@ -14,7 +14,7 @@ else:
 
 import requests
 
-from shared_helpers import configs
+from shared_helpers import config
 
 
 def _deliver_event_to_url(url, event_object):
@@ -32,7 +32,7 @@ def _deliver_event(event_id, event_type, timestamp, object_type, object_data):
                   'created': timestamp,
                   'data': {'object': object_data}}
 
-  for url in configs.get_config().get('event_subscribers', []):
+  for url in config.get_config().get('event_subscribers', []):
     defer(_deliver_event_to_url,
           url,
           event_object,

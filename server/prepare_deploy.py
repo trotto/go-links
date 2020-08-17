@@ -4,7 +4,7 @@ import sys
 import yaml
 
 sys.path.insert(1, os.path.join(os.path.dirname(os.path.realpath(__file__)), 'src'))
-from shared_helpers.configs import get_secrets
+from shared_helpers.config import get_config
 from shared_helpers.utils import generate_secret
 
 
@@ -25,7 +25,7 @@ def _check_for_client_secrets():
 
 
 if __name__ == "__main__":
-  secrets = get_secrets(False) or {}
+  secrets = get_config(False) or {}
 
   if 'sessions_secret' not in secrets:
     user_input = raw_input("You don't yet have a sessions secret, so one will be created for you and stored"

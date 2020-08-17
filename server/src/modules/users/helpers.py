@@ -4,7 +4,7 @@ import jinja2
 
 from modules.data import get_models
 from modules.organizations.utils import get_organization_id_for_email
-from shared_helpers import configs
+from shared_helpers import config
 from shared_helpers.encoding import convert_entity_to_dict
 from shared_helpers.events import enqueue_event
 
@@ -63,6 +63,6 @@ def get_or_create_user(email, user_org):
 
 
 def is_user_admin(user):
-  org_config = configs.get_organization_config(user.organization)
+  org_config = config.get_organization_config(user.organization)
 
   return user.email in org_config.get('admins', []) if org_config else False

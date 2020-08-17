@@ -30,20 +30,20 @@ class TestHandlers(TrottoTestCase):
     self.assertEqual(302, response.status_int)
     self.assertIn(expected_oauth_redirect_uri, response.headers['Location'])
 
-  @patch('modules.base.handlers.get_secrets', return_value={'testing': {'secret': 'a_test_secret',
+  @patch('modules.base.handlers.get_config', return_value={'testing': {'secret': 'a_test_secret',
                                                                         'domains': ['example.com']}})
   def test_login_via_test_token__no_token(self, _):
     response = self.testapp.get('/_/auth/oauth2_callback')
 
     self.assertEqual(302, response.status_int)
 
-  @patch('modules.base.handlers.get_secrets', return_value={})
+  @patch('modules.base.handlers.get_config', return_value={})
   def test_login_via_test_token__no_token__no_test_token_config(self, _):
     response = self.testapp.get('/_/auth/oauth2_callback')
 
     self.assertEqual(302, response.status_int)
 
-  @patch('modules.base.handlers.get_secrets', return_value={'testing': {'secret': 'a_test_secret',
+  @patch('modules.base.handlers.get_config', return_value={'testing': {'secret': 'a_test_secret',
                                                                         'domains': ['example.com']}})
   def test_login_via_test_token__invalid_token(self, _):
     token = jwt.encode({'email': 'sam@example.com'}, 'some_secret', algorithm='HS256')
@@ -54,7 +54,7 @@ class TestHandlers(TrottoTestCase):
     self.assertEqual(500, response.status_int)
     self.assertEqual(None, response.headers.get('Set-Cookie'))
 
-  @patch('modules.base.handlers.get_secrets', return_value={})
+  @patch('modules.base.handlers.get_config', return_value={})
   def test_login_via_test_token__no_test_token_config(self, _):
     token = jwt.encode({'email': 'sam@example.com'}, 'a_test_secret', algorithm='HS256')
 
@@ -64,7 +64,7 @@ class TestHandlers(TrottoTestCase):
     self.assertEqual(500, response.status_int)
     self.assertEqual(None, response.headers.get('Set-Cookie'))
 
-  @patch('modules.base.handlers.get_secrets', return_value={'testing': {'secret': 'a_test_secret',
+  @patch('modules.base.handlers.get_config', return_value={'testing': {'secret': 'a_test_secret',
                                                                         'domains': ['example.com']}})
   def test_login_via_test_token__valid_token_invalid_domain(self, _):
     token = jwt.encode({'user_email': 'sam@googs.com'}, 'a_test_secret', algorithm='HS256')
@@ -75,7 +75,7 @@ class TestHandlers(TrottoTestCase):
     self.assertEqual(500, response.status_int)
     self.assertEqual(None, response.headers.get('Set-Cookie'))
 
-  @patch('modules.base.handlers.get_secrets', return_value={'testing': {'secret': 'a_test_secret',
+  @patch('modules.base.handlers.get_config', return_value={'testing': {'secret': 'a_test_secret',
                                                                         'domains': ['example.com']}})
   def test_login_via_test_token__success(self, _):
     token = jwt.encode({'user_email': 'sam@example.com'}, 'a_test_secret', algorithm='HS256')

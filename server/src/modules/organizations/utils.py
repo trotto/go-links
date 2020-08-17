@@ -1,5 +1,5 @@
 from modules.users.constants import GENERIC_EMAIL_DOMAINS
-from shared_helpers import configs
+from shared_helpers import config
 from shared_helpers.constants import TEST_ORGANIZATION_EMAIL_ADDRESSES, TEST_ORGANIZATION_ID
 
 
@@ -12,6 +12,6 @@ def get_organization_id_for_email(email_address):
     # links for generic emails are siloed to just that email
     return email_address.strip()
 
-  org_config = configs.get_organization_config(email_domain)
+  org_config = config.get_organization_config(email_domain)
 
   return org_config.get('alias_to', email_domain) if org_config else email_domain

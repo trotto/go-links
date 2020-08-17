@@ -5,7 +5,7 @@ from modules.organizations import utils
 
 class FunctionsTests(unittest.TestCase):
 
-  @patch('shared_helpers.configs.get_organization_config', return_value=None)
+  @patch('shared_helpers.config.get_organization_config', return_value=None)
   def test_get_organization_id_for_email__corp_domain(self, mock_get_organization_config):
     self.assertEqual('optimizely.com',
                      utils.get_organization_id_for_email('alf@optimizely.com'))
@@ -20,7 +20,7 @@ class FunctionsTests(unittest.TestCase):
     self.assertEqual('test_org',
                      utils.get_organization_id_for_email('itsotester1@gmail.com'))
 
-  @patch('shared_helpers.configs.get_organization_config', return_value={'alias_to': 'itso.io'})
+  @patch('shared_helpers.config.get_organization_config', return_value={'alias_to': 'itso.io'})
   def test_get_organization_id_for_email__aliased_domain(self, mock_get_organization_config):
     self.assertEqual('itso.io',
                      utils.get_organization_id_for_email('alex@itso.co'))
