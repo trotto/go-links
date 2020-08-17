@@ -71,3 +71,20 @@ class TestFunctions(unittest.TestCase):
     with patch('os.getenv', side_effect=get_env):
       self.assertEqual({'a': 1, 'b': 2},
                        config.get_config())
+
+  def test_get_organization_config__from_dedicated_file(self):
+    with patch('builtins.open', mock_open(read_data='admins:\n - sam@googs.com')) as mocked_open:
+      self.assertEqual({'admins': ['sam@googs.com']},
+                       config.get_organization_config('googs.com'))
+
+      self.assertTrue(mocked_open.call_args[0][0].endswith('googs.com.yaml'))
+
+  @patch('shared_helpers.config.get_config', return_value={'sessions_secret': 'secret', 'admins': ['sam@googsetc.com']})
+  def test_get_organization_config__from_general_config_file(self, _):
+    self.assertEqual({'admins': ['sam@googsetc.com']},
+                     config.get_organization_config('googsetc.com'))
+
+  @patch('shared_helpers.config.get_config', return_value={'sessions_secret': 'secret'})
+  def test_get_organization_config__from_general_config_file__no_org_config(self, _):
+    self.assertEqual({},
+                     config.get_organization_config('googsetc.com'))

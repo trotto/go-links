@@ -39,6 +39,8 @@ def get_config():
 
 
 def get_organization_config(org_id):
+  ORG_CONFIG_KEYS = ['admins']
+
   try:
     with open(os.path.join(CONFIGS_PARENT_DIR,
                            'prod' if env.current_env_is_production() else 'dev',
@@ -46,9 +48,9 @@ def get_organization_config(org_id):
                            org_id + '.yaml')) as f:
       config = yaml.load(f, Loader=yaml.SafeLoader)
   except IOError:
-    return {}
+    config = get_config()
 
-  return config
+  return {k: v for k, v in config.items() if k in ORG_CONFIG_KEYS}
 
 
 def get_path_to_oauth_secrets():
