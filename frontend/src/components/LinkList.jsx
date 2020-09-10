@@ -19,7 +19,9 @@ function mapStateToProps(state) {
     defaultLinkSearchTerm: state.get('defaultLinkSearchTerm'),
     userInfo: state.get('userInfo'),
     draftDestination: state.getIn(['editing', 'draftDestination']),
-    goSupportedInCurrentSession: state.get('goSupportedInCurrentSession')
+    goSupportedInCurrentSession: state.get('goSupportedInCurrentSession'),
+    currentlyEditingLinkId: state.getIn(['linkEditingState', 'currentlyEditingLinkId']),
+    linkToDelete: state.getIn(['linkEditingState', 'linkToDelete'])
   };
 }
 
@@ -259,7 +261,7 @@ const DeletionModal = React.createClass({
   },
 
   isConfirmed: function() {
-    return this.state.confirmationText.trim() === this.props.link.shortpath;
+    return this.state.confirmationText.trim() === this.props.link.get('shortpath');
   },
 
   render: function() {
@@ -276,11 +278,11 @@ const DeletionModal = React.createClass({
             <div>
               <p>
                 Deleting a go link will delete the go link for everyone in your organization. No one on your
-                team will be able to use <span style={{fontWeight:'bold'}}>{this.props.link.shortpath}</span> until
+                team will be able to use <span style={{fontWeight:'bold'}}>{this.props.link.get('shortpath')}</span> until
                 it's re-created.
               </p>
               <p>
-                To confirm deletion, type <span style={{fontWeight:'bold'}}>{this.props.link.shortpath}</span> and
+                To confirm deletion, type <span style={{fontWeight:'bold'}}>{this.props.link.get('shortpath')}</span> and
                 press Delete.
               </p>
             </div>
@@ -288,7 +290,7 @@ const DeletionModal = React.createClass({
                ref={(input) => { this.confirmationInput = input; }}
                className="form-control"
                style={{width: '100%', margin: '10px 0 20px'}}
-               type="text" id="shortpath" placeholder={this.props.link.shortpath}
+               type="text" id="shortpath" placeholder={this.props.link.get('shortpath')}
                value={this.state.confirmationText}
                onChange={(e) => this.setState({ confirmationText: e.target.value.trim() })}
              />
@@ -318,19 +320,12 @@ const DeletionModal = React.createClass({
 
 export const LinksTable = React.createClass({
 
-  getInitialState: function () {
-     return {
-       currentlyEditingLinkId: null,
-       linkToDelete: null
-     }
-   },
-
   setEditingLinkId: function(linkId) {
-    this.setState({currentlyEditingLinkId: linkId})
+    this.props.updateLinkEditingState({currentlyEditingLinkId: linkId});
   },
 
   setLinkToDelete: function(linkToDelete) {
-    this.setState({ linkToDelete });
+    this.props.updateLinkEditingState({ linkToDelete });
   },
 
   render: function() {
@@ -369,7 +364,6 @@ export const LinksTable = React.createClass({
                     deletable={editable}
                     setEditingLinkId={this.setEditingLinkId}
                     setLinkToDelete={this.setLinkToDelete}
-                    currentlyEditingLinkId={this.state.currentlyEditingLinkId}
           />
         }
       },
@@ -452,11 +446,11 @@ export const LinksTable = React.createClass({
               </div>
             </div>
           </div>
-          {!this.state.linkToDelete ? null :
+          {!this.props.linkToDelete ? null :
               <DeletionModal
-                link={this.state.linkToDelete}
-                deleteLink={this.props.deleteLink.bind(this, this.state.linkToDelete.id)}
-                exit={this.setState.bind(this, { linkToDelete: null })}
+                link={this.props.linkToDelete}
+                deleteLink={this.props.deleteLink.bind(this, this.props.linkToDelete.get('id'))}
+                exit={this.setLinkToDelete.bind(this, null)}
               />
           }
         </div>
@@ -466,6 +460,16 @@ export const LinksTable = React.createClass({
 
 
 export const LinksTableContainer = connect(
-    mapStateToProps,
+    (states) => {
+      const state = states.core;
+
+      return {
+        links: state.get('links') || List(),
+        defaultLinkSearchTerm: state.get('defaultLinkSearchTerm'),
+        userInfo: state.get('userInfo'),
+        goSupportedInCurrentSession: state.get('goSupportedInCurrentSession'),
+        linkToDelete: state.getIn(['linkEditingState', 'linkToDelete'])
+      };
+    },
     actions
 )(LinksTable);

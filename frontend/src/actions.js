@@ -342,6 +342,12 @@ export function setDraftDestination(draftDestination) {
 }
 
 
+export const updateLinkEditingState = (state) => ({
+  type: 'UPDATE_LINK_EDITING_STATE',
+  state
+});
+
+
 export function updateComponentState(componentId, newState) {
 
   return function(dispatch, getState) {
