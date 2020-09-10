@@ -17,6 +17,10 @@ export const INIT_STATE = {
     shortpath: '',
     destination: ''
   },
+  linkEditingState: {
+    currentlyEditingLinkId: null,
+    linkToDelete: null
+  },
   termsOfServiceAcceptanceStatus: (window._trotto && window._trotto.alreadyAcceptedTerms === 'true') ? 'previously_accepted' : 'not_accepted',
   chromeExtensionInstalled: extensionIsInstalled,
   linkCreatedOnThisPageload: undefined,

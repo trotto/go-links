@@ -81,6 +81,9 @@ export default function (state = Map(), action) {
     case 'LINK_CREATED_ON_THIS_PAGELOAD':
       return state.set('linkCreatedOnThisPageload', fromJS(action.linkData));
 
+    case 'UPDATE_LINK_EDITING_STATE':
+      return state.update('linkEditingState', linkEditingState => linkEditingState.merge(action.state));
+
     case 'UPDATE_OPEN_MODAL':
       return state.merge({'modalShown': action.modalId, 'modalInputs': action.modalInputs});
 
