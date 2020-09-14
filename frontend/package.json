@@ -22,13 +22,15 @@
     "webpack-dev-server": "^3.8.0"
   },
   "dependencies": {
+    "@material-ui/core": "^4.11.0",
+    "@material-ui/icons": "^4.9.1",
     "detect-browser": "^2.0.0",
     "immutable": "^3.8.1",
     "isomorphic-fetch": "^2.2.1",
     "qs": "^6.5.1",
-    "react": "^15.6.2",
+    "react": "^16.13.1",
     "react-copy-to-clipboard": "^5.0.1",
-    "react-dom": "15.4.2",
+    "react-dom": "^16.13.1",
     "react-modal": "^3.11.2",
     "react-redux": "^4.4.5",
     "react-router": "^3.2.0",

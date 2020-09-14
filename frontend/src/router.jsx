@@ -7,9 +7,8 @@ import { LinksTableContainer } from './components/LinkList';
 import { hot } from 'react-hot-loader/root';
 
 
-const TrottoRouter = React.createClass({
-
-  render: () => {
+export class TrottoRouter extends React.Component {
+  render() {
     return (
         <Router key={Math.random()}  // providing key eliminates distracting "You cannot change <Router routes>" error
                                      // in console when hot-loading
@@ -24,7 +23,7 @@ const TrottoRouter = React.createClass({
         </Router>
     );
   }
-});
+}
 
 
 export default hot(TrottoRouter);

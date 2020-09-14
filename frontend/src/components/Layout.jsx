@@ -24,9 +24,9 @@ function mapStateToProps(state) {
 }
 
 
-export const MainLayout = React.createClass({
+export class MainLayout extends React.Component {
 
-  render: function() {
+  render() {
 
     const FOOTER_ITEMS = !TROTTO_HOSTED ? [] : [
       {
@@ -98,21 +98,12 @@ export const MainLayout = React.createClass({
                 <p>We <span role="img" aria-label="love love LOVE">❤️ ❤️ ❤️</span> feedback and feature requests. Add requests <a href="https://trello.com/invite/b/TVQdVwnU/71a24cb4c4e6c278c5e3c8fc21014fdc/trotto-go-links-feature-requets" target="_blank" rel="noopener noreferrer">here</a>.</p>
               </div>
             </div>
-            <div className="row">
-              <div id="credits" className="col-md-10 col-md-offset-1 text-center" style={{paddingTop: '20px'}}>
-                <div>
-                  Icons made
-                  by <a href="https://www.flaticon.com/authors/vectors-market" title="Vectors Market">Vectors Market</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> are
-                  licensed by <a href="http://creativecommons.org/licenses/by/3.0/" title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
 
     )
   }
-});
+}
 
 
 export const MainLayoutContainer = connect(

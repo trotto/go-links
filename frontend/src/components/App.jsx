@@ -18,9 +18,9 @@ function mapStateToProps(state) {
 }
 
 
-export const Butterbar = React.createClass({
+export class Butterbar extends React.Component {
 
-  render: function() {
+  render() {
     const CHROME_INSTALLATION_MESSAGE = `
         <a href="https://chrome.google.com/webstore/detail/trotto-go-links/nkeoojidblilnkcbbmfhaeebndapehjk" target="_blank">
            Install the Chrome extension</a> and simply type <span style="color:black">go/[keyword]</span> instead
@@ -53,7 +53,7 @@ export const Butterbar = React.createClass({
     if (!this.props.errorBarMessage && !priorityNotificationId) {
       return null;
     }
-    
+
     var style = !this.props.errorBarMessage
         ? {paddingLeft: '10px', paddingRight: '10px'}
         : {paddingLeft: '10px', paddingRight: '10px', position: 'fixed', left: '0', top: '0', zIndex: '1000'};
@@ -91,7 +91,7 @@ export const Butterbar = React.createClass({
         </div>
     );
   }
-});
+}
 
 
 export const ButterbarContainer = connect(
@@ -100,8 +100,8 @@ export const ButterbarContainer = connect(
 )(Butterbar);
 
 
-export const App = React.createClass({
-  render: function () {
+export class App extends React.Component {
+  render() {
 
     return (
         <div>
@@ -109,4 +109,5 @@ export const App = React.createClass({
         </div>
     )
   }
-});
+}
+
