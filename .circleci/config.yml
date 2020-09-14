@@ -16,7 +16,7 @@ build_frontend: &build_frontend
         source ~/.nvm/nvm.sh &&
         cd ${FRONTEND_ROOT} &&
         nvm install && nvm use &&
-        npm install &&
+        yarn install &&
         sh build_bundle.sh
 run_e2e_tests: &run_e2e_tests
   - run:

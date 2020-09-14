@@ -98,7 +98,7 @@ From the `server/` directory, run:
 In a separate terminal, from the `frontend/` directory, run:
 
 ```
-npm install
+yarn install
 ./start_dev_server.sh
 ```
 

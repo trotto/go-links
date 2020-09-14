@@ -5,9 +5,9 @@ import {Map, List} from 'immutable';
 import {getServiceBaseUrl} from '../utils';
 
 
-export const NavBarItem = React.createClass({
+export class NavBarItem extends React.Component {
 
-  render: function() {
+  render() {
     var style = {};
 
     if (window.location.hash === this.props.destination) {
@@ -30,18 +30,18 @@ export const NavBarItem = React.createClass({
         </li>
     )
   }
-});
+}
 
 
-export const NavBar = React.createClass({
+export class NavBar extends React.Component {
 
-  componentDidMount: function() {
+  componentDidMount() {
     var nav = responsiveNav(".nav-collapse", {
       closeOnNavClick: true
     });
-  },
+  }
 
-  render: function() {
+  render() {
     var navItems = [
       {
         text: 'How It Works',
@@ -102,4 +102,4 @@ export const NavBar = React.createClass({
         </div>
     )
   }
-});
+}

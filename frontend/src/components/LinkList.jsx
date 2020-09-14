@@ -5,6 +5,7 @@ import { browserHistory } from 'react-router';
 import ReactTable from "react-table";
 import {Map, List, Set, fromJS} from 'immutable';
 import Modal from 'react-modal';
+import { CreateOutlined, Cancel, DeleteOutline } from '@material-ui/icons';
 import {getServiceBaseUrl} from '../utils'
 
 var validUrl = require('valid-url');
@@ -26,29 +27,31 @@ function mapStateToProps(state) {
 }
 
 
-const EditableDestination = React.createClass({
+class EditableDestination extends React.Component {
 
-  getInitialState: function() {
-    return {
+  constructor(props) {
+    super(props);
+
+    this.state = {
       mousedOver: false,
       originalDestination: this.props.destination
     }
-  },
+  }
 
-  componentDidUpdate: function(prevProps, prevState) {
+  componentDidUpdate(prevProps, prevState) {
     if (this.props.currentlyEditingLinkId === this.props.id
         && prevProps.currentlyEditingLinkId !== this.props.id) {
       $('#edit-input-' + this.props.id).select();
     }
-  },
+  }
 
-  setMousedOver: function(bool) {
+  setMousedOver(bool) {
     this.setState({
       mousedOver: bool
     })
-  },
+  }
 
-  setEditingLinkId: function(linkId) {
+  setEditingLinkId(linkId) {
     if (linkId === this.props.currentlyEditingLinkId) {
       return;
     }
@@ -56,19 +59,19 @@ const EditableDestination = React.createClass({
     this.props.setDraftDestination(null);
 
     this.props.setEditingLinkId(linkId);
-  },
+  }
 
-  handleChange: function(evt){
+  handleChange(evt){
     this.props.setDraftDestination(evt.target.value);
-  },
+  }
 
-  handleKeyPress: function(e) {
+  handleKeyPress(e) {
     if (e.key === 'Enter') {
       this.updateLink();
     }
-  },
+  }
 
-  draftDestinationIsValid: function() {
+  draftDestinationIsValid() {
     if (!this.props.draftDestination) {
       return false;
     }
@@ -79,26 +82,26 @@ const EditableDestination = React.createClass({
     }
 
     return validUrl.isUri(this.props.draftDestination.replace(/%s/g, 'ss'));
-  },
+  }
 
-  getDisplayUrl: function() {
+  getDisplayUrl() {
     return this.isCurrentlyBeingEdited() && (this.props.draftDestination || this.props.draftDestination === '')
         ? this.props.draftDestination : this.state.originalDestination;
-  },
+  }
 
-  isCurrentlyBeingEdited: function(linkId) {
+  isCurrentlyBeingEdited(linkId) {
     return this.props.id === this.props.currentlyEditingLinkId;
-  },
+  }
 
-  updateLink: function() {
+  updateLink() {
     if (this.draftDestinationIsValid()) {
       this.props.updateLink(this.props.id, {destination: this.props.draftDestination});
 
       this.setEditingLinkId(null);
     }
-  },
+  }
 
-  render: function() {
+  render() {
     const currentlyBeingEdited = this.isCurrentlyBeingEdited();
 
     var inputWrapperStyle = {
@@ -126,13 +129,14 @@ const EditableDestination = React.createClass({
           >
             <div style={{width: '25px', paddingRight: '5px', display: 'flex', flexDirection: 'column', alignItems: 'center'}}>
               {currentlyBeingEdited ?
-                <img src="/_images/icons/close.svg" height="16"
-                     style={{opacity: '0.7'}}
-                     onClick={this.setEditingLinkId.bind(this, null)}
+                <Cancel
+                    fontSize="large"
+                    onClick={this.setEditingLinkId.bind(this, null)}
                 />
                   :
-                <img src={'/_images/icons/' + (this.state.mousedOver ? 'edit.svg' : 'edit_light.svg')} height="14"
-                     style={{visibility: this.props.editable ? 'visible' : 'hidden'}}
+                <CreateOutlined
+                    fontSize="large"
+                    style={{color: '#f27e8f', opacity: this.state.mousedOver ? '1' : '0.6'}}
                 />
               }
             </div>
@@ -144,8 +148,8 @@ const EditableDestination = React.createClass({
                         cursor: this.props.editable ? 'pointer' : 'default'}}
                 value={this.getDisplayUrl()}
                 disabled={!currentlyBeingEdited}
-                onChange={this.handleChange}
-                onKeyPress={this.handleKeyPress}
+                onChange={this.handleChange.bind(this)}
+                onKeyPress={this.handleKeyPress.bind(this)}
               />
               {!currentlyBeingEdited ? null :
                   <button
@@ -159,13 +163,14 @@ const EditableDestination = React.createClass({
               }
             </div>
           </div>
-          {!this.props.deletable ? null :
-              <div style={{width: '25px', paddingLeft: '5px', display: 'flex',
-                           flexDirection: 'column', alignItems: 'center'}}
+          {!this.props.editable ? null :
+              <div style={{paddingLeft: '5px', display: 'flex',
+                           alignItems: 'center'}}
               >
-                <img src={'/_images/icons/' + 'trash.svg'} height="14"
-                     style={{cursor: 'pointer'}}
-                     onClick={() => this.props.setLinkToDelete(this.props.link)}
+                <DeleteOutline
+                    fontSize="large"
+                    style={{cursor: 'pointer'}}
+                    onClick={() => this.props.setLinkToDelete(this.props.link)}
                 />
               </div>
           }
@@ -173,7 +178,7 @@ const EditableDestination = React.createClass({
     );
   }
 
-});
+}
 
 
 export const EditableDestinationContainer = connect(
@@ -249,29 +254,31 @@ const modalStyles = {
 };
 
 
-const DeletionModal = React.createClass({
-  getInitialState: function () {
-     return {
-       confirmationText: '',
-     }
-   },
+export class DeletionModal extends React.Component {
+  constructor(props) {
+    super(props);
 
-  focus: function() {
+    this.state = {
+      confirmationText: ''
+    }
+  }
+
+  focus() {
     this.confirmationInput.focus();
-  },
+  }
 
-  isConfirmed: function() {
+  isConfirmed() {
     return this.state.confirmationText.trim() === this.props.link.get('shortpath');
-  },
+  }
 
-  render: function() {
+  render() {
     const deletionConfirmed = this.isConfirmed();
     const deleteButtonStyles = deletionConfirmed ? {} : {backgroundColor: 'white'};
 
     return (
         <Modal
            isOpen={true}
-           onAfterOpen={this.focus}
+           onAfterOpen={this.focus.bind(this)}
            style={modalStyles}
         >
           <div style={{maxWidth: '600px', display: 'flex', flexDirection: 'column'}}>
@@ -315,20 +322,20 @@ const DeletionModal = React.createClass({
         </Modal>
     )
   }
-})
+}
 
 
-export const LinksTable = React.createClass({
+export class LinksTable extends React.Component {
 
-  setEditingLinkId: function(linkId) {
+  setEditingLinkId(linkId) {
     this.props.updateLinkEditingState({currentlyEditingLinkId: linkId});
-  },
+  }
 
-  setLinkToDelete: function(linkToDelete) {
+  setLinkToDelete(linkToDelete) {
     this.props.updateLinkEditingState({ linkToDelete });
-  },
+  }
 
-  render: function() {
+  render() {
 
     const DEFAULT_CELL_STYLING = {
       display: 'flex',
@@ -361,9 +368,8 @@ export const LinksTable = React.createClass({
                     id={row.original.id}
                     link={row.original}
                     editable={editable}
-                    deletable={editable}
-                    setEditingLinkId={this.setEditingLinkId}
-                    setLinkToDelete={this.setLinkToDelete}
+                    setEditingLinkId={this.setEditingLinkId.bind(this)}
+                    setLinkToDelete={this.setLinkToDelete.bind(this)}
           />
         }
       },
@@ -456,7 +462,7 @@ export const LinksTable = React.createClass({
         </div>
     );
   }
-});
+}
 
 
 export const LinksTableContainer = connect(

@@ -68,34 +68,35 @@ export const NewUserIntroContainer = connect(
 )(NewUserIntro);
 
 
-export const LinkForm = React.createClass({
+export class LinkForm extends React.Component {
 
-  getInitialState: function () {
-     return {
-       value: '',
-       copied: false,
-     }
-   },
+  constructor(props) {
+    super(props);
+    this.state = {
+      value: '',
+      copied: false,
+    }
+  }
 
-  componentDidMount: function() {
+  componentDidMount() {
     if (this.props.newLinkData && this.props.newLinkData.get('shortpath')) {  // shortpath already provided by redirect
       this.destinationInput.focus();
     } else {
       this.shortlinkInput.focus();
     }
-  },
+  }
 
   save() {
     this.props.saveLink();
-  },
+  }
 
-  _handleKeyPress: function(e) {
+  _handleKeyPress(e) {
     if (e.key === 'Enter') {
       document.getElementById('link-submit-button').click();
     }
-  },
+  }
 
-  _setCopied: function() {
+  _setCopied() {
     const setState = this.setState.bind(this);
 
     this.setState({copied: true});
@@ -103,9 +104,9 @@ export const LinkForm = React.createClass({
     setTimeout(function() {
       setState({copied: false});
     }, 1000);
-  },
+  }
 
-  render: function() {
+  render() {
 
     if (!this.props.linkCreationMessage) {
       var messageText = '';
@@ -195,7 +196,7 @@ export const LinkForm = React.createClass({
                       data-test-id="shortlink-submit-button"
                       type="submit" className="btn btn-default"
                       style={{float: 'right'}}
-                      onClick={this.save}
+                      onClick={this.save.bind(this)}
                   >
                     Create
                   </button>
@@ -207,7 +208,7 @@ export const LinkForm = React.createClass({
 
     )
   }
-});
+}
 
 
 export const LinkFormContainer = connect(
