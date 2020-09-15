@@ -372,7 +372,9 @@ class TestLinkTransferHandlers(TrottoTestCase):
                               'the_secret',
                               algorithm='HS256')
 
-    self.assertEqual({'url': base64.urlsafe_b64encode(expected_jwt).decode('utf-8').strip('=')},
+    expected_url = f"http://localhost/_transfer/{base64.urlsafe_b64encode(expected_jwt).decode('utf-8').strip('=')}"
+
+    self.assertEqual({'url': expected_url},
                      response.json)
 
   def test_get_transfer_link__authorized_admin(self, _):
@@ -391,7 +393,9 @@ class TestLinkTransferHandlers(TrottoTestCase):
                               'the_secret',
                               algorithm='HS256')
 
-    self.assertEqual({'url': base64.urlsafe_b64encode(expected_jwt).decode('utf-8').strip('=')},
+    expected_url = f"http://localhost/_transfer/{base64.urlsafe_b64encode(expected_jwt).decode('utf-8').strip('=')}"
+
+    self.assertEqual({'url': expected_url},
                      response.json)
 
   def test_get_transfer_link__user_only_has_read_access(self, _):
@@ -419,6 +423,9 @@ class TestLinkTransferHandlers(TrottoTestCase):
                                  headers={'TROTTO_USER_UNDER_TEST': 'joe@googs.com'},
                                  expect_errors=True)
     self.assertEqual(403, response.status_int)
+    self.assertEqual({'error_type': 'error_bar',
+                      'error': 'Your transfer link has expired'},
+                     response.json)
 
   def test_use_transfer_link__jwt_invalid_signature(self, _):
     transfer_token = base64.urlsafe_b64encode(jwt.encode(self.token_payload,
@@ -500,6 +507,9 @@ class TestLinkTransferHandlers(TrottoTestCase):
                                  headers={'TROTTO_USER_UNDER_TEST': 'joe@googs.com'},
                                  expect_errors=True)
     self.assertEqual(403, response.status_int)
+    self.assertEqual({'error_type': 'error_bar',
+                      'error': 'The owner of go/there has changed since your transfer link was created'},
+                     response.json)
 
   def test_use_transfer_link__token_from_user_without_access(self, _):
     User(id=20,
@@ -518,6 +528,9 @@ class TestLinkTransferHandlers(TrottoTestCase):
                                  headers={'TROTTO_USER_UNDER_TEST': 'joe@googs.com'},
                                  expect_errors=True)
     self.assertEqual(403, response.status_int)
+    self.assertEqual({'error_type': 'error_bar',
+                      'error': 'The user who created your transfer link no longer has edit rights for go/there'},
+                     response.json)
 
   def test_use_transfer_link__accepting_user_in_wrong_org(self, _):
     transfer_token = base64.urlsafe_b64encode(jwt.encode(self.token_payload,
@@ -563,3 +576,17 @@ class TestLinkTransferHandlers(TrottoTestCase):
     updated_link = ShortLink.get_by_id(7)
 
     self.assertEqual('joe@googs.com', updated_link.owner)
+
+  def test_redirect_transfer_url__signed_in(self, _):
+    response = self.testapp.get('/_transfer/my_token',
+                                headers={'TROTTO_USER_UNDER_TEST': 'joe@googs.com'})
+
+    self.assertEqual(302, response.status_int)
+    self.assertEqual('http://localhost/?transfer=my_token', response.location)
+
+  def test_redirect_transfer_url__not_signed_in(self, _):
+    response = self.testapp.get('/_transfer/my_token')
+
+    self.assertEqual(302, response.status_int)
+    self.assertEqual('http://localhost/_/auth/login?redirect_to=%2F_transfer%2Fmy_token%3F',
+                     response.location)

@@ -7,12 +7,14 @@ import {getServiceBaseUrl} from './utils';
 const enhancedFetch = function(endpoint, fetchInit, dispatch) {
 
   if ((fetchInit.method || 'GET') !== 'GET') {
+    fetchInit.headers = fetchInit.headers || {};
     fetchInit.headers['X-CSRFToken'] = window._trotto.csrfToken;
   }
 
   return fetch(endpoint, fetchInit)
       // TODO: handle 4xx and 5xx errors.
-      .then(response => response.json())
+      .then((response) => response.text())
+      .then((text) => !text ? {} : JSON.parse(text))
       .then(json => {
         if (json.error && json.error_type === 'error_bar') {
           dispatch(setErrorBarMessage(json.error));
@@ -205,6 +207,25 @@ export function deleteLink(linkId) {
 }
 
 
+export function takeOwnershipOfLink(transferToken) {
+
+  return function (dispatch) {
+    const endpoint = `/_/api/transfer_link/${transferToken}`;
+
+    const fetchInit = {
+      credentials: 'include',
+      method: 'POST'
+    };
+
+    return enhancedFetch(endpoint, fetchInit, dispatch)
+      .then(() => {
+        dispatch(fetchLinks());
+      })
+      .catch(reason => {});
+  }
+}
+
+
 export function receiveLinks(links) {
   return {
     type: 'RECEIVE_LINKS',
@@ -342,8 +363,8 @@ export function setDraftDestination(draftDestination) {
 }
 
 
-export const updateLinkEditingState = (state) => ({
-  type: 'UPDATE_LINK_EDITING_STATE',
+export const setLinkEditingStatus = (state) => ({
+  type: 'SET_LINK_EDITING_STATUS',
   state
 });
 

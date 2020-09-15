@@ -2,8 +2,9 @@ import base64
 import datetime
 from functools import wraps
 import logging
+from urllib.parse import urlencode
 
-from flask import Blueprint, request, jsonify, abort, g
+from flask import Blueprint, request, redirect, jsonify, abort, g
 from flask_login import current_user, login_required
 import jwt
 
@@ -161,7 +162,9 @@ def create_transfer_link(link_id):
 
   token = jwt.encode(payload, config.get_config()['sessions_secret'], algorithm='HS256')
 
-  return jsonify({'url': base64.urlsafe_b64encode(token).decode('utf-8').strip('=')}), 201
+  full_url = f"{request.host_url}_transfer/{base64.urlsafe_b64encode(token).decode('utf-8').strip('=')}"
+
+  return jsonify({'url': full_url}), 201
 
 
 class InvalidTransferToken(Exception):
@@ -171,6 +174,8 @@ class InvalidTransferToken(Exception):
 @routes.route('/_/api/transfer_link/<transfer_link_token>', methods=['POST'])
 @login_required
 def use_transfer_link(transfer_link_token):
+  user_facing_error = None
+
   try:
     padded_token = transfer_link_token + '=' * (4 - len(transfer_link_token) % 4)  # add any missing base64 padding
 
@@ -178,13 +183,16 @@ def use_transfer_link(transfer_link_token):
                          config.get_config()['sessions_secret'],
                          'HS256')
   except (jwt.exceptions.ExpiredSignatureError,
-          jwt.exceptions.InvalidSignatureError) as e:
+          jwt.exceptions.InvalidSignatureError,
+          jwt.exceptions.DecodeError) as e:
     if type(e) is jwt.exceptions.ExpiredSignatureError:
+      user_facing_error = 'Your transfer link has expired'
+
       logging.info('Attempt to use expired token: %s', transfer_link_token)
     if type(e) is jwt.exceptions.InvalidSignatureError:
       logging.warning('Attempt to use invalid token: %s', transfer_link_token)
 
-    abort(403)
+    abort(403, user_facing_error or 'Your transfer link is no longer valid')
 
   try:
     if not payload['sub'].startswith('link:'):
@@ -198,12 +206,16 @@ def use_transfer_link(transfer_link_token):
     if not link:
       raise InvalidTransferToken('Link does not exist')
 
-    if not check_mutate_authorization(link_id, payload['by']):
-      raise InvalidTransferToken('Token from unauthorized user')
-
     owner_from_token = user_helpers.get_user_by_id(payload['o'])
     if not owner_from_token or link.owner != owner_from_token.email:
+      user_facing_error = f'The owner of go/{link.shortpath} has changed since your transfer link was created'
+
       raise InvalidTransferToken('Owner from token does not match current owner')
+
+    if not check_mutate_authorization(link_id, payload['by']):
+      user_facing_error = f'The user who created your transfer link no longer has edit rights for go/{link.shortpath}'
+
+      raise InvalidTransferToken('Token from unauthorized user')
 
     if current_user.organization != link.organization:
       raise InvalidTransferToken("Current user does not match link's organization")
@@ -212,9 +224,17 @@ def use_transfer_link(transfer_link_token):
     logging.warning(e)
     logging.warning('Attempt to use invalid token: %s', transfer_link_token)
 
-    abort(403)
+    abort(403, user_facing_error or 'Your transfer link is no longer valid')
 
   link.owner = current_user.email
   link.put()
 
   return '', 201
+
+
+@routes.route('/_transfer/<transfer_link_token>')
+def redirect_transfer_url(transfer_link_token):
+  if not current_user.is_authenticated:
+    return redirect(f"/_/auth/login?{urlencode({'redirect_to': request.full_path})}")
+
+  return redirect(f"/?{urlencode({'transfer': transfer_link_token})}")

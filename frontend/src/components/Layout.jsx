@@ -6,9 +6,8 @@ import {Map, List} from 'immutable';
 import {LinkFormContainer} from './LinkCreation'
 import {NavBar} from'./Navigation';
 import {ButterbarContainer} from './App';
-
-
-const TROTTO_HOSTED = location.hostname.slice(location.hostname.length - 7) === 'trot.to';
+import {LinkModal} from "./Modals";
+import {isTrottoHosted} from "../utils";
 
 
 function mapStateToProps(state) {
@@ -19,7 +18,8 @@ function mapStateToProps(state) {
     shownSubsection: state.get('shownSubsection'),
     links: state.get('links'),
     userInfo: state.get('userInfo'),
-    modalShown: state.get('modalShown')
+    modalShown: state.get('modalShown'),
+    linkEditingStatus: state.get('linkEditingStatus')
   };
 }
 
@@ -28,7 +28,7 @@ export class MainLayout extends React.Component {
 
   render() {
 
-    const FOOTER_ITEMS = !TROTTO_HOSTED ? [] : [
+    const FOOTER_ITEMS = !isTrottoHosted() ? [] : [
       {
         text: 'Pricing',
         path: 'https://www.trot.to/pricing'
@@ -50,7 +50,7 @@ export class MainLayout extends React.Component {
     return (
         <div style={{height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between'}}>
           <div>
-            {TROTTO_HOSTED ? <ButterbarContainer /> : null}
+            <ButterbarContainer />
             <NavBar userInfo={this.props.userInfo} links={this.props.links} location={this.props.location} />
 
             {function(props) {
@@ -99,8 +99,10 @@ export class MainLayout extends React.Component {
               </div>
             </div>
           </div>
+          <LinkModal
+              linkEditingStatus={this.props.linkEditingStatus}
+          />
         </div>
-
     )
   }
 }
