@@ -1,11 +1,9 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import * as actions from '../actions';
-import { browserHistory } from 'react-router';
 import ReactTable from "react-table";
-import {Map, List, Set, fromJS} from 'immutable';
-import Modal from 'react-modal';
-import { CreateOutlined, Cancel, DeleteOutline } from '@material-ui/icons';
+import {List} from 'immutable';
+import { CreateOutlined, Cancel, DeleteOutline, Reply } from '@material-ui/icons';
 import {getServiceBaseUrl} from '../utils'
 
 var validUrl = require('valid-url');
@@ -21,8 +19,7 @@ function mapStateToProps(state) {
     userInfo: state.get('userInfo'),
     draftDestination: state.getIn(['editing', 'draftDestination']),
     goSupportedInCurrentSession: state.get('goSupportedInCurrentSession'),
-    currentlyEditingLinkId: state.getIn(['linkEditingState', 'currentlyEditingLinkId']),
-    linkToDelete: state.getIn(['linkEditingState', 'linkToDelete'])
+    linkEditingStatus: state.get('linkEditingStatus')
   };
 }
 
@@ -39,8 +36,8 @@ class EditableDestination extends React.Component {
   }
 
   componentDidUpdate(prevProps, prevState) {
-    if (this.props.currentlyEditingLinkId === this.props.id
-        && prevProps.currentlyEditingLinkId !== this.props.id) {
+    if (this.props.linkEditingStatus.get('edit') === this.props.id
+        && prevProps.linkEditingStatus.get('edit') !== this.props.id) {
       $('#edit-input-' + this.props.id).select();
     }
   }
@@ -52,7 +49,7 @@ class EditableDestination extends React.Component {
   }
 
   setEditingLinkId(linkId) {
-    if (linkId === this.props.currentlyEditingLinkId) {
+    if (linkId === this.props.linkEditingStatus.get('edit')) {
       return;
     }
 
@@ -89,8 +86,8 @@ class EditableDestination extends React.Component {
         ? this.props.draftDestination : this.state.originalDestination;
   }
 
-  isCurrentlyBeingEdited(linkId) {
-    return this.props.id === this.props.currentlyEditingLinkId;
+  isCurrentlyBeingEdited() {
+    return this.props.id === this.props.linkEditingStatus.get('edit');
   }
 
   updateLink() {
@@ -103,6 +100,7 @@ class EditableDestination extends React.Component {
 
   render() {
     const currentlyBeingEdited = this.isCurrentlyBeingEdited();
+    const linkId = this.props.link.id;
 
     var inputWrapperStyle = {
       borderColor: 'transparent',
@@ -134,10 +132,10 @@ class EditableDestination extends React.Component {
                     onClick={this.setEditingLinkId.bind(this, null)}
                 />
                   :
-                <CreateOutlined
-                    fontSize="large"
-                    style={{color: '#f27e8f', opacity: this.state.mousedOver ? '1' : '0.6'}}
-                />
+                  (this.props.editable && <CreateOutlined
+                      fontSize="large"
+                      style={{color: '#f27e8f', opacity: this.state.mousedOver ? '1' : '0.6'}}
+                  />)
               }
             </div>
             <div style={inputWrapperStyle}>
@@ -168,9 +166,16 @@ class EditableDestination extends React.Component {
                            alignItems: 'center'}}
               >
                 <DeleteOutline
+                    titleAccess={`Delete ${this.props.link.shortpath}`}
                     fontSize="large"
                     style={{cursor: 'pointer'}}
-                    onClick={() => this.props.setLinkToDelete(this.props.link)}
+                    onClick={() => this.props.setLinkEditingStatus({ delete: linkId })}
+                />
+                <Reply
+                    titleAccess={`Transfer ${this.props.link.shortpath}`}
+                    fontSize="large"
+                    style={{cursor: 'pointer', transform: 'scale(-1,1)'}}
+                    onClick={() => this.props.setLinkEditingStatus({ transfer: linkId })}
                 />
               </div>
           }
@@ -242,97 +247,10 @@ class CountCell extends React.Component {
 }
 
 
-const modalStyles = {
-  content: {
-    top: '50%',
-    left: '50%',
-    right: 'auto',
-    bottom: 'auto',
-    marginRight: '-50%',
-    transform: 'translate(-50%, -50%)'
-  }
-};
-
-
-export class DeletionModal extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      confirmationText: ''
-    }
-  }
-
-  focus() {
-    this.confirmationInput.focus();
-  }
-
-  isConfirmed() {
-    return this.state.confirmationText.trim() === this.props.link.get('shortpath');
-  }
-
-  render() {
-    const deletionConfirmed = this.isConfirmed();
-    const deleteButtonStyles = deletionConfirmed ? {} : {backgroundColor: 'white'};
-
-    return (
-        <Modal
-           isOpen={true}
-           onAfterOpen={this.focus.bind(this)}
-           style={modalStyles}
-        >
-          <div style={{maxWidth: '600px', display: 'flex', flexDirection: 'column'}}>
-            <div>
-              <p>
-                Deleting a go link will delete the go link for everyone in your organization. No one on your
-                team will be able to use <span style={{fontWeight:'bold'}}>{this.props.link.get('shortpath')}</span> until
-                it's re-created.
-              </p>
-              <p>
-                To confirm deletion, type <span style={{fontWeight:'bold'}}>{this.props.link.get('shortpath')}</span> and
-                press Delete.
-              </p>
-            </div>
-            <input
-               ref={(input) => { this.confirmationInput = input; }}
-               className="form-control"
-               style={{width: '100%', margin: '10px 0 20px'}}
-               type="text" id="shortpath" placeholder={this.props.link.get('shortpath')}
-               value={this.state.confirmationText}
-               onChange={(e) => this.setState({ confirmationText: e.target.value.trim() })}
-             />
-            <div style={{display: 'flex', width: '100%', justifyContent: 'space-between'}}>
-              <button
-                type="submit" className="btn btn-muted"
-                onClick={this.props.exit}
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className={`btn ${deletionConfirmed ? 'btn-electric' : 'btn-disabled'}`}
-                style={deleteButtonStyles}
-                disabled={!deletionConfirmed}
-                onClick={() => { this.props.deleteLink(); this.props.exit(); }}
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </Modal>
-    )
-  }
-}
-
-
 export class LinksTable extends React.Component {
 
   setEditingLinkId(linkId) {
-    this.props.updateLinkEditingState({currentlyEditingLinkId: linkId});
-  }
-
-  setLinkToDelete(linkToDelete) {
-    this.props.updateLinkEditingState({ linkToDelete });
+    this.props.setLinkEditingStatus({edit: linkId});
   }
 
   render() {
@@ -369,7 +287,6 @@ export class LinksTable extends React.Component {
                     link={row.original}
                     editable={editable}
                     setEditingLinkId={this.setEditingLinkId.bind(this)}
-                    setLinkToDelete={this.setLinkToDelete.bind(this)}
           />
         }
       },
@@ -452,13 +369,6 @@ export class LinksTable extends React.Component {
               </div>
             </div>
           </div>
-          {!this.props.linkToDelete ? null :
-              <DeletionModal
-                link={this.props.linkToDelete}
-                deleteLink={this.props.deleteLink.bind(this, this.props.linkToDelete.get('id'))}
-                exit={this.setLinkToDelete.bind(this, null)}
-              />
-          }
         </div>
     );
   }
@@ -474,7 +384,7 @@ export const LinksTableContainer = connect(
         defaultLinkSearchTerm: state.get('defaultLinkSearchTerm'),
         userInfo: state.get('userInfo'),
         goSupportedInCurrentSession: state.get('goSupportedInCurrentSession'),
-        linkToDelete: state.getIn(['linkEditingState', 'linkToDelete'])
+        linkEditingStatus: state.get('linkEditingStatus')
       };
     },
     actions

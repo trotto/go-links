@@ -1,7 +1,7 @@
 import os
 
 import jinja2
-from flask import Flask, send_from_directory, redirect, request
+from flask import Flask, send_from_directory, redirect, request, jsonify
 from flask_login import LoginManager, current_user
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -34,6 +34,12 @@ def init_app_without_routes(disable_csrf=False):
     from modules.base.authentication import login_test_user
 
     app.before_request(login_test_user)
+
+  @app.errorhandler(403)
+  def handle_403(error):
+    return jsonify({'error_type': 'error_bar',
+                    'error': error.description or ''
+                    }), 403
 
   login_manager = LoginManager()
   login_manager.init_app(app)

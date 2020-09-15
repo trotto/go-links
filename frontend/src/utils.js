@@ -19,3 +19,6 @@ export function getServiceBaseUrl() {
 export function doesBrowserSupportExtension() {
   return browser.name === 'chrome' && !browser.mobile;
 }
+
+
+export const isTrottoHosted = () => location.hostname.slice(location.hostname.length - 7) === 'trot.to';

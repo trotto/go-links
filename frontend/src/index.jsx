@@ -5,7 +5,7 @@ import {createStore, applyMiddleware, combineReducers} from 'redux';
 import reducer from './reducer';
 import TrottoRouter from './router';
 import {receiveSaveResult, updateNewLinkFieldWithString,
-        setLinkCreationMessage, fetchUserInfo, receiveUserInfo} from './actions';
+        setLinkCreationMessage, fetchUserInfo, setLinkEditingStatus} from './actions';
 import {INIT_STATE} from './init_state';
 import thunkMiddleware from 'redux-thunk';
 import createLogger from 'redux-logger';
@@ -33,15 +33,15 @@ store.dispatch({
   state: INIT_STATE
 });
 
+const queryParams = qs.parse(location.search.slice(1));
+
 // handle responses for requests processed right after login
-if (location.search.indexOf('r=') !== -1) {
+if (queryParams.r) {
   var b64Encoded = location.search.split('r=', 2)[1].replace(/_/g, '/').replace(/-/g, '+');  // was URL-safe encoded
   store.dispatch(receiveSaveResult(JSON.parse(atob(b64Encoded))));
   history.replaceState({}, '', '/');
-} else if (location.search.indexOf('sp=') !== -1) {
+} else if (queryParams.sp) {
   // TODO: Group all this into an action.
-  var queryParams = qs.parse(location.search.slice(1));
-
   const shortpath = queryParams.sp;
 
   store.dispatch(updateNewLinkFieldWithString('shortpath', shortpath));
@@ -49,6 +49,10 @@ if (location.search.indexOf('r=') !== -1) {
   history.replaceState({}, '', '/');
 
   store.dispatch(setLinkCreationMessage('error', '"go/' + shortpath + '" doesn\'t exist yet. You can create it now!'));
+} else if (queryParams.transfer) {
+  history.replaceState({}, '', '/');
+
+  store.dispatch(setLinkEditingStatus({completeTransfer: queryParams.transfer}));
 }
 
 

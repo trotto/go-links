@@ -13,13 +13,13 @@ if (window.location.search.indexOf('autoclose=true') !== -1) {
 
 export const INIT_STATE = {
   userInfo: undefined,
+  links: undefined,
   newLinkData: {
     shortpath: '',
     destination: ''
   },
-  linkEditingState: {
-    currentlyEditingLinkId: null,
-    linkToDelete: null
+  linkEditingStatus: {
+    // edit: 3
   },
   termsOfServiceAcceptanceStatus: (window._trotto && window._trotto.alreadyAcceptedTerms === 'true') ? 'previously_accepted' : 'not_accepted',
   chromeExtensionInstalled: extensionIsInstalled,

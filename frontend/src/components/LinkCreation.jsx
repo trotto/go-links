@@ -3,8 +3,6 @@ import {connect} from 'react-redux';
 import {CopyToClipboard} from 'react-copy-to-clipboard';
 import * as actions from '../actions';
 import * as getters from '../getters';
-import { browserHistory } from 'react-router';
-import {Map, List, Set, fromJS} from 'immutable';
 import {ReduxManagedStateComponent} from './Abstract'
 
 

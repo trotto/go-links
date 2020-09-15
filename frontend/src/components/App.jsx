@@ -1,6 +1,7 @@
 import React from 'react';
 import {connect} from 'react-redux';
 import * as actions from '../actions';
+import {isTrottoHosted} from "../utils";
 
 const { detect } = require('detect-browser');
 const browser = detect();
@@ -17,9 +18,10 @@ function mapStateToProps(state) {
   };
 }
 
-
-export class Butterbar extends React.Component {
-
+const Butterbar = connect(
+    mapStateToProps,
+    actions
+)(class extends React.Component {
   render() {
     const CHROME_INSTALLATION_MESSAGE = `
         <a href="https://chrome.google.com/webstore/detail/trotto-go-links/nkeoojidblilnkcbbmfhaeebndapehjk" target="_blank">
@@ -39,15 +41,17 @@ export class Butterbar extends React.Component {
 
     var priorityNotificationId;
 
-    if (browser.name === 'chrome'
-        && this.props.userInfo !== undefined
-        && (this.props.userInfo && this.props.userInfo.getIn(['notifications', 'install_extension']) !== 'dismissed')
-        && !this.props.chromeExtensionInstalled) {
-      priorityNotificationId = 'install_extension';
-    } else if (new Date().getTime() < 1566648000000
-        && this.props.userInfo
-        && this.props.userInfo.getIn(['notifications', 'oss_announcement']) !== 'dismissed') {
-      priorityNotificationId = 'oss_announcement';
+    if (isTrottoHosted()) {
+      if (browser.name === 'chrome'
+          && this.props.userInfo !== undefined
+          && (this.props.userInfo && this.props.userInfo.getIn(['notifications', 'install_extension']) !== 'dismissed')
+          && !this.props.chromeExtensionInstalled) {
+        priorityNotificationId = 'install_extension';
+      } else if (new Date().getTime() < 1566648000000
+          && this.props.userInfo
+          && this.props.userInfo.getIn(['notifications', 'oss_announcement']) !== 'dismissed') {
+        priorityNotificationId = 'oss_announcement';
+      }
     }
 
     if (!this.props.errorBarMessage && !priorityNotificationId) {
@@ -56,10 +60,11 @@ export class Butterbar extends React.Component {
 
     var style = !this.props.errorBarMessage
         ? {paddingLeft: '10px', paddingRight: '10px'}
-        : {paddingLeft: '10px', paddingRight: '10px', position: 'fixed', left: '0', top: '0', zIndex: '1000'};
+        : {paddingLeft: '10px', paddingRight: '10px',
+          position: this.props.position, left: '0', top: '0', zIndex: this.props.position === 'fixed' ? '1000' : '0'};
 
     return (
-        <div className="alert alert-warning error-bar" style={style}>
+        <div className={`alert ${this.props.errorBarMessage ? 'alert-danger': 'alert-warning'} error-bar`} style={style}>
           {this.props.errorBarMessage ?
             <div>
               <span>
@@ -91,13 +96,15 @@ export class Butterbar extends React.Component {
         </div>
     );
   }
-}
+});
 
 
-export const ButterbarContainer = connect(
-    mapStateToProps,
-    actions
-)(Butterbar);
+export const ButterbarContainer = () => (
+  <React.Fragment>
+    <Butterbar position="static" />
+    <Butterbar position="fixed" />
+  </React.Fragment>
+);
 
 
 export class App extends React.Component {
