@@ -1,5 +1,4 @@
 import React from 'react';
-import Typography from '@material-ui/core/Typography';
 import {getConfig} from '../../config/index';
 
 
@@ -11,7 +10,7 @@ export const SuccessMessage = ({children}) => (
 
 
 export const ErrorMessage = ({children}) => (
-  <Typography color="error">
+  <div style={{color: getConfig('palette.error')}}>
     {children}
-  </Typography>
+  </div>
 );
