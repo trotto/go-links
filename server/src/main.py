@@ -1,3 +1,4 @@
+import json
 import os
 
 import jinja2
@@ -81,6 +82,13 @@ def home():
   template = JINJA_ENVIRONMENT.get_template('index.html')
 
   return template.render({'csrf_token': generate_csrf()})
+
+
+@app.route('/_scripts/config.js')
+def layout_config():
+  layout_json = json.dumps(get_config().get('layout', {}))
+  return f"window._trotto = window._trotto || {{}}; window._trotto.layout = {layout_json};"
+
 
 @app.route('/_styles/<path:path>')
 @app.route('/_scripts/<path:path>')

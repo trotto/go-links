@@ -1,8 +1,6 @@
 import React from 'react';
-import {connect} from 'react-redux';
-import { hashHistory } from 'react-router';
-import {Map, List} from 'immutable';
 import {getServiceBaseUrl} from '../utils';
+import {getConfig} from '../config';
 
 
 export class NavBarItem extends React.Component {
@@ -42,26 +40,14 @@ export class NavBar extends React.Component {
   }
 
   render() {
-    var navItems = [
-      {
-        text: 'How It Works',
-        destination: 'https://www.trot.to/how-it-works',
-        openInNewTab: true
-      }
-    ];
+    const navItems = getConfig('header.links').toJS()
+        .filter(item => this.props.links || item.id !== 'directory');
 
     if (this.props.userInfo !== undefined) {
       navItems.push({
         text: !this.props.userInfo ? 'Sign In' : 'Sign Out',
-        destination: getServiceBaseUrl('default') + '/_/auth/' + (!this.props.userInfo ? 'login' : 'logout'),
+        url: getServiceBaseUrl('default') + '/_/auth/' + (!this.props.userInfo ? 'login' : 'logout'),
         title: !this.props.userInfo ? '' : 'Sign out of ' + this.props.userInfo.get('email')
-      });
-    }
-
-    if (this.props.links) {
-      navItems.splice(0, 0, {
-        text: 'Directory',
-        destination: '#/directory'
       });
     }
 
@@ -72,10 +58,10 @@ export class NavBar extends React.Component {
               <div style={{width: '100%', display: 'flex', justifyContent: 'space-between'}}>
                 <a className="unstyled-link" href="#/">
                   <div style={{display: 'flex', alignItems: 'center'}}>
-                    <img style={{height: '1.6em'}} src="/_images/snout.png" />
+                    <img style={getConfig('header.logo.css').toJS()} src={getConfig('header.logo.url')} />
                     <div style={{marginLeft: '7px', color: 'black', textDecoration: 'none',
                                  fontSize: '1.6em', opacity: '0.7'}}>
-                      <b>Trotto</b>
+                      <b>{getConfig('header.title')}</b>
                     </div>
                   </div>
                 </a>
@@ -86,9 +72,9 @@ export class NavBar extends React.Component {
                     <ul>
                       {navItems.map(itemData =>
                         <NavBarItem
-                            key={itemData.destination}
+                            key={itemData.url}
                             text={itemData.text}
-                            destination={itemData.destination}
+                            destination={itemData.url}
                             title={itemData.title}
                             openInNewTab={itemData.openInNewTab}
                         />

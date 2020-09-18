@@ -4,6 +4,8 @@ import {CopyToClipboard} from 'react-copy-to-clipboard';
 import * as actions from '../actions';
 import * as getters from '../getters';
 import {ReduxManagedStateComponent} from './Abstract'
+import {PrimaryButton, SecondaryButton} from './shared/Buttons';
+import {SuccessMessage, ErrorMessage} from './shared/Messages';
 
 
 function mapStateToProps(state) {
@@ -112,9 +114,11 @@ export class LinkForm extends React.Component {
       var messageText = this.props.linkCreationMessage.get('html');
     }
 
-    var messageColor = '#4F8A10';
+    let messageComponent;
     if (this.props.linkCreationMessage && this.props.linkCreationMessage.get('type') === 'error') {
-      messageColor = '#ff0033';
+      messageComponent = <ErrorMessage>{messageText}</ErrorMessage>;
+    } else {
+      messageComponent = <SuccessMessage>{messageText}</SuccessMessage>;
     }
 
     return (
@@ -163,33 +167,36 @@ export class LinkForm extends React.Component {
                  style={{marginTop: '10px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start'}}>
               <div style={{width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-evenly'}}>
                 <div style={{display: 'flex', alignItems: 'baseline', flexWrap: 'wrap', flexGrow: '1'}}>
-                  <div className="text-center" style={{fontSize: '0.9em', color: messageColor}}>
-                    {messageText}
+                  <div className="text-center" style={{fontSize: '0.9em'}}>
+                    {messageComponent}
                   </div>
                   <div>
                     <a href={!this.props.linkCreationMessage ? '' : this.props.linkCreationMessage.get('tootsLink')}
                        data-test-id="new-shortlink-anchor-tag"
                        target="_blank"
-                       style={{display: !this.props.linkCreationMessage || !this.props.linkCreationMessage.get('tootsLink') ? 'none' : 'block',marginLeft:'5px',marginRight:'5px',color:'#f27e8f',fontWeight:'bold'}}
+                       style={{display: !this.props.linkCreationMessage || !this.props.linkCreationMessage.get('tootsLink') ? 'none' : 'block',marginLeft:'5px',marginRight:'5px',fontWeight:'bold'}}
                     >
                     {!this.props.linkCreationMessage || !this.props.linkCreationMessage.get('tootsLink')
-                        ? '' : this.props.linkCreationMessage.get('tootsLink').split('://')[1]}
+                        ? '' : <SuccessMessage>{this.props.linkCreationMessage.get('tootsLink').split('://')[1]}</SuccessMessage>}
                     </a>
                   </div>
                   {!this.props.linkCreationMessage || !this.props.linkCreationMessage.get('tootsLink') ? null :
                     <div style={{display: 'flex', alignItems: 'center'}}>
                       <CopyToClipboard text={this.props.linkCreationMessage.get('tootsLink')} onCopy={() => this._setCopied()}>
-                        {!this.state.copied ?
-                          <button type="button" className="btn btn-outline-success btn-xs" style={{marginLeft: '5px'}}>copy</button>
-                        :
-                          <button type="button" className="btn btn-outline-success btn-xs" style={{marginLeft: '5px'}}>copied</button>
-                        }
+                        <SecondaryButton
+                            type="button"
+                            variant="outlined"
+                            size="small"
+                            style={{marginLeft: '5px'}}
+                        >
+                          {!this.state.copied ? 'copy' : 'copied'}
+                        </SecondaryButton>
                       </CopyToClipboard>
                     </div>
                   }
                 </div>
                 <div>
-                  <button
+                  <PrimaryButton
                       id="link-submit-button"
                       data-test-id="shortlink-submit-button"
                       type="submit" className="btn btn-default"
@@ -197,7 +204,7 @@ export class LinkForm extends React.Component {
                       onClick={this.save.bind(this)}
                   >
                     Create
-                  </button>
+                  </PrimaryButton>
                 </div>
               </div>
             </div>

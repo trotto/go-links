@@ -2,8 +2,11 @@ import React from 'react';
 import {connect} from 'react-redux';
 import * as actions from '../actions';
 import {isTrottoHosted} from "../utils";
+import {getConfig} from '../config';
+import './Global.css';
 
 const { detect } = require('detect-browser');
+const hexRgb = require('hex-rgb');
 const browser = detect();
 
 
@@ -58,10 +61,15 @@ const Butterbar = connect(
       return null;
     }
 
+    const errorColors = hexRgb(getConfig('palette.error'));
+    const textColor = `rgba(${errorColors.red}, ${errorColors.green}, ${errorColors.blue}, 1)`;
+    const backgroundColor = `rgba(${errorColors.red}, ${errorColors.green}, ${errorColors.blue}, 0.1)`;
+
     var style = !this.props.errorBarMessage
         ? {paddingLeft: '10px', paddingRight: '10px'}
         : {paddingLeft: '10px', paddingRight: '10px',
-          position: this.props.position, left: '0', top: '0', zIndex: this.props.position === 'fixed' ? '1000' : '0'};
+          position: this.props.position, left: '0', top: '0', zIndex: this.props.position === 'fixed' ? '1000' : '0',
+          color: textColor, backgroundColor: backgroundColor, border: 0};
 
     return (
         <div className={`alert ${this.props.errorBarMessage ? 'alert-danger': 'alert-warning'} error-bar`} style={style}>

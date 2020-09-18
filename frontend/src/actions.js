@@ -134,7 +134,7 @@ export function receiveSaveResult(responseJson) {
       dispatch(setLinkCreationMessage(
           'good_news',
           'Success! New go link created:',
-          host + '/' + responseJson.shortpath
+          'http://go/' + responseJson.shortpath
       ));
     }
   }

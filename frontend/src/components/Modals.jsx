@@ -6,6 +6,7 @@ import {CircularProgress} from '@material-ui/core';
 import {CopyToClipboard} from 'react-copy-to-clipboard';
 import * as actions from '../actions';
 import {linksById} from "../getters";
+import {SecondaryButton} from './shared/Buttons';
 
 
 Modal.setAppElement('#app');
@@ -47,7 +48,6 @@ class GenericModal extends React.Component {
       onExit
     } = this.props;
 
-    const confirmButtonStyles = confirmed ? {} : {backgroundColor: 'white'};
     const onConfirm = (() => {
       if (confirmAction)
         confirmAction();
@@ -74,15 +74,14 @@ class GenericModal extends React.Component {
                 {cancelButtonText}
               </button>
               {confirmButtonText && (
-                <button
+                <SecondaryButton
                     type="submit"
-                    className={`btn ${confirmed ? (confirmButtonClass || 'btn-default') : 'btn-disabled'}`}
-                    style={confirmButtonStyles}
+                    variant="contained"
                     disabled={!confirmed}
                     onClick={onConfirm}
                 >
                   {confirmButtonText}
-                </button>
+                </SecondaryButton>
               )}
             </div>
           </div>
@@ -94,7 +93,7 @@ class GenericModal extends React.Component {
 
 const ProgressSpinner = () => (
     <div style={Object.assign({zIndex: 10000, position: 'fixed'}, modalStyles.content)}>
-      <CircularProgress style={{color: '#f27e8f'}} />
+      <CircularProgress color="primary" />
     </div>
 );
 

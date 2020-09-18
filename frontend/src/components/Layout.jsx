@@ -1,13 +1,11 @@
 import React from 'react';
 import {connect} from 'react-redux';
-import { hashHistory } from 'react-router';
 import * as actions from '../actions';
-import {Map, List} from 'immutable';
 import {LinkFormContainer} from './LinkCreation'
 import {NavBar} from'./Navigation';
 import {ButterbarContainer} from './App';
 import {LinkModal} from "./Modals";
-import {isTrottoHosted} from "../utils";
+import {getConfig} from "../config";
 
 
 function mapStateToProps(state) {
@@ -27,25 +25,7 @@ function mapStateToProps(state) {
 export class MainLayout extends React.Component {
 
   render() {
-
-    const FOOTER_ITEMS = !isTrottoHosted() ? [] : [
-      {
-        text: 'Pricing',
-        path: 'https://www.trot.to/pricing'
-      },
-      {
-        text: 'Privacy',
-        path: 'https://www.trot.to/privacy'
-      },
-      {
-        text: 'Terms',
-        path: 'https://www.trot.to/terms'
-      },
-      {
-        text: 'Contact Us',
-        path: 'https://www.trot.to/contact'
-      }
-    ];
+    const footerIcon = getConfig('footer.icon');
 
     return (
         <div style={{height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between'}}>
@@ -68,36 +48,42 @@ export class MainLayout extends React.Component {
                style={{margin: '30px auto'}}>
             <div className="row">
               <div className="col-md-4 col-md-offset-2" style={{paddingTop: '10px', paddingBottom: '10px'}}>
-                <div style={{display: 'flex', maxWidth: '400px', justifyContent: 'space-between'}}>
-                  <a style={{marginRight: '10px'}}
-                     href="https://github.com/trotto/go-links"
-                     target="_blank"
-                  >
-                    <img height="25" src="/_images/octocat.png" />
-                  </a>
-                  {FOOTER_ITEMS.map((item, index) =>
+                <div style={{display: 'flex', maxWidth: '400px'}}>
+                  {getConfig('footer.showSourceLink') && (
+                    <a style={{marginRight: '10px'}}
+                       href="https://github.com/trotto/go-links"
+                       target="_blank"
+                    >
+                      <img height="25" src="/_images/octocat.png" />
+                    </a>
+                  )}
+                  {getConfig('footer.links').map((item, index) =>
                     <a key={index}
-                       href={item.path}
-                       onClick={item.scrollUp ? () => window.scrollTo(0, 0) : () => {}}
+                       href={item.get('url')}
+                       onClick={item.get('scrollUp') ? () => window.scrollTo(0, 0) : () => {}}
                        style={{color: 'black', opacity: '0.7', fontSize: '1.3em', marginRight: '10px'}}>
-                      {item.text}
+                      {item.get('text')}
                     </a>
                   )}
                 </div>
               </div>
               <div className="col-md-4 text-right" style={{paddingTop: '10px', color: 'black', opacity: '0.7', fontSize: '1.3em'}}>
-                <img height="30"
-                     src="/_images/toots.png"
-                     title="Toots the Pig, Stubbifier First Class"
-                     style={{marginRight: '10px'}}
-                />
+                {footerIcon && (
+                  <img height="30"
+                       src={footerIcon.get('url')}
+                       title={footerIcon.get('title', '')}
+                       style={{marginRight: '10px'}}
+                  />
+                )}
               </div>
             </div>
-            <div className="row">
-              <div id="features" className="col-md-10 col-md-offset-1 text-center" style={{paddingTop: '20px'}}>
-                <p>We <span role="img" aria-label="love love LOVE">❤️ ❤️ ❤️</span> feedback and feature requests. Add requests <a href="https://trello.com/invite/b/TVQdVwnU/71a24cb4c4e6c278c5e3c8fc21014fdc/trotto-go-links-feature-requets" target="_blank" rel="noopener noreferrer">here</a>.</p>
+            {getConfig('footer.showFeedbackInvitation') && (
+              <div className="row">
+                <div id="features" className="col-md-10 col-md-offset-1 text-center" style={{paddingTop: '20px'}}>
+                  <p>We <span role="img" aria-label="love love LOVE">❤️ ❤️ ❤️</span> feedback and feature requests. Add requests <a href="https://trello.com/invite/b/TVQdVwnU/71a24cb4c4e6c278c5e3c8fc21014fdc/trotto-go-links-feature-requets" target="_blank" rel="noopener noreferrer">here</a>.</p>
+                </div>
               </div>
-            </div>
+            )}
           </div>
           <LinkModal
               linkEditingStatus={this.props.linkEditingStatus}
