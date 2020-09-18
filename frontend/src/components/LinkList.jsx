@@ -4,6 +4,7 @@ import * as actions from '../actions';
 import ReactTable from "react-table";
 import {List} from 'immutable';
 import { CreateOutlined, Cancel, DeleteOutline, Reply } from '@material-ui/icons';
+import {PrimaryButton} from './shared/Buttons';
 import {getServiceBaseUrl} from '../utils'
 
 var validUrl = require('valid-url');
@@ -134,7 +135,8 @@ class EditableDestination extends React.Component {
                   :
                   (this.props.editable && <CreateOutlined
                       fontSize="large"
-                      style={{color: '#f27e8f', opacity: this.state.mousedOver ? '1' : '0.6'}}
+                      color="primary"
+                      style={{opacity: this.state.mousedOver ? '1' : '0.6'}}
                   />)
               }
             </div>
@@ -150,14 +152,13 @@ class EditableDestination extends React.Component {
                 onKeyPress={this.handleKeyPress.bind(this)}
               />
               {!currentlyBeingEdited ? null :
-                  <button
-                      className="btn btn-default"
-                      style={{padding: '3px 6px', fontSize: '14px'}}
+                  <PrimaryButton
+                      style={{padding: '3px 6px', fontSize: '12px'}}
                       disabled={!this.draftDestinationIsValid()}
                       onClick={e => {e.stopPropagation(); this.updateLink()}}
                   >
                     Save
-                  </button>
+                  </PrimaryButton>
               }
             </div>
           </div>
@@ -383,8 +384,7 @@ export const LinksTableContainer = connect(
         links: state.get('links') || List(),
         defaultLinkSearchTerm: state.get('defaultLinkSearchTerm'),
         userInfo: state.get('userInfo'),
-        goSupportedInCurrentSession: state.get('goSupportedInCurrentSession'),
-        linkEditingStatus: state.get('linkEditingStatus')
+        goSupportedInCurrentSession: state.get('goSupportedInCurrentSession')
       };
     },
     actions

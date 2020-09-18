@@ -1,0 +1,28 @@
+{
+  "$id": "http://trot.to/schemas/links.json",
+  "type": "array",
+  "items": {
+    "oneOf": [
+      {
+        "type": "string"
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "text",
+          "url"
+        ],
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri-reference"
+          }
+        }
+      }
+    ]
+  }
+}

@@ -2,3 +2,6 @@ libs/
 config.zip
 test_curl_commands.txt
 client_secrets.json
+config/*
+!config/schema.json
+!config/schema/

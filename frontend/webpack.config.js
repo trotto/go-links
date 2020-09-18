@@ -13,6 +13,40 @@ config = {
         loaders: ['react-hot-loader/webpack', 'babel-loader'],
         exclude: /node_modules/,
         include: path.join(__dirname, 'src')
+      },
+      {
+        test: /\.css$/i,
+        include: path.join(__dirname, './src/components/Global.css'),
+        use: [
+          'style-loader',
+          {
+            loader: 'css-loader'
+          },
+        ],
+      },
+      {
+        test: /\.css$/i,
+        exclude: [
+          /node_modules/,
+          path.join(__dirname, './src/components/Global.css')
+        ],
+        use: [
+          'style-loader',
+          {
+            loader: 'css-loader',
+            options: {
+              modules: true,
+            },
+          },
+        ],
+      },
+      {
+        test: /\.(png|jpe?g|gif|svg|eot|ttf|woff|woff2)$/i,
+        exclude: /node_modules/,
+        loader: 'url-loader',
+        options: {
+          limit: 8192,
+        },
       }
     ]
   },

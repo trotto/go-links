@@ -9,7 +9,7 @@ import {receiveSaveResult, updateNewLinkFieldWithString,
 import {INIT_STATE} from './init_state';
 import thunkMiddleware from 'redux-thunk';
 import createLogger from 'redux-logger';
-import {Map, List, Set, fromJS} from 'immutable';
+import { TrottoThemeProvider } from "./config/theme";
 
 var qs = require('qs');
 
@@ -79,7 +79,9 @@ store.dispatch(fetchUserInfo());
 
 
 render((
-    <Provider store={store}>
-      <TrottoRouter />
-    </Provider>
+    <TrottoThemeProvider>
+      <Provider store={store}>
+        <TrottoRouter/>
+      </Provider>
+    </TrottoThemeProvider>
 ), document.getElementById('app'));

@@ -1,3 +1,4 @@
+/* Per webpack config, all CSS in this file will be injected with selectors unchanged. */
 html, body {
    height:100%;
 }
@@ -208,7 +209,7 @@ input {
   float: right;
   text-indent: -9999px;
   overflow: hidden;
-  background: url("/_images/icons/hamburger.svg") no-repeat;
+  background: url("../assets/hamburger.svg") no-repeat;
   background-size: contain;
 }
 
