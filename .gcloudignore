@@ -1,0 +1,3 @@
+server/.virtualenv/
+frontend/
+e2e_tests/
