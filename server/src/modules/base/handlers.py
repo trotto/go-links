@@ -1,5 +1,6 @@
 import datetime
 import jwt
+import logging
 import pickle
 
 from flask import Blueprint, redirect, request, session, url_for
@@ -95,14 +96,15 @@ def oauth2_callback():
 
   flow = flow_from_clientsecrets(get_path_to_oauth_secrets(),
                                  scope='https://www.googleapis.com/auth/userinfo.email',
-                                 redirect_uri=request.base_url)
+                                 redirect_uri=f'{authentication.get_host_for_request(request)}/_/auth/oauth2_callback')
 
   if not session.get('oauth_state') or session.get('oauth_state') != request.args.get('state'):
     return redirect(url_for('base.login'))
 
   try:
     credentials = flow.step2_exchange(request.args.get('code'))
-  except (FlowExchangeError, ValueError):
+  except (FlowExchangeError, ValueError) as e:
+    logging.warning(e)
     # user declined to auth; move on
     return redirect(session.get('redirect_to_after_oauth', '/'))
 

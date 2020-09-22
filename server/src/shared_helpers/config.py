@@ -15,7 +15,7 @@ class MissingConfigError(Exception):
 
 def get_config():
   if os.getenv('TROTTO_CONFIG'):
-    return yaml.load(base64.b64decode(os.getenv('TROTTO_CONFIG')))
+    return yaml.load(base64.b64decode(os.getenv('TROTTO_CONFIG')), Loader=yaml.SafeLoader)
 
   if os.getenv('DATABASE_URL') and os.getenv('FLASK_SECRET'):
     return {'postgres': {'url': os.getenv('DATABASE_URL')},
