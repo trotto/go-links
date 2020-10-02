@@ -4,7 +4,7 @@ import os
 import jinja2
 from flask import Flask, send_from_directory, redirect, request, jsonify
 from flask_login import LoginManager, current_user
-from flask_sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy as _BaseSQLAlchemy
 from flask_migrate import Migrate
 from flask_wtf.csrf import CSRFProtect, generate_csrf
 
