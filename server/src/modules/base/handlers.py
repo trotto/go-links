@@ -21,10 +21,8 @@ routes = Blueprint('base', __name__,
 
 def get_google_login_url(oauth_redirect_uri=None, redirect_to_after_oauth=None):
   if not oauth_redirect_uri:
-    oauth_redirect_uri = '%s%s' % (
-      'http://localhost:9095' if request.host.startswith('localhost')
-      else authentication.get_host_for_request(request),
-      '/_/auth/oauth2_callback')
+    oauth_redirect_uri = '%s%s' % (authentication.get_host_for_request(request),
+                                   '/_/auth/oauth2_callback')
 
   if not redirect_to_after_oauth:
     redirect_to_after_oauth = 'http://localhost:5007' if request.host.startswith('localhost') else '/'
