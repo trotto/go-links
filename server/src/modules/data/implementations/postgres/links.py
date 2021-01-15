@@ -68,3 +68,7 @@ class ShortLink(db.Model, links.ShortLink):
   def delete(self):
     db.session.delete(self)
     db.session.commit()
+
+  @staticmethod
+  def _get_all():
+    return ShortLink.query.all()
