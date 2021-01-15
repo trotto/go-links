@@ -1,6 +1,5 @@
 #!/bin/bash
 
-export DATABASE=postgres
 export ENVIRONMENT=dev
 
 cd src

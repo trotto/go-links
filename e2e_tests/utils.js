@@ -24,7 +24,7 @@ const signIn = async (page, userEmail) => {
     testing: {
       secret: testTokenSecret
     }
-  } = yaml.parse(fs.readFileSync('../server/src/config/secrets.yaml', 'utf8'));
+  } = yaml.parse(fs.readFileSync('../server/src/config/app.yml', 'utf8'));
 
   const testToken = jwt.sign({
     user_email: userEmail,
