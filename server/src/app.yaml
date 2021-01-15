@@ -1,3 +1,6 @@
 runtime: python37
+entrypoint: gunicorn -b :$PORT main:app
 env_variables:
   PYTHONHTTPSVERIFY: 1
+  FLASK_APP: main.py
+  POSTGRES_UPGRADE_ON_START: true

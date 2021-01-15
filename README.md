@@ -7,8 +7,8 @@
 _(See the guide [here](https://www.trot.to/docs/deploy/deploy-to-heroku) to deploy to Heroku in minutes.)_
 
 
-Reliable and battle-tested, this [go links](https://www.trot.to/go-links) solution is used by companies all around
-the world daily as the core of [Trotto](https://www.trot.to).
+Reliable and battle-tested continuously in production since 2017, this [go links](https://www.trot.to/go-links) solution
+is used by companies all around the world daily as the core of [Trotto](https://www.trot.to).
 
 Try out the latest build at [latest-master.trotto.dev](https://latest-master.trotto.dev) and also check out the
 matching [open-source browser extension](https://github.com/trotto/browser-extension).

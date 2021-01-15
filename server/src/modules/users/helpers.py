@@ -34,6 +34,10 @@ def get_user_by_id(user_id):
   return models.User.get_by_id(user_id)
 
 
+def get_users_by_organization(org_id):
+  return models.User.query.filter(models.User.organization == org_id)
+
+
 def get_or_create_user(email, user_org):
   email = email.lower()
 
@@ -62,7 +66,10 @@ def get_or_create_user(email, user_org):
   return user
 
 
-def is_user_admin(user):
+def is_user_admin(user, organization=None):
+  if organization and organization != user.organization:
+    return False
+
   org_config = config.get_organization_config(user.organization)
 
   return user.email in org_config.get('admins', []) if org_config else False

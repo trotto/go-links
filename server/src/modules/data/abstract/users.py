@@ -26,6 +26,9 @@ class User(BaseModel):
 
     self.organization = get_organization_id_for_email(kwargs['email'])
 
+  def __eq__(self, other):
+    return self.id == other.id  # simple comparison for unit tests
+
   def get_id(self):  # as required by Flask-Login
     return str(super().get_id())
 

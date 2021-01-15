@@ -25,6 +25,7 @@ class TestHandlers(TrottoTestCase):
                                organization='googs.com',
                                owner='kay@googs.com',
                                shortpath='there',
+                               shortpath_prefix='there',
                                destination_url='http://example.com/there')
 
     mock_create_short_link.return_value = mock_shortlink
@@ -94,6 +95,7 @@ class TestHandlers(TrottoTestCase):
                 organization='googs.com',
                 owner='kay@googs.com',
                 shortpath='there',
+                shortpath_prefix='there',
                 destination_url='http://example.com'
                 ).put()
       ShortLink(id=2,
@@ -101,12 +103,14 @@ class TestHandlers(TrottoTestCase):
                 organization='googs.com',
                 owner='jay@googs.com',
                 shortpath='here',
+                shortpath_prefix='here',
                 destination_url='http://gmail.com'
                 ).put()
       ShortLink(id=3,
                 organization='widgets.com',
                 owner='el@widgets.com',
                 shortpath='elsewhere',
+                shortpath_prefix='elsewhere',
                 destination_url='http://drive.com'
                 ).put()
 
@@ -136,6 +140,7 @@ class TestHandlers(TrottoTestCase):
               organization='googs.com',
               owner='kay@googs.com',
               shortpath='there',
+              shortpath_prefix='there',
               destination_url='http://example.com'
               ).put()
 
@@ -183,6 +188,7 @@ class TestHandlers(TrottoTestCase):
               organization='googs.com',
               owner='kay@googs.com',
               shortpath='there',
+              shortpath_prefix='there',
               destination_url='http://drive.com'
               ).put()
 
@@ -203,6 +209,7 @@ class TestHandlers(TrottoTestCase):
               organization='googs.com',
               owner='kay@googs.com',
               shortpath='there',
+              shortpath_prefix='there',
               destination_url='http://drive.com'
               ).put()
 
@@ -222,6 +229,7 @@ class TestHandlers(TrottoTestCase):
               organization='widgets.com',
               owner='kc@widgets.com',
               shortpath='there',
+              shortpath_prefix='there',
               destination_url='http://drive.com'
               ).put()
 
@@ -241,6 +249,7 @@ class TestHandlers(TrottoTestCase):
               organization='googs.com',
               owner='kay@googs.com',
               shortpath='there',
+              shortpath_prefix='there',
               destination_url='http://drive.com'
               ).put()
 
@@ -261,6 +270,7 @@ class TestHandlers(TrottoTestCase):
               organization='googs.com',
               owner='kay@googs.com',
               shortpath='there',
+              shortpath_prefix='there',
               destination_url='http://drive.com'
               ).put()
 
@@ -282,6 +292,7 @@ class TestHandlers(TrottoTestCase):
               organization='googs.com',
               owner='kay@googs.com',
               shortpath='there',
+              shortpath_prefix='there',
               destination_url='http://drive.com'
               ).put()
 
@@ -299,6 +310,7 @@ class TestHandlers(TrottoTestCase):
                                organization='googs.com',
                                owner='kay@googs.com',
                                shortpath='there',
+                               shortpath_prefix='there',
                                destination_url='http://drive.com')
     test_shortlink.put()
 
@@ -333,11 +345,13 @@ class TestLinkTransferHandlers(TrottoTestCase):
 
     self.test_user = User(id=777,
                           email='kay@googs.com',
+                          organization='googs.com',
                           domain_type='corporate')
     self.test_user.put()
 
     # admin user
     User(email='sam@googs.com',
+         organization='googs.com',
          domain_type='corporate'
          ).put()
 
@@ -345,6 +359,7 @@ class TestLinkTransferHandlers(TrottoTestCase):
                                     organization='googs.com',
                                     owner=self.test_user.email,
                                     shortpath='there',
+                                    shortpath_prefix='there',
                                     destination_url='http://drive.com')
     self.test_shortlink.put()
 
@@ -493,6 +508,7 @@ class TestLinkTransferHandlers(TrottoTestCase):
   def test_use_transfer_link__owner_does_not_match(self, _):
     User(id=20,
          email='al@googs.com',
+         organization='googs.com',
          domain_type='corporate'
          ).put()
 
@@ -514,6 +530,7 @@ class TestLinkTransferHandlers(TrottoTestCase):
   def test_use_transfer_link__token_from_user_without_access(self, _):
     User(id=20,
          email='al@googs.com',
+         organization='googs.com',
          domain_type='corporate'
          ).put()
 
