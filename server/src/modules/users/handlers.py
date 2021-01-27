@@ -3,20 +3,20 @@ import copy
 from flask import Blueprint, request, jsonify, abort
 from flask_login import current_user, login_required
 
-from modules.users.helpers import get_users_by_organization, is_user_admin, get_user_by_id
+from modules.users.helpers import get_users_by_organization, is_user_admin, get_user_by_id, get_admin_ids
 
 
 routes = Blueprint('users', __name__,
                    template_folder='../../static/templates')
 
 
-def _user_info(user):
+def _user_info(user, admins_ids=None):
   return {
     'id': user.id,
     'created': user.created.isoformat()[:19],
     'email': user.email,
     'organization': user.organization,
-    'admin': is_user_admin(user),
+    'admin': user.id in admins_ids if admins_ids is not None else is_user_admin(user),
     'role': user.role,
     'notifications': user.notifications or {}
   }
@@ -42,7 +42,10 @@ def get_my_org_users():
   if not is_user_admin(copy.copy(current_user)):
     abort(403)
 
-  return jsonify([_user_info(u) for u in get_users_by_organization(current_user.organization)])
+  admin_ids = get_admin_ids(current_user.organization)
+
+  return jsonify([_user_info(u, admin_ids)
+                  for u in get_users_by_organization(current_user.organization)])
 
 
 @routes.route('/_/api/users/me', methods=['PUT'])

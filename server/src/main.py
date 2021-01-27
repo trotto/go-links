@@ -24,8 +24,8 @@ def init_app_without_routes(disable_csrf=False):
 
   app.config['SQLALCHEMY_DATABASE_URI'] = get_config()['postgres']['url']
 
-  if os.getenv('POSTGRES_URL_COMMERCIAL'):
-    app.config['SQLALCHEMY_BINDS'] = {'commercial': os.getenv('POSTGRES_URL_COMMERCIAL')}
+  if get_config()['postgres'].get('commercial_url'):
+    app.config['SQLALCHEMY_BINDS'] = {'commercial': get_config()['postgres']['commercial_url']}
 
   app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -61,6 +61,10 @@ def init_app_without_routes(disable_csrf=False):
     from modules.users.helpers import get_user_by_id
 
     return get_user_by_id(user_id)
+
+  @app.route('/_/health_check')
+  def health_check():
+    return 'OK'
 
   return app
 

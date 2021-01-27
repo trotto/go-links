@@ -4,12 +4,17 @@ import os
 import yaml
 
 from shared_helpers import env
+from shared_helpers.utils import get_from_key_path
 
 
 CONFIGS_PARENT_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../config')
 
 
 class MissingConfigError(Exception):
+  pass
+
+
+class ServiceNotConfiguredError(Exception):
   pass
 
 
@@ -34,6 +39,19 @@ def get_config():
       raise
 
     config = {'sessions_secret': 'placeholder'}
+
+  return config
+
+
+def get_config_by_key_path(key_path):
+  return get_from_key_path(get_config(), key_path)
+
+
+def get_service_config(service_id):
+  config = get_config_by_key_path(['services', service_id])
+
+  if not config:
+    raise ServiceNotConfiguredError(service_id)
 
   return config
 
