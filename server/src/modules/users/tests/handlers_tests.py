@@ -147,3 +147,28 @@ class TestUserHandlers(TrottoTestCase):
     self.assertEqual(403, response.status_int)
 
     mock_is_user_admin.assert_called_once_with(self.ray)
+
+  @patch('modules.users.handlers.is_user_admin', return_value=True)
+  @patch('modules.users.handlers.get_admin_ids', return_value=[1, 8675])
+  def test_users_endpoint__with_admin_service__is_admin(self, mock_get_admin_ids, mock_is_user_admin):
+    response = self.testapp.get('/_/api/organizations/mine/users',
+                                headers={'TROTTO_USER_UNDER_TEST': 'ray@googs.com'})
+
+    self.assertCountEqual(json.loads(response.text),
+                          [{'id': 8675,
+                            'created': '2021-01-11T01:02:03',
+                            'email': 'ray@googs.com',
+                            'organization': 'googs.com',
+                            'role': None,
+                            'admin': True,
+                            'notifications': {}},
+                           {'id': 777,
+                            'created': '2021-01-10T01:02:03',
+                            'email': 'kay@googs.com',
+                            'organization': 'googs.com',
+                            'role': None,
+                            'admin': False,
+                            'notifications': {'some_announcement': 'dismissed'}}])
+
+    mock_get_admin_ids.assert_called_once_with('googs.com')
+    mock_is_user_admin.assert_called_once_with(self.ray)

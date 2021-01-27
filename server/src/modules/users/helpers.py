@@ -7,6 +7,7 @@ from modules.organizations.utils import get_organization_id_for_email
 from shared_helpers import config
 from shared_helpers.encoding import convert_entity_to_dict
 from shared_helpers.events import enqueue_event
+from shared_helpers.services import get as service_get
 
 
 models = get_models('users')
@@ -66,9 +67,21 @@ def get_or_create_user(email, user_org):
   return user
 
 
+def get_admin_ids(organization):
+  try:
+    return [user['id'] for user
+            in service_get('admin', f'/organizations/{organization}/users?role=admin')]
+  except config.ServiceNotConfiguredError:
+    return None
+
+
 def is_user_admin(user, organization=None):
   if organization and organization != user.organization:
     return False
+
+  admin_ids = get_admin_ids(user.organization)
+  if admin_ids is not None:
+    return user.id in admin_ids
 
   org_config = config.get_organization_config(user.organization)
 
