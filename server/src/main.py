@@ -38,10 +38,10 @@ def init_app_without_routes(disable_csrf=False):
   db = SQLAlchemy(app)
   migrate = Migrate(app, db)
 
-  if os.getenv('ENVIRONMENT') == 'test_env':
-    from modules.base.authentication import login_test_user
+  from modules.base import authentication
 
-    app.before_request(login_test_user)
+  if os.getenv('ENVIRONMENT') == 'test_env':
+    app.before_request(authentication.login_test_user)
 
   @app.errorhandler(403)
   def handle_403(error):
@@ -61,6 +61,9 @@ def init_app_without_routes(disable_csrf=False):
     from modules.users.helpers import get_user_by_id
 
     return get_user_by_id(user_id)
+
+  app.before_request(authentication.validate_user_authentication)
+
 
   @app.route('/_/health_check')
   def health_check():

@@ -1,16 +1,13 @@
-import datetime
 import jwt
 import logging
-import pickle
 
 from flask import Blueprint, abort, redirect, request, session, url_for
-from flask_login import login_user, logout_user
+from flask_login import logout_user
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
 
 from modules.base import authentication
 from modules.organizations.utils import get_organization_id_for_email
-from modules.users.helpers import get_or_create_user
 from shared_helpers.config import get_config, get_path_to_oauth_secrets
 from shared_helpers import utils
 
@@ -49,18 +46,6 @@ def login():
   return redirect(get_google_login_url(None, redirect_to))
 
 
-def login_email(user_email):
-  user = get_or_create_user(user_email,
-                            get_organization_id_for_email(user_email))
-
-  if not user.accepted_terms_at:
-    # all login methods now have UI for consenting to terms
-    user.accepted_terms_at = datetime.datetime.utcnow()
-    user.put()
-
-  login_user(user)
-
-
 @routes.route('/_/auth/logout')
 def logout():
   logout_user()
@@ -79,7 +64,7 @@ def login_via_test_token():
     raise Exception('Invalid test user %s, with test token: %s' % (payload['user_email'],
                                                                    request.args.get('test_token')))
 
-  login_email(payload['user_email'])
+  authentication.login_email(payload['user_email'], 'test_token')
 
   return True
 
@@ -106,7 +91,8 @@ def oauth2_callback():
     # user declined to auth; move on
     return redirect(session.get('redirect_to_after_oauth', '/'))
 
-  login_email(authentication.get_user_email(credentials))
+  authentication.login_email(authentication.get_user_email(credentials),
+                             'google')
 
   return redirect(session.get('redirect_to_after_oauth', '/'))
 
@@ -126,7 +112,7 @@ def login_with_jwt():
 
       return abort(400)
 
-    login_email(user_info['email'])
+    authentication.login_email(user_info['email'], user_info['method'])
   except jwt.DecodeError:
     logging.warning('Attempt to use invalid JWT: %s', token)
 
