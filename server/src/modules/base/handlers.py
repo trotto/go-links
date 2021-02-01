@@ -1,12 +1,12 @@
 import jwt
 import logging
 
-from flask import Blueprint, abort, redirect, request, session, url_for
+from flask import Blueprint, abort, redirect, render_template, request, session, url_for
 from flask_login import logout_user
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
 
-from modules.base import authentication
+from modules.base import authentication, errors
 from modules.organizations.utils import get_organization_id_for_email
 from shared_helpers.config import get_config, get_path_to_oauth_secrets
 from shared_helpers import utils
@@ -43,7 +43,18 @@ def get_google_login_url(oauth_redirect_uri=None, redirect_to_after_oauth=None):
 def login():
   redirect_to = request.args.get('redirect_to', None)
 
-  return redirect(get_google_login_url(None, redirect_to))
+  google_login_url = get_google_login_url(None, redirect_to)
+
+  error_code = request.args.get('e', None)
+
+  if error_code:
+    error_message = errors.get_error_message_from_code(error_code)
+    if error_message:
+      return render_template('auth/login_selector.html',
+                             google_auth_url=google_login_url,
+                             error_message=error_message)
+
+  return redirect(google_login_url)
 
 
 @routes.route('/_/auth/logout')

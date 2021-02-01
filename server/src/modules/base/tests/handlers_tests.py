@@ -36,6 +36,17 @@ class TestHandlers(TrottoTestCase):
     self.assertEqual(302, response.status_int)
     self.assertIn(expected_oauth_redirect_uri, response.headers['Location'])
 
+  def test_login_endpoint__with_error_code(self):
+    response = self.testapp.get('/_/auth/login?e=account_disabled')
+
+    self.assertEqual(200, response.status_int)
+    self.assertIn('error-bar', response.text)
+
+  def test_login_endpoint__with_unknown_error_code(self):
+    response = self.testapp.get('/_/auth/login?e=mysterycode')
+
+    self.assertEqual(302, response.status_int)
+
   @patch('modules.base.handlers.get_config', return_value={'testing': {'secret': 'a_test_secret',
                                                                         'domains': ['example.com']}})
   def test_login_via_test_token__no_token(self, _):
