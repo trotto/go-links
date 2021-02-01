@@ -17,6 +17,7 @@ class User(db.Model, users.User):
                     nullable=False)
   organization = db.Column(db.String(80),
                            nullable=False)
+  enabled = db.Column(db.Boolean, default=True)
   role = db.Column(db.String(30))
   accepted_terms_at = db.Column(db.DateTime)
   domain_type = db.Column(db.String(30))

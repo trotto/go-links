@@ -7,6 +7,7 @@ from modules.organizations.utils import get_organization_id_for_email
 class User(BaseModel):
   email = str
   organization = str
+  enabled = bool
   role = str
   accepted_terms_at = datetime
   domain_type = str
@@ -18,7 +19,7 @@ class User(BaseModel):
 
   # TODO: Eliminate the need for this duplication with a better base class.
   _properties = ['id', 'created', 'modified',
-                 'email', 'organization', 'role', 'accepted_terms_at',
+                 'email', 'organization', 'enabled', 'role', 'accepted_terms_at',
                  'domain_type', 'notifications']
 
   def __init__(self, **kwargs):
