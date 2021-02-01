@@ -3,7 +3,7 @@ import jwt
 import logging
 import pickle
 
-from flask import Blueprint, redirect, request, session, url_for
+from flask import Blueprint, abort, redirect, request, session, url_for
 from flask_login import login_user, logout_user
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
@@ -109,3 +109,29 @@ def oauth2_callback():
   login_email(authentication.get_user_email(credentials))
 
   return redirect(session.get('redirect_to_after_oauth', '/'))
+
+
+@routes.route('/_/auth/jwt')
+def login_with_jwt():
+  token = request.args.get('token')
+
+  if not token:
+    return abort(400)
+
+  try:
+    user_info = jwt.decode(token, get_config()['sessions_secret'], algorithms=['HS256'])
+
+    if get_organization_id_for_email(user_info['email']) != user_info['organization']:
+      logging.warning('Attempt to use JWT with mismatched org: %s', token)
+
+      return abort(400)
+
+    login_email(user_info['email'])
+  except jwt.DecodeError:
+    logging.warning('Attempt to use invalid JWT: %s', token)
+
+    return abort(400)
+  except jwt.ExpiredSignatureError:
+    logging.warning('Attempt to use expired JWT: %s', token)
+
+  return redirect('/')

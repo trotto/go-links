@@ -94,7 +94,7 @@ def add_routes():
   from modules.users.handlers import routes as user_routes
   try:
     from commercial.blueprints import COMMERCIAL_BLUEPRINTS
-  except ImportError:
+  except ModuleNotFoundError:
     COMMERCIAL_BLUEPRINTS = []
 
   app.register_blueprint(base_routes)
