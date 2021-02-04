@@ -29,6 +29,51 @@ class TestFunctions(TrottoTestCase):
 
     mock_service_get.assert_called_once_with('admin', '/organizations/example.com/settings')
 
+  def test_get_user_email__success__gmail(self):
+    mock_oauth_credentials = Mock()
+    mock_oauth_credentials.id_token = {'email_verified': True,
+                                       'hd': None,
+                                       'email': 'sam@gmail.com'}
+
+    self.assertEqual('sam@gmail.com',
+                     authentication.get_user_email(mock_oauth_credentials))
+
+  def test_get_user_email__success__google_workspace(self):
+    mock_oauth_credentials = Mock()
+    mock_oauth_credentials.id_token = {'email_verified': True,
+                                       'hd': 'googs.com',
+                                       'email': 'bill@googs.com'}
+
+    self.assertEqual('bill@googs.com',
+                     authentication.get_user_email(mock_oauth_credentials))
+
+  def test_get_user_email__success__mixed_case(self):
+    mock_oauth_credentials = Mock()
+    mock_oauth_credentials.id_token = {'email_verified': True,
+                                       'hd': None,
+                                       'email': 'Sam@Gmail.com'}
+
+    self.assertEqual('sam@gmail.com',
+                     authentication.get_user_email(mock_oauth_credentials))
+
+  def test_get_user_email__email_not_verified(self):
+    mock_oauth_credentials = Mock()
+    mock_oauth_credentials.id_token = {'email_verified': False,
+                                       'hd': 'googs.com',
+                                       'email': 'bill@googs.com'}
+
+    self.assertEqual(None,
+                     authentication.get_user_email(mock_oauth_credentials))
+
+  def test_get_user_email__not_gmail_or_google_workspace(self):
+    mock_oauth_credentials = Mock()
+    mock_oauth_credentials.id_token = {'email_verified': True,
+                                       'hd': None,
+                                       'email': 'case3@googs.com'}
+
+    self.assertEqual(None,
+                     authentication.get_user_email(mock_oauth_credentials))
+
   @staticmethod
   def _get_mock_request(host, headers=None):
     mock_request = Mock()

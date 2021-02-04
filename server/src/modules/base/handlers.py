@@ -102,8 +102,10 @@ def oauth2_callback():
     # user declined to auth; move on
     return redirect(session.get('redirect_to_after_oauth', '/'))
 
-  authentication.login_email(authentication.get_user_email(credentials),
-                             'google')
+  user_email = authentication.get_user_email(credentials)
+
+  if user_email:
+    authentication.login_email(user_email,'google')
 
   return redirect(session.get('redirect_to_after_oauth', '/'))
 
