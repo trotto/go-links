@@ -7,6 +7,11 @@ from flask_login import current_user
 from modules.links.helpers import get_shortlink
 from shared_helpers.events import enqueue_event
 
+try:
+  from commercial.routing import ROUTERS
+except ModuleNotFoundError:
+  ROUTERS = []
+
 
 routes = Blueprint('routing', __name__,
                    template_folder='../../static/templates')
@@ -52,6 +57,12 @@ def get_go_link(path):
   elif request.args.get('s') == 'crx' and request.args.get('sc'):
     return force_to_original_url()
   else:
+    for router in ROUTERS:
+      response = router(current_user.organization, shortpath)
+
+      if response:
+        return response
+
     return redirect(
       '%s/?%s'
       % ('http://localhost:5007' if request.host.startswith('localhost') else '',

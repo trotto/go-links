@@ -54,7 +54,18 @@ def get_user_email(oauth_credentials):
   if not user_info['email_verified']:
     return None
 
-  return user_info['email'].lower()
+  user_email = user_info['email'].lower()
+
+  _, domain = user_email.split('@', 1)
+
+  # Only permit Google auth for Gmail or Google Workspace (fka G Suite) accounts.
+  # See go/1199638960374226.
+  if domain != 'gmail.com' and not user_info.get('hd'):
+    logging.warning('Unsupported Google login for email %s', user_email)
+
+    return None
+
+  return user_email
 
 
 def get_host_for_request(request):
