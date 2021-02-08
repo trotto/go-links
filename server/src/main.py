@@ -52,6 +52,8 @@ def init_app_without_routes(disable_csrf=False):
   login_manager = LoginManager()
   login_manager.init_app(app)
 
+  global csrf_protect
+
   if not disable_csrf:
     csrf_protect = CSRFProtect()
     csrf_protect.init_app(app)
