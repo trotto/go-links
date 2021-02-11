@@ -3,6 +3,7 @@ import {connect} from 'react-redux';
 import {CopyToClipboard} from 'react-copy-to-clipboard';
 import * as actions from '../actions';
 import * as getters from '../getters';
+import Select from 'react-select';
 import {ReduxManagedStateComponent} from './Abstract'
 import {PrimaryButton, SecondaryButton} from './shared/Buttons';
 import {SuccessMessage, ErrorMessage} from './shared/Messages';
@@ -21,7 +22,8 @@ function mapStateToProps(state) {
     linkCreatedOnThisPageload: state.get('linkCreatedOnThisPageload'),
     goSupportedInCurrentSession: state.get('goSupportedInCurrentSession'),
     userLoggedIn: getters.userLoggedIn(state),
-    userInfo: state.get('userInfo')
+    userInfo: state.get('userInfo'),
+    namespaces: state.get('namespaces')
   };
 }
 
@@ -66,6 +68,55 @@ export const NewUserIntroContainer = connect(
     mapStateToProps,
     actions
 )(NewUserIntro);
+
+
+export class NamespaceSelector extends ReduxManagedStateComponent {
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      componentId: 'namespaceSelector',
+      defaults: {}
+    };
+  }
+
+  handleSelectChange(selectedOption) {
+    this.props.updateNewLinkFieldWithString('namespace', selectedOption.value);
+
+    this.props.shortlinkInput.focus();
+  }
+
+  render() {
+    var widthInEm = 0.65 * Math.max(...this.props.namespaces.map(ns => ns.length));
+    var style = {display: 'flex', alignItems: 'center', textAlign: 'right'};
+
+    return (
+        <div style={style}>
+          <div id="ns-selector" style={{width: widthInEm + 'em'}}>
+            <Select
+              name="ns"
+              value={this.props.newLinkData.get('namespace') || 'go'}
+              onChange={this.handleSelectChange.bind(this)}
+              options={this.props.namespaces.toArray().map((namespace) =>  ({value: namespace, label: namespace }))}
+              searchable={true}
+              noResultsText={null}
+              clearable={false}
+              arrowRenderer={() => <span style={{width: '0'}}></span>}
+              style={{cursor: 'pointer'}}
+            />
+          </div>
+          <div style={{padding: '0 3px 0 7px'}}>
+            /
+          </div>
+        </div>
+    )
+  }
+}
+export const NamespaceSelectorContainer = connect(
+    mapStateToProps,
+    actions
+)(NamespaceSelector);
 
 
 export class LinkForm extends React.Component {
@@ -128,9 +179,9 @@ export class LinkForm extends React.Component {
             <div className="col-md-3 col-md-offset-2">
               <div style={{width: '100%', display: 'flex', alignItems: 'center'}}>
                  <div style={{paddingRight: '5px'}}>
-                   <div>
-                     go/
-                   </div>
+                   {this.props.namespaces.size === 1 ?
+                       <div>go/</div>
+                       : <NamespaceSelectorContainer shortlinkInput={this.shortlinkInput} />}
                  </div>
                  <input
                      className="form-control"
@@ -174,6 +225,7 @@ export class LinkForm extends React.Component {
                     <a href={!this.props.linkCreationMessage ? '' : this.props.linkCreationMessage.get('tootsLink')}
                        data-test-id="new-shortlink-anchor-tag"
                        target="_blank"
+                       rel="noopener noreferrer"
                        style={{display: !this.props.linkCreationMessage || !this.props.linkCreationMessage.get('tootsLink') ? 'none' : 'block',marginLeft:'5px',marginRight:'5px',fontWeight:'bold'}}
                     >
                     {!this.props.linkCreationMessage || !this.props.linkCreationMessage.get('tootsLink')
