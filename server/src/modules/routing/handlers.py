@@ -5,6 +5,7 @@ from flask import Blueprint, request, redirect
 from flask_login import current_user
 
 from modules.links.helpers import get_shortlink
+from shared_helpers import config
 from shared_helpers.events import enqueue_event
 
 try:
@@ -15,6 +16,19 @@ except ModuleNotFoundError:
 
 routes = Blueprint('routing', __name__,
                    template_folder='../../static/templates')
+
+
+def check_namespace(user_org, shortpath):
+  shortpath_parts = shortpath.split('/', 1)
+  if len(shortpath_parts) > 1:
+    org_namespaces = config.get_organization_config(user_org).get('namespaces')
+    if org_namespaces:
+      shortpath_start, shortpath_remainder = shortpath_parts
+
+      if shortpath_start in org_namespaces:
+        return shortpath_start, shortpath_remainder
+
+  return 'go', shortpath
 
 
 def queue_event(followed_at, shortlink_id, destination, accessed_via, email=None):
@@ -46,7 +60,9 @@ def get_go_link(path):
 
     return redirect('/_/auth/login?%s' % parse.urlencode({'redirect_to': request.full_path}))
 
-  matching_shortlink, destination = get_shortlink(current_user.organization, shortpath)
+  namespace, shortpath = check_namespace(current_user.organization, shortpath)
+
+  matching_shortlink, destination = get_shortlink(current_user.organization, namespace, shortpath)
 
   if matching_shortlink:
     queue_event(requested_at,
@@ -58,13 +74,17 @@ def get_go_link(path):
     return force_to_original_url()
   else:
     for router in ROUTERS:
-      response = router(current_user.organization, shortpath)
+      response = router(current_user.organization, namespace, shortpath)
 
       if response:
         return response
 
+    create_link_params = {'sp': shortpath}
+    if namespace != 'go':
+      create_link_params['ns'] = namespace
+
     return redirect(
       '%s/?%s'
       % ('http://localhost:5007' if request.host.startswith('localhost') else '',
-         parse.urlencode({'sp': shortpath}))
+         parse.urlencode(create_link_params))
     )

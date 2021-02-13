@@ -121,7 +121,7 @@ class EditableDestination extends React.Component {
     return (
         <div style={{display: 'flex', width: '100%', justifyContent: 'space-between', alignItems: 'center'}}>
           <div style={{display: 'flex', alignItems: 'center', cursor: this.props.editable ? 'pointer' : 'default',
-                       flexGrow: 1}}
+                       width: 0, flexGrow: 1}}
                onClick={!this.props.editable ? () => {} : this.setEditingLinkId.bind(this, this.props.id)}
                onMouseOver={this.setMousedOver.bind(this, true)}
                onMouseOut={this.setMousedOver.bind(this, false)}
@@ -143,7 +143,7 @@ class EditableDestination extends React.Component {
             <div style={inputWrapperStyle}>
               <input
                 id={'edit-input-' + this.props.id}
-                style={{flexGrow: '1', padding: '4px 7px 4px 2px',
+                style={{width: 0, flexGrow: '1', padding: '4px 7px 4px 2px',
                         borderColor: 'transparent', backgroundColor: 'transparent',
                         cursor: this.props.editable ? 'pointer' : 'default'}}
                 value={this.getDisplayUrl()}
@@ -162,9 +162,8 @@ class EditableDestination extends React.Component {
               }
             </div>
           </div>
-          {!this.props.editable ? null :
-              <div style={{paddingLeft: '5px', display: 'flex',
-                           alignItems: 'center'}}
+          {this.props.editable && !currentlyBeingEdited &&
+              <div style={{paddingLeft: '5px', display: 'flex', alignItems: 'center'}}
               >
                 <DeleteOutline
                     titleAccess={`Delete ${this.props.link.shortpath}`}
@@ -214,6 +213,7 @@ class KeywordCell extends React.Component {
          >
            <a href={shortlink}
               target="_blank"
+              rel="noopener noreferrer"
               style={{width: '0', flexGrow: '1', overflow: 'hidden'}}
            >
              {row.value}
@@ -261,14 +261,15 @@ export class LinksTable extends React.Component {
       alignItems: 'center',
       justifyContent: 'start',
       paddingRight: '15px',
-      paddingLeft: '15px'
+      paddingLeft: '15px',
+      height: 'inherit'
     };
 
     var COLUMNS = [
       {
         Header: "Shortlink",
         accessor: "shortpath",
-        maxWidth: '200',
+        maxWidth: '120',
         style: DEFAULT_CELL_STYLING,
         Cell: row => {
           return <KeywordCell row={row} goSupportedInCurrentSession={this.props.goSupportedInCurrentSession} />
@@ -294,12 +295,14 @@ export class LinksTable extends React.Component {
       {
         Header: "Owner",
         accessor: "owner",
-        maxWidth: '200',
+        maxWidth: '120',
         style: DEFAULT_CELL_STYLING,
         // doing this because justify-content style specified with `style` key gets reverted to default when
         // resizing (possible bug in library)
-        Cell: row => <div style={{display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'flex-start'}}>
-                       {row.value}
+        Cell: row => <div style={{display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'flex-start'}}
+                          title={row.value}
+                     >
+                       {row.value.split('@')[0]}
                      </div>
       }
     ];
@@ -308,7 +311,7 @@ export class LinksTable extends React.Component {
       var data = List();
     } else {
       var data = this.props.links.map(
-          link => link.update('shortpath', shortpath => 'go' + '/' + shortpath));
+          link => link.update('shortpath', shortpath => (link.get('namespace') || 'go') + '/' + shortpath));
     }
 
     // Note: For the moment, the default install doesn't track visit counts.
@@ -322,7 +325,7 @@ export class LinksTable extends React.Component {
         maxWidth: '100',
         Cell: row => {
           return <CountCell
-              style={DEFAULT_CELL_STYLING}
+              style={Object.assign({}, DEFAULT_CELL_STYLING, {height: '100%'})}
               row={row}
               visitCountsProgress={this.props.visitCountsProgress}
           />

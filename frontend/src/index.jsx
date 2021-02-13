@@ -43,12 +43,14 @@ if (queryParams.r) {
 } else if (queryParams.sp) {
   // TODO: Group all this into an action.
   const shortpath = queryParams.sp;
+  const namespace = queryParams.ns || 'go';
 
+  store.dispatch(updateNewLinkFieldWithString('namespace', namespace));
   store.dispatch(updateNewLinkFieldWithString('shortpath', shortpath));
 
   history.replaceState({}, '', '/');
 
-  store.dispatch(setLinkCreationMessage('error', '"go/' + shortpath + '" doesn\'t exist yet. You can create it now!'));
+  store.dispatch(setLinkCreationMessage('error', `${namespace}/${shortpath} doesn't exist yet. You can create it now!`));
 } else if (queryParams.transfer) {
   history.replaceState({}, '', '/');
 

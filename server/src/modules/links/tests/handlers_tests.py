@@ -24,6 +24,7 @@ class TestHandlers(TrottoTestCase):
                                modified=datetime.datetime(2018, 11, 1),
                                organization='googs.com',
                                owner='kay@googs.com',
+                               namespace='go',
                                shortpath='there',
                                shortpath_prefix='there',
                                destination_url='http://example.com/there')
@@ -39,15 +40,16 @@ class TestHandlers(TrottoTestCase):
                       'created': '2018-10-01 00:00:00',
                       'modified': '2018-11-01 00:00:00',
                       'owner': 'kay@googs.com',
+                      'namespace': 'go',
                       'shortpath': 'there',
                       'destination_url': 'http://example.com/there',
                       'visits_count': 0},
                      json.loads(response.text))
 
     self.assertEqual(mock_create_short_link.call_args_list,
-                     [call('googs.com', 'kay@googs.com', 'there', 'http://example.com/there')])
+                     [call('googs.com', 'kay@googs.com', 'go', 'there', 'http://example.com/there')])
 
-  def test_create_link__no_patching(self):
+  def test_create_link__no_patching__no_namespace_specified(self):
     self.testapp.post_json('/_/api/links',
                            {'shortpath': 'favorites',
                             'destination': 'http://example.com'},
@@ -59,6 +61,43 @@ class TestHandlers(TrottoTestCase):
 
     shortlink = shortlinks[0]
 
+    self.assertEqual(None, shortlink._ns)  # namespace of "go" is null in the database
+    self.assertEqual('favorites', shortlink.shortpath)
+    self.assertEqual('http://example.com', shortlink.destination_url)
+
+  def test_create_link__no_patching__go_namespace_specified(self):
+    self.testapp.post_json('/_/api/links',
+                           {'namespace': 'go',
+                            'shortpath': 'favorites',
+                            'destination': 'http://example.com'},
+                           headers={'TROTTO_USER_UNDER_TEST': 'kay@googs.com'})
+
+    shortlinks = ShortLink._get_all()
+
+    self.assertEqual(1, len(shortlinks))
+
+    shortlink = shortlinks[0]
+
+    self.assertEqual(None, shortlink._ns)  # namespace of "go" is null in the database
+    self.assertEqual('favorites', shortlink.shortpath)
+    self.assertEqual('http://example.com', shortlink.destination_url)
+
+  @patch('shared_helpers.config.get_organization_config',
+         side_effect=lambda org: {'namespaces': ['eng', 'prod']} if org == 'googs.com' else {})
+  def test_create_link__config_patching_only__other_namespace_specified(self, _):
+    self.testapp.post_json('/_/api/links',
+                           {'namespace': 'eng',
+                            'shortpath': 'favorites',
+                            'destination': 'http://example.com'},
+                           headers={'TROTTO_USER_UNDER_TEST': 'kay@googs.com'})
+
+    shortlinks = ShortLink._get_all()
+
+    self.assertEqual(1, len(shortlinks))
+
+    shortlink = shortlinks[0]
+
+    self.assertEqual('eng', shortlink._ns)
     self.assertEqual('favorites', shortlink.shortpath)
     self.assertEqual('http://example.com', shortlink.destination_url)
 
@@ -94,6 +133,7 @@ class TestHandlers(TrottoTestCase):
                 created=datetime.datetime(2018, 10, 1),
                 organization='googs.com',
                 owner='kay@googs.com',
+                namespace='go',
                 shortpath='there',
                 shortpath_prefix='there',
                 destination_url='http://example.com'
@@ -102,6 +142,7 @@ class TestHandlers(TrottoTestCase):
                 created=datetime.datetime(2018, 11, 1),
                 organization='googs.com',
                 owner='jay@googs.com',
+                # no namespace explicitly set,
                 shortpath='here',
                 shortpath_prefix='here',
                 destination_url='http://gmail.com'
@@ -109,36 +150,64 @@ class TestHandlers(TrottoTestCase):
       ShortLink(id=3,
                 organization='widgets.com',
                 owner='el@widgets.com',
+                namespace='go',
                 shortpath='elsewhere',
                 shortpath_prefix='elsewhere',
                 destination_url='http://drive.com'
                 ).put()
+      ShortLink(id=4,
+                created=datetime.datetime(2019, 11, 1),
+                organization='googs.com',
+                owner='jay@googs.com',
+                namespace='eng',
+                shortpath='1',
+                shortpath_prefix='1',
+                destination_url='http://1.com').put()
+      ShortLink(id=5,
+                organization='widgets.com',
+                owner='el@widgets.com',
+                namespace='eng',
+                shortpath='2',
+                shortpath_prefix='2',
+                destination_url='http://2.com').put()
 
     response = self.testapp.get('/_/api/links',
                                 headers={'TROTTO_USER_UNDER_TEST': 'kay@googs.com'})
 
-    self.assertEqual([{'id': 1,
-                       'created': '2018-10-01 00:00:00',
-                       'modified': str(modified_datetime),
-                       'mine': True,
-                       'owner': 'kay@googs.com',
-                       'shortpath': 'there',
-                       'destination_url': 'http://example.com',
-                       'visits_count': 0},
-                      {'id': 2,
-                       'created': '2018-11-01 00:00:00',
-                       'modified': str(modified_datetime),
-                       'mine': False,
-                       'owner': 'jay@googs.com',
-                       'shortpath': 'here',
-                       'destination_url': 'http://gmail.com',
-                       'visits_count': 0}],
-                     json.loads(response.text))
+    self.assertCountEqual([{'id': 1,
+                            'created': '2018-10-01 00:00:00',
+                            'modified': str(modified_datetime),
+                            'mine': True,
+                            'owner': 'kay@googs.com',
+                            'namespace': 'go',
+                            'shortpath': 'there',
+                            'destination_url': 'http://example.com',
+                            'visits_count': 0},
+                           {'id': 2,
+                            'created': '2018-11-01 00:00:00',
+                            'modified': str(modified_datetime),
+                            'mine': False,
+                            'owner': 'jay@googs.com',
+                            'namespace': 'go',
+                            'shortpath': 'here',
+                            'destination_url': 'http://gmail.com',
+                            'visits_count': 0},
+                           {'id': 4,
+                            'created': '2019-11-01 00:00:00',
+                            'modified': str(modified_datetime),
+                            'mine': False,
+                            'owner': 'jay@googs.com',
+                            'namespace': 'eng',
+                            'shortpath': '1',
+                            'destination_url': 'http://1.com',
+                            'visits_count': 0}],
+                          json.loads(response.text))
 
   def test_update_link__go_link__successful(self):
     ShortLink(id=7,
               organization='googs.com',
               owner='kay@googs.com',
+              namespace='go',
               shortpath='there',
               shortpath_prefix='there',
               destination_url='http://example.com'
@@ -154,7 +223,7 @@ class TestHandlers(TrottoTestCase):
 
   def test_created_and_modified_date_tracking(self):
     time_1 = datetime.datetime.utcnow() + datetime.timedelta(days=2)
-    time_2 = datetime.datetime.utcnow() + datetime.timedelta(days=4)
+    time_2 = time_1 + datetime.timedelta(days=2)
 
     with freeze_time(time_1):
       self.testapp.post_json('/_/api/links',
@@ -187,6 +256,7 @@ class TestHandlers(TrottoTestCase):
     ShortLink(id=7,
               organization='googs.com',
               owner='kay@googs.com',
+              namespace='go',
               shortpath='there',
               shortpath_prefix='there',
               destination_url='http://drive.com'
@@ -208,6 +278,7 @@ class TestHandlers(TrottoTestCase):
     ShortLink(id=7,
               organization='googs.com',
               owner='kay@googs.com',
+              namespace='go',
               shortpath='there',
               shortpath_prefix='there',
               destination_url='http://drive.com'
@@ -228,6 +299,7 @@ class TestHandlers(TrottoTestCase):
     ShortLink(id=7,
               organization='widgets.com',
               owner='kc@widgets.com',
+              namespace='go',
               shortpath='there',
               shortpath_prefix='there',
               destination_url='http://drive.com'
@@ -248,6 +320,7 @@ class TestHandlers(TrottoTestCase):
     ShortLink(id=7,
               organization='googs.com',
               owner='kay@googs.com',
+              namespace='go',
               shortpath='there',
               shortpath_prefix='there',
               destination_url='http://drive.com'
@@ -269,6 +342,7 @@ class TestHandlers(TrottoTestCase):
     ShortLink(id=7,
               organization='googs.com',
               owner='kay@googs.com',
+              namespace='go',
               shortpath='there',
               shortpath_prefix='there',
               destination_url='http://drive.com'
@@ -291,6 +365,7 @@ class TestHandlers(TrottoTestCase):
     ShortLink(id=7,
               organization='googs.com',
               owner='kay@googs.com',
+              namespace='go',
               shortpath='there',
               shortpath_prefix='there',
               destination_url='http://drive.com'
@@ -309,6 +384,7 @@ class TestHandlers(TrottoTestCase):
     test_shortlink = ShortLink(id=7,
                                organization='googs.com',
                                owner='kay@googs.com',
+                               namespace='go',
                                shortpath='there',
                                shortpath_prefix='there',
                                destination_url='http://drive.com')
@@ -332,6 +408,7 @@ class TestHandlers(TrottoTestCase):
                                                 'id': 7,
                                                 'visits_count': 0,
                                                 'owner': 'kay@googs.com',
+                                                'namespace': 'go',
                                                 'destination_url': 'http://drive.com'})
 
 

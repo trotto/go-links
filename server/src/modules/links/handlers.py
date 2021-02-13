@@ -23,7 +23,7 @@ routes = Blueprint('links', __name__,
 models = get_models('links')
 
 
-PUBLIC_KEYS = ['id', 'created', 'modified', 'owner', 'shortpath', 'destination_url', 'visits_count']
+PUBLIC_KEYS = ['id', 'created', 'modified', 'owner', 'namespace',  'shortpath', 'destination_url', 'visits_count']
 
 
 def get_field_conversion_fns():
@@ -98,6 +98,7 @@ def post_link():
   try:
     new_link = helpers.create_short_link(current_user.organization,
                                          object_data.get('owner', current_user.email),
+                                         object_data.get('namespace', 'go'),
                                          object_data['shortpath'],
                                          object_data['destination'])
   except helpers.LinkCreationException as e:

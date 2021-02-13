@@ -17,6 +17,11 @@
 
 from datetime import datetime
 
+try:
+  from commercial.data.utils import allocate_id
+except ModuleNotFoundError:
+  allocate_id = None
+
 
 class BaseModel(object):
   id = int
@@ -44,3 +49,6 @@ class BaseModel(object):
     self.modified = datetime.utcnow()
     if not self.id:
       self.created = datetime.utcnow()
+
+    if not self.id and allocate_id:
+      self.id = allocate_id(self)

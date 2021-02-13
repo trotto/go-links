@@ -57,7 +57,8 @@ def get_service_config(service_id):
 
 
 def get_organization_config(org_id):
-  ORG_CONFIG_KEYS = ['admins']
+  ORG_CONFIG_KEYS = ['admins',
+                     'namespaces']
 
   try:
     with open(os.path.join(CONFIGS_PARENT_DIR,

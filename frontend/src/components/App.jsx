@@ -65,11 +65,12 @@ const Butterbar = connect(
     const textColor = `rgba(${errorColors.red}, ${errorColors.green}, ${errorColors.blue}, 1)`;
     const backgroundColor = `rgba(${errorColors.red}, ${errorColors.green}, ${errorColors.blue}, 0.1)`;
 
-    var style = !this.props.errorBarMessage
-        ? {paddingLeft: '10px', paddingRight: '10px'}
-        : {paddingLeft: '10px', paddingRight: '10px',
-          position: this.props.position, left: '0', top: '0', zIndex: this.props.position === 'fixed' ? '1000' : '0',
-          color: textColor, backgroundColor: backgroundColor, border: 0};
+    var style =  {paddingLeft: '10px', paddingRight: '10px',
+                  position: this.props.position, left: '0', top: '0', zIndex: this.props.position === 'fixed' ? '1000' : '0'};
+
+    if (this.props.errorBarMessage) {
+      Object.assign(style, {color: textColor, backgroundColor: backgroundColor, border: 0});
+    }
 
     return (
         <div className={`alert ${this.props.errorBarMessage ? 'alert-danger': 'alert-warning'} error-bar`} style={style}>
