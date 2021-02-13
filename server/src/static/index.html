@@ -38,7 +38,8 @@
         <script>
             window._trotto = {
                 alreadyAcceptedTerms: "{{ 'true' if alreadyAcceptedTerms else 'false' }}",
-                csrfToken: "{{ csrf_token }}"
+                csrfToken: "{{ csrf_token }}",
+                namespaces: {{ namespaces|safe }}
             };
         </script>
     </head>

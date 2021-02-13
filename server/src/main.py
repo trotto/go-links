@@ -9,7 +9,7 @@ from flask_migrate import Migrate, upgrade as upgrade_db
 from flask_wtf.csrf import CSRFProtect, generate_csrf
 from werkzeug.routing import BaseConverter
 
-from shared_helpers.config import get_config
+from shared_helpers.config import get_config, get_organization_config
 
 JINJA_ENVIRONMENT = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.join(os.path.dirname(__file__), 'static')),
@@ -120,7 +120,10 @@ def home():
 
   template = JINJA_ENVIRONMENT.get_template('index.html')
 
-  return template.render({'csrf_token': generate_csrf()})
+  namespaces = get_organization_config(current_user.organization).get('namespaces', [])
+
+  return template.render({'csrf_token': generate_csrf(),
+                          'namespaces': json.dumps(namespaces)})
 
 
 @app.route('/_scripts/config.js')
