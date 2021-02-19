@@ -1,5 +1,7 @@
 import json
+import logging
 import os
+import traceback
 
 import jinja2
 from flask import Flask, send_from_directory, redirect, request, jsonify
@@ -30,13 +32,11 @@ def init_app_without_routes(disable_csrf=False):
   app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
   global db
-  global migrate
   class SQLAlchemy(_BaseSQLAlchemy):
     def apply_pool_defaults(self, app, options):
         super(SQLAlchemy, self).apply_pool_defaults(app, options)
         options["pool_pre_ping"] = True
   db = SQLAlchemy(app)
-  migrate = Migrate(app, db)
 
   from modules.base import authentication
 
@@ -77,9 +77,18 @@ def init_app_without_routes(disable_csrf=False):
 app = init_app_without_routes()
 
 
-if os.getenv('POSTGRES_UPGRADE_ON_START', '').lower() == 'true':
-  with app.app_context():
-    upgrade_db(directory=os.path.join(os.path.dirname(__file__), 'migrations'))
+with app.app_context():
+  try:
+    global migrate
+
+    migrate = Migrate(app, db)
+
+    if os.getenv('POSTGRES_UPGRADE_ON_START', '').lower() == 'true':
+      upgrade_db(directory=os.path.join(os.path.dirname(__file__), 'migrations'))
+  except:
+    logging.warning("Exception from Flask-Migrate/Alembic. This may be expected if you've deployed a new version of the"
+                    " app and an older version hasn't finished shutting down, or you've rolled back versions. %s",
+                    traceback.format_exc())
 
 
 class RegexConverter(BaseConverter):
