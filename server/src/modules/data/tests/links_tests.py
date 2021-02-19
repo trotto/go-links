@@ -89,7 +89,7 @@ class TestFunctions(TrottoTestCase):
     other_co_link = self._add_link('eng', '2', 'other.co')
 
     googs_links = links.ShortLink.get_by_prefix('googs.com', 'go', '1')
-    googs_links = sorted(googs_links, key=lambda l: l.id)
+    googs_links = sorted(googs_links, key=lambda l: l.created)
 
     self.assertEqual([googs_link_1, googs_link_2], googs_links)
     # verify setting of non-column `namespace` prop
@@ -132,8 +132,8 @@ class TestFunctions(TrottoTestCase):
     link2 = self._add_link('eng', '1/2')
 
     googs_links = links.ShortLink.get_by_organization('googs.com')
-    googs_links = sorted(googs_links, key=lambda l: l.id)
+    googs_links = sorted(googs_links, key=lambda l: l.created)
 
-    self.assertEqual([link1, link2], sorted(googs_links, key=lambda l: l.id))
+    self.assertEqual([link1, link2], googs_links)
     self.assertEqual(['go', 'eng'],
                       [l.namespace for l in googs_links])
