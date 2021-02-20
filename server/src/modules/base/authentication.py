@@ -1,6 +1,7 @@
 import datetime
 import logging
 import os
+from urllib.parse import quote
 
 from flask import abort, request, redirect
 from flask_login import login_user, current_user
@@ -19,7 +20,7 @@ def login_test_user():
 
 def get_allowed_authentication_methods(organization):
   try:
-    return service_get('admin', f'/organizations/{organization}/settings').get('authentication_methods', None)
+    return service_get('admin', f'/organizations/{quote(organization)}/settings').get('authentication_methods', None)
   except config.ServiceNotConfiguredError:
     return None
 

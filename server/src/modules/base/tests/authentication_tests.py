@@ -15,6 +15,13 @@ class TestFunctions(TrottoTestCase):
 
     mock_service_get.assert_called_once_with('admin', '/organizations/example.com/settings')
 
+  @patch('modules.base.authentication.service_get', return_value={'authentication_methods': ['google']})
+  def test_get_allowed_authentication_methods__admin_service_configured__url_encoded_char(self, mock_service_get):
+    self.assertEqual(['google'],
+                     authentication.get_allowed_authentication_methods('j@gmail.com'))
+
+    mock_service_get.assert_called_once_with('admin', '/organizations/j%40gmail.com/settings')
+
   @patch('modules.base.authentication.service_get', return_value={})
   def test_get_allowed_authentication_methods__admin_service_configured__no_methods(self, mock_service_get):
     self.assertEqual(None,

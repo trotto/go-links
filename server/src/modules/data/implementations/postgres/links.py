@@ -45,6 +45,7 @@ class ShortLink(db.Model, links.ShortLink):
                                nullable=False)
   destination_url = db.Column(db.String(3000),
                               nullable=False)
+  type = db.Column(db.String(30))
   visits_count = db.Column(db.Integer)
   visits_count_last_updated = db.Column(db.DateTime)
 

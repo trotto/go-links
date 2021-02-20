@@ -62,7 +62,6 @@ def get_organization_config(org_id):
 
   try:
     with open(os.path.join(CONFIGS_PARENT_DIR,
-                           'prod' if env.current_env_is_production() else 'dev',
                            'organizations',
                            org_id + '.yaml')) as f:
       config = yaml.load(f, Loader=yaml.SafeLoader)
