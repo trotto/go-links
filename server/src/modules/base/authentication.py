@@ -7,7 +7,7 @@ from flask import abort, request, redirect
 from flask_login import login_user, current_user
 
 from modules.organizations.utils import get_organization_id_for_email
-from modules.users.helpers import get_or_create_user
+from modules.users.helpers import get_or_create_user, get_user_by_id
 from shared_helpers import config
 from shared_helpers.services import get as service_get
 
@@ -25,14 +25,22 @@ def get_allowed_authentication_methods(organization):
     return None
 
 
-def login_email(user_email, authentication_method):
-  user = get_or_create_user(user_email,
-                            get_organization_id_for_email(user_email))
+def login(authentication_method, user_id=None, user_email=None):
+  if user_id:
+    user = get_user_by_id(user_id)
+
+    if not user:
+      logging.warning('Attempt to sign in nonexistent user %s', user_id)
+
+      abort(400)
+  else:
+    user = get_or_create_user(user_email,
+                              get_organization_id_for_email(user_email))
 
   allowed_authentication_methods = get_allowed_authentication_methods(user.organization)
   if allowed_authentication_methods is not None and authentication_method not in allowed_authentication_methods:
     logging.warning("User %s attempted to authenticate with method '%s'. Allowed methods are %s.",
-                    user_email, authentication_method, allowed_authentication_methods)
+                    user.id, authentication_method, allowed_authentication_methods)
 
     abort(redirect(f'/_/auth/login?e=auth_not_allowed-{authentication_method}'))
 

@@ -75,7 +75,7 @@ def login_via_test_token():
     raise Exception('Invalid test user %s, with test token: %s' % (payload['user_email'],
                                                                    request.args.get('test_token')))
 
-  authentication.login_email(payload['user_email'], 'test_token')
+  authentication.login('test_token', user_email=payload['user_email'])
 
   return True
 
@@ -105,7 +105,7 @@ def oauth2_callback():
   user_email = authentication.get_user_email(credentials)
 
   if user_email:
-    authentication.login_email(user_email,'google')
+    authentication.login('google', user_email=user_email)
 
   return redirect(session.get('redirect_to_after_oauth', '/'))
 
@@ -120,12 +120,15 @@ def login_with_jwt():
   try:
     user_info = jwt.decode(token, get_config()['sessions_secret'], algorithms=['HS256'])
 
-    if get_organization_id_for_email(user_info['email']) != user_info['organization']:
-      logging.warning('Attempt to use JWT with mismatched org: %s', token)
+    if 'id' in user_info:
+      authentication.login(user_info['method'], user_id=user_info['id'])
+    else:
+      if get_organization_id_for_email(user_info['email']) != user_info['organization']:
+        logging.warning('Attempt to use JWT with mismatched org: %s', token)
 
-      return abort(400)
+        return abort(400)
 
-    authentication.login_email(user_info['email'], user_info['method'])
+      authentication.login(user_info['method'], user_email=user_info['email'])
   except jwt.DecodeError:
     logging.warning('Attempt to use invalid JWT: %s', token)
 
