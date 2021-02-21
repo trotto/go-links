@@ -84,6 +84,32 @@ def get_shortlink(organization, namespace, shortpath):
     return derive_pattern_match(organization, namespace, shortpath)
 
 
+def find_conflicting_link(organization, namespace, shortpath):
+  if '%s' not in shortpath:
+    raise ValueError('Provided shortpath must be a programmatic link containing "%s"')
+
+  shortpath_parts = shortpath.split('/')
+  shortpath_prefix = shortpath_parts[0]
+
+  links_with_prefix = models.ShortLink.get_by_prefix(organization,
+                                                     namespace,
+                                                     shortpath_prefix)
+
+  for link in links_with_prefix:
+    other_shortpath_parts = link.shortpath.split('/')
+
+    if len(shortpath_parts) != len(other_shortpath_parts):
+      continue
+
+    for i in range(0, len(shortpath_parts)):
+      if shortpath_parts[i] != '%s' and shortpath_parts[i] != other_shortpath_parts[i]:
+        continue
+
+    return link
+
+  return None
+
+
 def create_short_link(organization, owner, namespace, shortpath, destination):
   return upsert_short_link(organization, owner, namespace, shortpath, destination, None)
 
@@ -128,9 +154,13 @@ def upsert_short_link(organization, owner, namespace, shortpath, destination, up
 
   shortpath_parts = shortpath.split('/')
   if len(shortpath_parts) > 1:
+    placeholder_found = False
+
     for part in shortpath_parts[1:]:
-      if part != '%s':
-        raise LinkCreationException('Keywords can have only "%s" placeholders after the first "/". Ex: "drive/%s"')
+      if part == '%s':
+        placeholder_found = True
+      elif placeholder_found:
+        raise LinkCreationException('After the first "%s" placeholder, you can only have additional placeholders')
 
   if '%' in shortpath:
     if '%' in shortpath and shortpath.count('%') != shortpath.count('%s'):
@@ -146,8 +176,23 @@ def upsert_short_link(organization, owner, namespace, shortpath, destination, up
     existing_link, _ = get_shortlink(organization, namespace, shortpath)
 
     if existing_link:
-      raise LinkCreationException('That go link already exists. %s/%s points to %s'
-                                  % (namespace, shortpath, existing_link.destination_url))
+      error_message = 'That go link already exists. %s/%s points to %s' % (namespace,
+                                                                           shortpath,
+                                                                           existing_link.destination_url)
+
+      if existing_link.shortpath != shortpath:
+        error_message = 'A conflicting go link already exists. %s/%s points to %s' % (namespace,
+                                                                                      existing_link.shortpath,
+                                                                                      existing_link.destination_url)
+
+      raise LinkCreationException(error_message)
+
+    if '%s' in shortpath:
+      conflicting_link = find_conflicting_link(organization, namespace, shortpath)
+
+      if conflicting_link:
+        raise LinkCreationException('A conflicting go link already exists. %s/%s points to %s'
+                                    % (namespace, conflicting_link.shortpath, conflicting_link.destination_url))
 
   # Note: urlparse('128.90.0.1:8080/start').scheme returns '128.90.0.1'. Hence the additional checking.
   destination_url_scheme = urlparse(destination).scheme
