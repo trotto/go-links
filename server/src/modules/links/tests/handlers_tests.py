@@ -43,6 +43,7 @@ class TestHandlers(TrottoTestCase):
                       'namespace': 'go',
                       'shortpath': 'there',
                       'destination_url': 'http://example.com/there',
+                      'type': None,
                       'visits_count': 0},
                      json.loads(response.text))
 
@@ -182,6 +183,7 @@ class TestHandlers(TrottoTestCase):
                             'namespace': 'go',
                             'shortpath': 'there',
                             'destination_url': 'http://example.com',
+                            'type': None,
                             'visits_count': 0},
                            {'id': 2,
                             'created': '2018-11-01 00:00:00',
@@ -191,6 +193,7 @@ class TestHandlers(TrottoTestCase):
                             'namespace': 'go',
                             'shortpath': 'here',
                             'destination_url': 'http://gmail.com',
+                            'type': None,
                             'visits_count': 0},
                            {'id': 4,
                             'created': '2019-11-01 00:00:00',
@@ -200,6 +203,7 @@ class TestHandlers(TrottoTestCase):
                             'namespace': 'eng',
                             'shortpath': '1',
                             'destination_url': 'http://1.com',
+                            'type': None,
                             'visits_count': 0}],
                           json.loads(response.text))
 
@@ -409,7 +413,8 @@ class TestHandlers(TrottoTestCase):
                                                 'visits_count': 0,
                                                 'owner': 'kay@googs.com',
                                                 'namespace': 'go',
-                                                'destination_url': 'http://drive.com'})
+                                                'destination_url': 'http://drive.com',
+                                                'type': None})
 
 
 @patch('shared_helpers.config.get_config', return_value={'sessions_secret': 'the_secret',

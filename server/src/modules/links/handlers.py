@@ -23,7 +23,8 @@ routes = Blueprint('links', __name__,
 models = get_models('links')
 
 
-PUBLIC_KEYS = ['id', 'created', 'modified', 'owner', 'namespace',  'shortpath', 'destination_url', 'visits_count']
+PUBLIC_KEYS = ['id', 'created', 'modified', 'owner', 'namespace',
+               'shortpath', 'destination_url', 'type', 'visits_count']
 
 
 def get_field_conversion_fns():

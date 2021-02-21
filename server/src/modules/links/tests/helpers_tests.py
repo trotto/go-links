@@ -262,3 +262,79 @@ class TestOtherFunctionsEmptyDatabase(TrottoTestCase):
                                    'visits_count': None,
                                    'visits_count_last_updated': None},
                                   new_link)
+
+
+class TestHierarchicalLinks(TrottoTestCase):
+
+  def setUp(self):
+    super().setUp()
+
+    ShortLink(id=16,
+              organization='1.com',
+              owner='kay@1.com',
+              namespace='go',
+              shortpath='trotto/docs',
+              shortpath_prefix='trotto',
+              destination_url='http://www.trot.to/docs'
+              ).put()
+
+    ShortLink(id=17,
+              organization='1.com',
+              owner='kay@1.com',
+              namespace='go',
+              shortpath='trotto/fr/t',
+              shortpath_prefix='trotto',
+              destination_url='http://fr.trot.to'
+              ).put()
+
+    ShortLink(id=18,
+              organization='1.com',
+              owner='jay@1.com',
+              namespace='go',
+              shortpath='drive/%s',
+              shortpath_prefix='drive',
+              destination_url='http://drive.com/%s'
+              ).put()
+
+  def test_get_shortlink__hierarchical_link_exists(self):
+    self.assertEqual((ShortLink.get_by_id(16), 'http://www.trot.to/docs'),
+                     helpers.get_shortlink('1.com', 'go', 'trotto/docs'))
+
+    self.assertEqual((ShortLink.get_by_id(17), 'http://fr.trot.to'),
+                     helpers.get_shortlink('1.com', 'go', 'trotto/fr/t'))
+
+  def test_get_shortlink__hierarchical_link_exists_in_other_org(self):
+    self.assertEqual((None, None),
+                     helpers.get_shortlink('2.com', 'go', 'trotto/docs'))
+
+  def test_get_shortlink__hierarchical_link_does_not_exist(self):
+    self.assertEqual((None, None),
+                     helpers.get_shortlink('1.com', 'go', 'trotto/jots'))
+
+  def test_get_shortlink__hierarchical_link_does_not_exist__subpath_exists(self):
+    self.assertEqual((None, None),
+                     helpers.get_shortlink('1.com', 'go', 'trotto'))
+
+    self.assertEqual((None, None),
+                     helpers.get_shortlink('1.com', 'go', 'trotto/fr'))
+
+  def test_create_short_link__conflicting_programmatic_link(self):
+    with self.assertRaises(helpers.LinkCreationException) as cm:
+      helpers.create_short_link('1.com', 'kay@1.com', 'go', 'drive/recent', 'drive.com/recent')
+
+    self.assertEqual('A conflicting go link already exists. go/drive/%s points to http://drive.com/%s',
+                     str(cm.exception))
+
+  def test_create_short_link__conflicting_hierarchical_link(self):
+    with self.assertRaises(helpers.LinkCreationException) as cm:
+      helpers.create_short_link('1.com', 'kay@1.com', 'go', 'trotto/%s', 'https://www.trot.to/q=%s')
+
+    self.assertEqual('A conflicting go link already exists. go/trotto/docs points to http://www.trot.to/docs',
+                     str(cm.exception))
+
+  def test_create_short_link__non_placeholder_after_placeholder(self):
+    with self.assertRaises(helpers.LinkCreationException) as cm:
+      helpers.create_short_link('1.com', 'kay@1.com', 'go', 'trotto/%s/q', 'https://www.trot.to/q=%s')
+
+    self.assertEqual('After the first "%s" placeholder, you can only have additional placeholders',
+                     str(cm.exception))
