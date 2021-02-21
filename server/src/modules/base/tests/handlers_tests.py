@@ -112,11 +112,19 @@ def get_me():
   return jsonify(current_user.email)
 
 
-def _generate_signin_token(secret, email, org, expires_in_seconds, method='custom_method'):
-  return jwt.encode({'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=expires_in_seconds),
-                     'email': email,
-                     'organization': org,
-                     'method': method},
+def _generate_signin_token(secret, org, expires_in_seconds, user_id=None, user_email=None, method='custom_method'):
+  payload = {'exp': datetime.datetime.utcnow() + datetime.timedelta(seconds=expires_in_seconds),
+             'method': method}
+
+  if user_id:
+    payload['id'] = user_id
+  elif user_email:
+    payload['email'] = user_email
+    payload['organization'] = org
+  else:
+    raise ValueError('Either user_id or user_email must be provided')
+
+  return jwt.encode(payload,
                     secret,
                     'HS256').decode('utf-8')
 
@@ -172,9 +180,9 @@ class TestAuthenticationControls(TrottoTestCase):
 
   def _try_auth_method(self, configured_methods, try_method):
     token = _generate_signin_token('so_secret',
-                                   'kay@googs.com',
                                    'googs.com',
                                    30,
+                                   user_email='kay@googs.com',
                                    method=try_method)
 
     with patch('modules.base.handlers.get_config', return_value={'sessions_secret': 'so_secret'}), \
@@ -213,7 +221,8 @@ class TestAuthenticationControls(TrottoTestCase):
 
 class TestJwtSignin(TrottoTestCase):
 
-  blueprints_under_test = [handlers.routes]
+  blueprints_under_test = [handlers.routes,
+                           test_blueprint]
 
   def test_jwt_signin__no_token(self):
     response = self.testapp.get('/_/auth/jwt',
@@ -235,9 +244,9 @@ class TestJwtSignin(TrottoTestCase):
   @patch('modules.base.handlers.get_config', return_value={'sessions_secret': 'so_secret'})
   def test_jwt_signin__token_signed_with_wrong_secret(self, _):
     response = self.testapp.get('/_/auth/jwt?token=%s' % (_generate_signin_token('a_secret',
-                                                                                 'jo@googs.com',
                                                                                  'googs.com',
-                                                                                 30)),
+                                                                                 30,
+                                                                                 user_email='jo@googs.com')),
                                 expect_errors=True)
 
     self.assertEqual(400, response.status_int)
@@ -248,9 +257,9 @@ class TestJwtSignin(TrottoTestCase):
   @patch('modules.base.handlers.get_config', return_value={'sessions_secret': 'so_secret'})
   def test_jwt_signin__expired_token(self, _, mock_log_warning):
     token = _generate_signin_token('so_secret',
-                                   'jo@googs.com',
                                    'googs.com',
-                                   -10)
+                                   -10,
+                                   user_email='jo@googs.com')
 
     response = self.testapp.get('/_/auth/jwt?token=%s' % (token))
 
@@ -264,9 +273,9 @@ class TestJwtSignin(TrottoTestCase):
   @patch('modules.base.handlers.get_config', return_value={'sessions_secret': 'so_secret'})
   def test_jwt_signin__valid_token__mismatched_org(self, _):
     response = self.testapp.get('/_/auth/jwt?token=%s' % (_generate_signin_token('so_secret',
-                                                                                 'jo@googs.com',
                                                                                  'other.com',
-                                                                                 30)),
+                                                                                 30,
+                                                                                 user_email='jo@googs.com')),
                                 expect_errors=True)
 
     self.assertEqual(400, response.status_int)
@@ -277,12 +286,45 @@ class TestJwtSignin(TrottoTestCase):
   @patch('modules.base.handlers.get_config', return_value={'sessions_secret': 'so_secret'})
   def test_jwt_signin__valid_token__successful_signin(self, _, mock_log_warning):
     response = self.testapp.get('/_/auth/jwt?token=%s' % (_generate_signin_token('so_secret',
-                                                                                 'jo@googs.com',
                                                                                  'googs.com',
-                                                                                 30)))
+                                                                                 30,
+                                                                                 user_email='jo@googs.com')))
 
     self.assertEqual(302, response.status_int)
 
     mock_log_warning.assert_not_called()
 
     self.assertIn('session=', response.headers.get('Set-Cookie', ''))
+
+  @patch('modules.base.handlers.get_config', return_value={'sessions_secret': 'so_secret'})
+  def test_jwt_signin__by_user_id__user_does_not_exist(self, _):
+    response = self.testapp.get('/_/auth/jwt?token=%s' % (_generate_signin_token('so_secret',
+                                                                                 'googs.com',
+                                                                                 30,
+                                                                                 user_id=80)),
+                                expect_errors=True)
+
+    self.assertEqual(400, response.status_int)
+
+    self.assertNotIn('session=', response.headers.get('Set-Cookie', ''))
+
+  @patch('modules.base.handlers.get_config', return_value={'sessions_secret': 'so_secret'})
+  def test_jwt_signin__by_user_id__successful_signin(self, _):
+    test_user = User(id=3,
+                     created=datetime.datetime(2021, 1, 12, 1, 2, 3),
+                     email='kay@googs.com',
+                     domain_type='corporate',
+                     organization='googs.com')
+    test_user.put()
+
+    login_response = self.testapp.get('/_/auth/jwt?token=%s' % (_generate_signin_token('so_secret',
+                                                                                       'googs.com',
+                                                                                       30,
+                                                                                       user_id=3)))
+
+    self.assertEqual(302, login_response.status_int)
+
+    user_info_response = self.testapp.get('/me',
+                                          headers={'Cookie': login_response.headers['Set-Cookie']})
+
+    self.assertEqual('kay@googs.com', user_info_response.json)
