@@ -9,9 +9,20 @@ from flask_login import LoginManager, current_user
 from flask_sqlalchemy import SQLAlchemy as _BaseSQLAlchemy
 from flask_migrate import Migrate, upgrade as upgrade_db
 from flask_wtf.csrf import CSRFProtect, generate_csrf
+import sentry_sdk
 from werkzeug.routing import BaseConverter
 
-from shared_helpers.config import get_config, get_organization_config
+from shared_helpers import config
+
+
+sentry_config = config.get_config_by_key_path(['monitoring', 'sentry'])
+if sentry_config:
+  from sentry_sdk.integrations.flask import FlaskIntegration
+
+  sentry_sdk.init(dsn=sentry_config['dsn'],
+                  integrations=[FlaskIntegration()],
+                  traces_sample_rate=sentry_config.get('traces_sample_rate', 0.1))
+
 
 JINJA_ENVIRONMENT = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.join(os.path.dirname(__file__), 'static')),
@@ -22,12 +33,12 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 def init_app_without_routes(disable_csrf=False):
   app = Flask(__name__)
 
-  app.secret_key = get_config()['sessions_secret']
+  app.secret_key = config.get_config()['sessions_secret']
 
-  app.config['SQLALCHEMY_DATABASE_URI'] = get_config()['postgres']['url']
+  app.config['SQLALCHEMY_DATABASE_URI'] = config.get_config()['postgres']['url']
 
-  if get_config()['postgres'].get('commercial_url'):
-    app.config['SQLALCHEMY_BINDS'] = {'commercial': get_config()['postgres']['commercial_url']}
+  if config.get_config()['postgres'].get('commercial_url'):
+    app.config['SQLALCHEMY_BINDS'] = {'commercial': config.get_config()['postgres']['commercial_url']}
 
   app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -61,6 +72,8 @@ def init_app_without_routes(disable_csrf=False):
   @login_manager.user_loader
   def load_user(user_id):
     from modules.users.helpers import get_user_by_id
+
+    sentry_sdk.set_user({'id': user_id})
 
     return get_user_by_id(user_id)
 
@@ -129,7 +142,7 @@ def home():
 
   template = JINJA_ENVIRONMENT.get_template('index.html')
 
-  namespaces = get_organization_config(current_user.organization).get('namespaces', [])
+  namespaces = config.get_organization_config(current_user.organization).get('namespaces', [])
 
   return template.render({'csrf_token': generate_csrf(),
                           'namespaces': json.dumps(namespaces)})
@@ -137,7 +150,7 @@ def home():
 
 @app.route('/_scripts/config.js')
 def layout_config():
-  layout_json = json.dumps(get_config().get('layout', {}))
+  layout_json = json.dumps(config.get_config().get('layout', {}))
   return f"window._trotto = window._trotto || {{}}; window._trotto.layout = {layout_json};"
 
 
