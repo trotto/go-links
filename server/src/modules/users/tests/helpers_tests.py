@@ -42,6 +42,13 @@ class TestHelperFunctions(TrottoTestCase):
 
     mock_service_get.assert_called_once_with('admin', '/organizations/googs.com/users?role=admin')
 
+  @patch('modules.users.helpers.service_get', return_value=[{'id': 1}, {'id': 4}, {'id': 2}])
+  def test_get_admin_ids__admin_service_configured__url_encoded_char(self, mock_service_get):
+    self.assertEqual([1, 4, 2],
+                     helpers.get_admin_ids('j@gmail.com'))
+
+    mock_service_get.assert_called_once_with('admin', '/organizations/j%40gmail.com/users?role=admin')
+
   @patch('modules.users.helpers.service_get', side_effect=ServiceNotConfiguredError)
   def test_get_admin_ids__admin_service_not_configured(self, mock_service_get):
     self.assertEqual(None,
