@@ -1,4 +1,5 @@
 import os
+from urllib.parse import quote
 
 import jinja2
 
@@ -70,7 +71,7 @@ def get_or_create_user(email, user_org):
 def get_admin_ids(organization):
   try:
     return [user['id'] for user
-            in service_get('admin', f'/organizations/{organization}/users?role=admin')]
+            in service_get('admin', f'/organizations/{quote(organization)}/users?role=admin')]
   except config.ServiceNotConfiguredError:
     return None
 
