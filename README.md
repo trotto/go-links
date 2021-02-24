@@ -61,11 +61,11 @@ cd go-links
 ### Create a virtualenv
 
 Inside the `go-links/server` directory, create and enter a
-Python 3.8 [virtualenv](https://virtualenv.pypa.io/en/latest/installation.html) and install dependencies:
+Python 3.8 [virtualenv](https://docs.python.org/3/library/venv.html) and install dependencies:
 
 ```
 cd go-links/server
-virtualenv --python=python3 .virtualenv/
+python3 -m venv .virtualenv
 source .virtualenv/bin/activate
 pip install -r src/requirements.txt
 ```
