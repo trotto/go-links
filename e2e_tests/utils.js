@@ -60,5 +60,6 @@ module.exports = {
   signIn,
   createGoLink,
   getPrettyUniqueString,
-  getPrettyUniqueEmail
+  getPrettyUniqueEmail,
+  TEST_INSTANCE_BASE
 };
