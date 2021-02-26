@@ -13,12 +13,20 @@ from testing import TrottoTestCase
 User = get_models('users').User
 
 
+MULTIPLE_LOGIN_METHODS = [{'label': 'Sign in with Google',
+                           'image': '/_images/auth/google_signin_button.png',
+                           'url': '/_/auth/login/google'},
+                          {'label': 'Custom signin',
+                           'image': 'https://mylogin/logo.png',
+                           'url': 'https://mylogin/login'}]
+
+
 class TestHandlers(TrottoTestCase):
 
   blueprints_under_test = [handlers.routes]
 
   def test_login_endpoint__no_upstream_host_header(self):
-    response = self.testapp.get('/_/auth/login',
+    response = self.testapp.get('/_/auth/login/google',
                                 headers={'Host': 'trot.to'})
 
     expected_oauth_redirect_uri = urlencode({'redirect_uri': 'https://trot.to/_/auth/oauth2_callback'})
@@ -27,7 +35,7 @@ class TestHandlers(TrottoTestCase):
     self.assertIn(expected_oauth_redirect_uri, response.headers['Location'])
 
   def test_login_endpoint__upstream_host_header(self):
-    response = self.testapp.get('/_/auth/login',
+    response = self.testapp.get('/_/auth/login/google',
                                 headers={'Host': 'trot.to',
                                          'X-Upstream-Host': 'go.trot.to'})
 
@@ -47,8 +55,42 @@ class TestHandlers(TrottoTestCase):
 
     self.assertEqual(302, response.status_int)
 
+  def test_login_endpoint__single_login_method(self):
+    response = self.testapp.get('/_/auth/login')
+
+    self.assertEqual(302, response.status_int)
+    self.assertEqual(f"http://localhost/_/auth/login/google?{urlencode({'redirect_to': 'http://localhost'})}",
+                     response.headers['Location'])
+
+  def test_login_endpoint__single_login_method__with_redirect_to(self):
+    response = self.testapp.get('/_/auth/login?redirect_to=%2Froadmap')
+
+    self.assertEqual(302, response.status_int)
+    self.assertEqual(f"http://localhost/_/auth/login/google?{urlencode({'redirect_to': 'http://localhost/roadmap'})}",
+                     response.headers['Location'])
+
+  @patch('modules.base.handlers.LOGIN_METHODS', MULTIPLE_LOGIN_METHODS)
+  def test_login_endpoint__multiple_login_methods(self):
+    response = self.testapp.get('/_/auth/login')
+
+    self.assertEqual(200, response.status_int)
+    self.assertIn(f"/_/auth/login/google?{urlencode({'redirect_to': 'http://localhost'})}",
+                  response.text)
+    self.assertIn(f"https://mylogin/login?{urlencode({'redirect_to': 'http://localhost'})}",
+                  response.text)
+
+  @patch('modules.base.handlers.LOGIN_METHODS', MULTIPLE_LOGIN_METHODS)
+  def test_login_endpoint__multiple_login_methods__with_redirect_to(self):
+    response = self.testapp.get('/_/auth/login?redirect_to=%2Froadmap')
+
+    self.assertEqual(200, response.status_int)
+    self.assertIn(f"/_/auth/login/google?{urlencode({'redirect_to': 'http://localhost/roadmap'})}",
+                  response.text)
+    self.assertIn(f"https://mylogin/login?{urlencode({'redirect_to': 'http://localhost/roadmap'})}",
+                  response.text)
+
   @patch('modules.base.handlers.get_config', return_value={'testing': {'secret': 'a_test_secret',
-                                                                        'domains': ['example.com']}})
+                                                                       'domains': ['example.com']}})
   def test_login_via_test_token__no_token(self, _):
     response = self.testapp.get('/_/auth/oauth2_callback')
 
@@ -61,7 +103,7 @@ class TestHandlers(TrottoTestCase):
     self.assertEqual(302, response.status_int)
 
   @patch('modules.base.handlers.get_config', return_value={'testing': {'secret': 'a_test_secret',
-                                                                        'domains': ['example.com']}})
+                                                                       'domains': ['example.com']}})
   def test_login_via_test_token__invalid_token(self, _):
     token = jwt.encode({'email': 'sam@example.com'}, 'some_secret', algorithm='HS256')
 

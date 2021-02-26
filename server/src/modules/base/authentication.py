@@ -125,5 +125,5 @@ def get_user_email(oauth_credentials):
 def get_host_for_request(request):
   host = request.headers.get('X-Upstream-Host') or request.host
 
-  return '%s://%s' % ('http' if host.startswith('localhost:') else 'https',
+  return '%s://%s' % ('http' if host == 'localhost' or host.startswith('localhost:') else 'https',
                       host)

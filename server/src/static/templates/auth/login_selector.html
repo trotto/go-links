@@ -46,10 +46,14 @@
         <div class="container" id="link-form" style="padding-top:60px">
           <div class="row">
             <div class="col-md-8 col-md-offset-2 text-center">
-              <div style="width:100%;display:flex;flex-direction:column">
-                  <a data-test-id="google-signin-button" href="{{ google_auth_url }}">
-                    <img height="60" src="/_images/auth/google_signin_button.png" />
-                  </a>
+              <div style="width:100%;display:flex;flex-direction:column;align-items:center">
+                  <div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:center">
+                    {% for method in login_methods %}
+                      <a style="padding:10px" aria-label="{{ method.label }}" href="{{ method.url }}?{{ redirect_to }}">
+                        <img height="50" src="{{ method.image }}" />
+                      </a>
+                    {% endfor %}
+                  </div>
                   <p style="font-size:1.4rem;padding-top:10px">
                     By signing in, you agree to Trotto's <a href="/_docs/terms" target="_blank">
                     Terms of Service</a> and <a href="/_docs/privacy" target="_blank">Privacy Policy</a>.
