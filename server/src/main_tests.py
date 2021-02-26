@@ -54,6 +54,17 @@ class TestInitialization(TrottoTestCase):
                                           'TROTTO_USER_UNDER_TEST': 'kay@googs.com'})
     self.assertEqual(201, response.status_int)
 
+  @patch('modules.base.authentication.csrf_exempt_paths', set(['/_/api/links']))
+  def test_csrf__exempt_path(self):
+    testapp = webtest.TestApp(app)
+
+    response = testapp.post_json('/_/api/links',
+                                 {'shortpath': 'there',
+                                  'destination': 'http://example.com/there'},
+                                 headers={'origin': 'mytrotto.com',
+                                          'TROTTO_USER_UNDER_TEST': 'kay@googs.com'})
+    self.assertEqual(201, response.status_int)
+
   @patch('modules.base.authentication.validate_internal_request', side_effect=InvalidInternalToken)
   def test_csrf__invalid_internal_token(self, mock_validate_internal_request):
     testapp = webtest.TestApp(app)
