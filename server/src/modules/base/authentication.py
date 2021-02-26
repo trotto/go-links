@@ -17,6 +17,9 @@ from shared_helpers.services import validate_internal_request, get as service_ge
 ADDITIONAL_ALLOWED_ORIGINS = config.get_config_by_key_path(['additional_allowed_origins']) or []
 
 
+csrf_exempt_paths = set()
+
+
 def login_test_user():
   if os.getenv('ENVIRONMENT') == 'test_env' and request.headers.get('TROTTO_USER_UNDER_TEST'):
     login_user(get_or_create_user(request.headers.get('TROTTO_USER_UNDER_TEST'),
@@ -43,6 +46,9 @@ def check_csrf():
   if request.headers.get('origin') in ADDITIONAL_ALLOWED_ORIGINS:
     return
 
+  if request.path in csrf_exempt_paths:
+    return
+
   try:
     validate_internal_request(request)
 
@@ -51,6 +57,10 @@ def check_csrf():
     pass
 
   abort(400, 'Invalid CSRF token.')
+
+
+def exempt_path_from_csrf(path):
+  csrf_exempt_paths.add(path)
 
 
 def get_allowed_authentication_methods(organization):

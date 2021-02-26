@@ -58,6 +58,7 @@ def get_service_config(service_id):
 
 def get_organization_config(org_id):
   ORG_CONFIG_KEYS = ['admins',
+                     'alias_to',
                      'namespaces']
 
   try:
