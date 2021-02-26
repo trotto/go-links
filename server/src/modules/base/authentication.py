@@ -5,17 +5,52 @@ from urllib.parse import quote
 
 from flask import abort, request, redirect
 from flask_login import login_user, current_user
+from flask_wtf.csrf import validate_csrf
+from wtforms.validators import ValidationError
 
 from modules.organizations.utils import get_organization_id_for_email
 from modules.users.helpers import get_or_create_user, get_user_by_id
 from shared_helpers import config
-from shared_helpers.services import get as service_get
+from shared_helpers.services import validate_internal_request, get as service_get, InvalidInternalToken
+
+
+ADDITIONAL_ALLOWED_ORIGINS = config.get_config_by_key_path(['additional_allowed_origins']) or []
 
 
 def login_test_user():
   if os.getenv('ENVIRONMENT') == 'test_env' and request.headers.get('TROTTO_USER_UNDER_TEST'):
     login_user(get_or_create_user(request.headers.get('TROTTO_USER_UNDER_TEST'),
                                   get_organization_id_for_email(request.headers.get('TROTTO_USER_UNDER_TEST'))))
+
+
+def check_csrf():
+  """Verifies one of the following is true, or aborts with 400.
+
+  a) the request includes a valid CSRF token
+  b) the origin is explicitly allowed
+  c) the request includes a valid internal token
+  """
+  if request.method in ['OPTIONS', 'GET']:
+    return
+
+  try:
+    validate_csrf(request.headers.get('X-CSRFToken'))
+
+    return
+  except ValidationError:
+    pass
+
+  if request.headers.get('origin') in ADDITIONAL_ALLOWED_ORIGINS:
+    return
+
+  try:
+    validate_internal_request(request)
+
+    return
+  except InvalidInternalToken:
+    pass
+
+  abort(400, 'Invalid CSRF token.')
 
 
 def get_allowed_authentication_methods(organization):

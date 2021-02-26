@@ -8,7 +8,7 @@ from flask import Flask, send_from_directory, redirect, request, jsonify
 from flask_login import LoginManager, current_user
 from flask_sqlalchemy import SQLAlchemy as _BaseSQLAlchemy
 from flask_migrate import Migrate, upgrade as upgrade_db
-from flask_wtf.csrf import CSRFProtect, generate_csrf
+from flask_wtf.csrf import generate_csrf
 import sentry_sdk
 from werkzeug.routing import BaseConverter
 
@@ -66,8 +66,7 @@ def init_app_without_routes(disable_csrf=False):
   global csrf_protect
 
   if not disable_csrf:
-    csrf_protect = CSRFProtect()
-    csrf_protect.init_app(app)
+    app.before_request(authentication.check_csrf)
 
   @login_manager.user_loader
   def load_user(user_id):
