@@ -58,8 +58,8 @@ class TestFunctions(TrottoTestCase):
     self.assertEqual([None],
                      [l._ns for l in links.ShortLink._get_all()])
 
-  @patch('modules.data.implementations.postgres.links.DEFAULT_NAMESPACE', 'yo')
-  def test_put__ns_column_explicitly_set_to_alternative_default_namespace(self):
+  @patch('modules.data.implementations.postgres.links.get_default_namespace', return_value='yo')
+  def test_put__ns_column_explicitly_set_to_alternative_default_namespace(self, mock_get_default_namespace):
     links.ShortLink(created=datetime.datetime(2018, 10, 1),
                     organization='googs.com',
                     owner=f'kay@googs.com',
@@ -73,18 +73,22 @@ class TestFunctions(TrottoTestCase):
     self.assertEqual([None],
                      [l._ns for l in links.ShortLink._get_all()])
 
+    mock_get_default_namespace.assert_called_with('googs.com')
+
   def test_put__other_namespace(self):
     self._add_link('eng', 'there')
 
     self.assertEqual(['eng'],
                      [l._ns for l in links.ShortLink._get_all()])
 
-  @patch('modules.data.implementations.postgres.links.DEFAULT_NAMESPACE', 'eng')
-  def test_put__alternative_default_namespace(self):
+  @patch('modules.data.implementations.postgres.links.get_default_namespace', return_value='eng')
+  def test_put__alternative_default_namespace(self, mock_get_default_namespace):
     self._add_link('eng', 'there')
 
     self.assertEqual([None],
                      [l._ns for l in links.ShortLink._get_all()])
+
+    mock_get_default_namespace.assert_called_with('googs.com')
 
   def test_get_by_id__go_namespace(self):
     go_link = self._add_link('go', '1')

@@ -90,4 +90,6 @@ def get_path_to_oauth_secrets():
   return production_path
 
 
-DEFAULT_NAMESPACE = get_config_by_key_path(['default_namespace']) or 'go'
+def get_default_namespace(org_id):
+  return get_organization_config(org_id).get('default_namespace',
+                                             get_config_by_key_path(['default_namespace']) or 'go')

@@ -88,3 +88,27 @@ class TestFunctions(unittest.TestCase):
   def test_get_organization_config__from_general_config_file__no_org_config(self, _):
     self.assertEqual({},
                      config.get_organization_config('googsetc.com'))
+
+  @patch('shared_helpers.config.get_config', return_value={'default_namespace': 'gogogo'})
+  @patch('shared_helpers.config.get_organization_config', return_value={'default_namespace': 'yo'})
+  def test_get_default_namespace__set_at_org_level(self, mock_get_organization_config, _):
+    self.assertEqual('yo',
+                     config.get_default_namespace('googs.com'))
+
+    mock_get_organization_config.assert_called_once_with('googs.com')
+
+  @patch('shared_helpers.config.get_config', return_value={'default_namespace': 'gogogo'})
+  @patch('shared_helpers.config.get_organization_config', return_value={})
+  def test_get_default_namespace__only_set_at_app_level(self, mock_get_organization_config, _):
+    self.assertEqual('gogogo',
+                     config.get_default_namespace('googs.com'))
+
+    mock_get_organization_config.assert_called_once_with('googs.com')
+
+  @patch('shared_helpers.config.get_config', return_value={})
+  @patch('shared_helpers.config.get_organization_config', return_value={})
+  def test_get_default_namespace__not_set(self, mock_get_organization_config, _):
+    self.assertEqual('go',
+                     config.get_default_namespace('googs.com'))
+
+    mock_get_organization_config.assert_called_once_with('googs.com')
