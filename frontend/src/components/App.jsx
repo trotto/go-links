@@ -2,7 +2,7 @@ import React from 'react';
 import {connect} from 'react-redux';
 import * as actions from '../actions';
 import {isTrottoHosted} from "../utils";
-import {getConfig} from '../config';
+import {getConfig, DEFAULT_NAMESPACE} from '../config';
 import './Global.css';
 
 const { detect } = require('detect-browser');
@@ -48,7 +48,8 @@ const Butterbar = connect(
       if (browser.name === 'chrome'
           && this.props.userInfo !== undefined
           && (this.props.userInfo && this.props.userInfo.getIn(['notifications', 'install_extension']) !== 'dismissed')
-          && !this.props.chromeExtensionInstalled) {
+          && !this.props.chromeExtensionInstalled
+          && DEFAULT_NAMESPACE === 'go') {
         priorityNotificationId = 'install_extension';
       } else if (new Date().getTime() < 1566648000000
           && this.props.userInfo

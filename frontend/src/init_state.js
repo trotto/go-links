@@ -1,4 +1,4 @@
-import {List} from 'immutable';
+import { DEFAULT_NAMESPACE } from './config';
 
 const { detect } = require('detect-browser');
 const browser = detect();
@@ -15,7 +15,7 @@ export const INIT_STATE = {
   userInfo: undefined,
   links: undefined,
   newLinkData: {
-    namespace: 'go',
+    namespace: DEFAULT_NAMESPACE,
     shortpath: '',
     destination: ''
   },
@@ -26,7 +26,7 @@ export const INIT_STATE = {
   chromeExtensionInstalled: extensionIsInstalled,
   linkCreatedOnThisPageload: undefined,
   goSupportedInCurrentSession: extensionIsInstalled,
-  namespaces: ['go'].concat(window._trotto.namespaces || []),
+  namespaces: [DEFAULT_NAMESPACE].concat(window._trotto.namespaces || []),
   modalShown: undefined,
   browserName: browser.name,
   '_components': {}

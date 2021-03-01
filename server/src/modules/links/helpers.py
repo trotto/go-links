@@ -123,13 +123,13 @@ def update_short_link(link_object):
 def check_namespaces(organization, namespace, shortpath):
   org_namespaces = config.get_organization_config(organization).get('namespaces', [])
 
-  if namespace != 'go' and namespace not in org_namespaces:
+  if namespace != config.DEFAULT_NAMESPACE and namespace not in org_namespaces:
     raise LinkCreationException('"%s" is not a valid link prefix for your organization' % (namespace))
 
   # If an organization has a namespace of, for example, "eng", go/eng can be created, but go/eng/%s would conflict
   # with eng/something, as {base}/eng/something is how users without an extension installed can still easily
   # access links in the "eng" namespace.
-  if namespace == 'go':
+  if namespace == config.DEFAULT_NAMESPACE:
     shortpath_parts = shortpath.split('/')
     if len(shortpath_parts) > 1 and shortpath_parts[0] in org_namespaces:
       raise LinkCreationException('"%s" is a reserved prefix for your organization' % (shortpath_parts[0]))

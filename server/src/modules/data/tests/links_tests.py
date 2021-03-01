@@ -1,5 +1,7 @@
 import datetime
 
+from mock import patch
+
 from modules.data.implementations.postgres import links
 
 from testing import TrottoTestCase
@@ -56,10 +58,32 @@ class TestFunctions(TrottoTestCase):
     self.assertEqual([None],
                      [l._ns for l in links.ShortLink._get_all()])
 
+  @patch('modules.data.implementations.postgres.links.DEFAULT_NAMESPACE', 'yo')
+  def test_put__ns_column_explicitly_set_to_alternative_default_namespace(self):
+    links.ShortLink(created=datetime.datetime(2018, 10, 1),
+                    organization='googs.com',
+                    owner=f'kay@googs.com',
+                    namespace='yo',
+                    _ns='yo',
+                    shortpath='there',
+                    shortpath_prefix='there',
+                    destination_url='http://example.com'
+                    ).put()
+
+    self.assertEqual([None],
+                     [l._ns for l in links.ShortLink._get_all()])
+
   def test_put__other_namespace(self):
     self._add_link('eng', 'there')
 
     self.assertEqual(['eng'],
+                     [l._ns for l in links.ShortLink._get_all()])
+
+  @patch('modules.data.implementations.postgres.links.DEFAULT_NAMESPACE', 'eng')
+  def test_put__alternative_default_namespace(self):
+    self._add_link('eng', 'there')
+
+    self.assertEqual([None],
                      [l._ns for l in links.ShortLink._get_all()])
 
   def test_get_by_id__go_namespace(self):

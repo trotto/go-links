@@ -36,7 +36,7 @@ class TestHandlers(TrottoTestCase):
                                        'destination': 'http://example.com/there'},
                                       headers={'TROTTO_USER_UNDER_TEST': 'kay@googs.com'})
 
-    self.assertEqual({'id': 123,
+    self.assertEqual({'id': '123',
                       'created': '2018-10-01 00:00:00',
                       'modified': '2018-11-01 00:00:00',
                       'owner': 'kay@googs.com',
@@ -175,7 +175,7 @@ class TestHandlers(TrottoTestCase):
     response = self.testapp.get('/_/api/links',
                                 headers={'TROTTO_USER_UNDER_TEST': 'kay@googs.com'})
 
-    self.assertCountEqual([{'id': 1,
+    self.assertCountEqual([{'id': '1',
                             'created': '2018-10-01 00:00:00',
                             'modified': str(modified_datetime),
                             'mine': True,
@@ -185,7 +185,7 @@ class TestHandlers(TrottoTestCase):
                             'destination_url': 'http://example.com',
                             'type': None,
                             'visits_count': 0},
-                           {'id': 2,
+                           {'id': '2',
                             'created': '2018-11-01 00:00:00',
                             'modified': str(modified_datetime),
                             'mine': False,
@@ -195,7 +195,7 @@ class TestHandlers(TrottoTestCase):
                             'destination_url': 'http://gmail.com',
                             'type': None,
                             'visits_count': 0},
-                           {'id': 4,
+                           {'id': '4',
                             'created': '2019-11-01 00:00:00',
                             'modified': str(modified_datetime),
                             'mine': False,
@@ -409,7 +409,7 @@ class TestHandlers(TrottoTestCase):
                                                {'shortpath': 'there',
                                                 'created': str(test_shortlink.created),
                                                 'modified': str(test_shortlink.modified),
-                                                'id': 7,
+                                                'id': '7',
                                                 'visits_count': 0,
                                                 'owner': 'kay@googs.com',
                                                 'namespace': 'go',

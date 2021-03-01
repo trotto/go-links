@@ -59,6 +59,8 @@ def get_service_config(service_id):
 def get_organization_config(org_id):
   ORG_CONFIG_KEYS = ['admins',
                      'alias_to',
+                     'default_namespace',
+                     'layout',
                      'namespaces']
 
   try:
@@ -86,3 +88,6 @@ def get_path_to_oauth_secrets():
         raise MissingConfigError('Missing `config/client_secrets.json` in non-local environment')
 
   return production_path
+
+
+DEFAULT_NAMESPACE = get_config_by_key_path(['default_namespace']) or 'go'

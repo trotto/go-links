@@ -144,7 +144,7 @@ const DeletionModal = connect(
   const [confirmed, setConfirmed] = useState(false);
 
   let link = linksById.get(linkId);
-  link = link.set('shortpath', `go/${link.get('shortpath')}`);
+  link = link.set('shortpath', `${link.get('namespace')}/${link.get('shortpath')}`);
 
   const message = (
       <div>
@@ -199,7 +199,7 @@ const InitTransferModal = connect(
   }
 
   let link = linksById.get(linkId);
-  link = link.set('shortpath', `go/${link.get('shortpath')}`);
+  link = link.set('shortpath', `${link.get('namespace')}/${link.get('shortpath')}`);
 
   const onCopy = () => {
     setJustCopied(true);
@@ -253,7 +253,7 @@ const CompleteTransferModal = connect(
   actions
 )(({ linkId: linkToken, linksById, setLinkEditingStatus, setErrorBarMessage, takeOwnershipOfLink }) => {
   const tokenPayload = JSON.parse(atob(atob(linkToken).split('.')[1]));
-  const linkIdActual = parseInt(tokenPayload.sub.slice('link:'.length));
+  const linkIdActual = tokenPayload.sub.slice('link:'.length);
 
   if (linksById === undefined)
     return <ProgressSpinner />;
@@ -271,7 +271,7 @@ const CompleteTransferModal = connect(
   const message = (
       <div style={{marginBottom: '10px'}}>
         Would you like to take ownership of
-        of <span style={{fontWeight:'bold'}}>go/{link.get('shortpath')}</span>?
+        of <span style={{fontWeight:'bold'}}>{link.get('namespace')}/{link.get('shortpath')}</span>?
       </div>
   );
 
