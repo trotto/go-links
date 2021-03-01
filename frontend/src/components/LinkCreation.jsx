@@ -7,6 +7,7 @@ import Select from 'react-select';
 import {ReduxManagedStateComponent} from './Abstract'
 import {PrimaryButton, SecondaryButton} from './shared/Buttons';
 import {SuccessMessage, ErrorMessage} from './shared/Messages';
+import { DEFAULT_NAMESPACE } from '../config';
 
 
 function mapStateToProps(state) {
@@ -96,7 +97,7 @@ export class NamespaceSelector extends ReduxManagedStateComponent {
           <div id="ns-selector" style={{width: widthInEm + 'em'}}>
             <Select
               name="ns"
-              value={this.props.newLinkData.get('namespace') || 'go'}
+              value={this.props.newLinkData.get('namespace') || DEFAULT_NAMESPACE}
               onChange={this.handleSelectChange.bind(this)}
               options={this.props.namespaces.toArray().map((namespace) =>  ({value: namespace, label: namespace }))}
               searchable={true}
@@ -180,7 +181,7 @@ export class LinkForm extends React.Component {
               <div style={{width: '100%', display: 'flex', alignItems: 'center'}}>
                  <div style={{paddingRight: '5px'}}>
                    {this.props.namespaces.size === 1 ?
-                       <div>go/</div>
+                       <div>{DEFAULT_NAMESPACE}/</div>
                        : <NamespaceSelectorContainer shortlinkInput={this.shortlinkInput} />}
                  </div>
                  <input

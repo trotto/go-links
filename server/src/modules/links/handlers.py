@@ -12,6 +12,7 @@ from modules.links import helpers
 from modules.data import get_models
 from modules.users import helpers as user_helpers
 from shared_helpers import config
+from shared_helpers.config import DEFAULT_NAMESPACE
 from shared_helpers.encoding import convert_entity_to_dict
 from shared_helpers.events import enqueue_event
 
@@ -29,6 +30,7 @@ PUBLIC_KEYS = ['id', 'created', 'modified', 'owner', 'namespace',
 
 def get_field_conversion_fns():
   return {
+    'id': lambda id: str(id),
     'visits_count': (lambda count: count or 0),
     'created': (lambda created: str(created).split('+')[0]),
     'modified': (lambda created: str(created).split('+')[0])
@@ -99,7 +101,7 @@ def post_link():
   try:
     new_link = helpers.create_short_link(current_user.organization,
                                          object_data.get('owner', current_user.email),
-                                         object_data.get('namespace', 'go'),
+                                         object_data.get('namespace', DEFAULT_NAMESPACE),
                                          object_data['shortpath'],
                                          object_data['destination'])
   except helpers.LinkCreationException as e:
@@ -210,12 +212,12 @@ def use_transfer_link(transfer_link_token):
 
     owner_from_token = user_helpers.get_user_by_id(payload['o'])
     if not owner_from_token or link.owner != owner_from_token.email:
-      user_facing_error = f'The owner of go/{link.shortpath} has changed since your transfer link was created'
+      user_facing_error = f'The owner of {link.namespace}/{link.shortpath} has changed since your transfer link was created'
 
       raise InvalidTransferToken('Owner from token does not match current owner')
 
     if not check_mutate_authorization(link_id, payload['by']):
-      user_facing_error = f'The user who created your transfer link no longer has edit rights for go/{link.shortpath}'
+      user_facing_error = f'The user who created your transfer link no longer has edit rights for {link.namespace}/{link.shortpath}'
 
       raise InvalidTransferToken('Token from unauthorized user')
 

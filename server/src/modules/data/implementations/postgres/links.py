@@ -3,12 +3,13 @@ import datetime
 
 from main import db
 from modules.data.abstract import links
+from shared_helpers.config import DEFAULT_NAMESPACE
 
 
 def _get_link_key(organization, namespace, shortpath):
   # go/17
 
-  ns_and_path = shortpath if namespace == 'go' or not namespace else f'{namespace}:{shortpath}'
+  ns_and_path = shortpath if namespace == DEFAULT_NAMESPACE or not namespace else f'{namespace}:{shortpath}'
 
   # keys were misformatted like `b'Z29vZ3MuY29t':roadmap` originally, and now this misformatting is
   # done explicitly rather than updating all existing rows
@@ -16,7 +17,7 @@ def _get_link_key(organization, namespace, shortpath):
 
 
 def set_namespace_prop(link):
-  link.namespace = link._ns or 'go'
+  link.namespace = link._ns or DEFAULT_NAMESPACE
 
   return link
 
@@ -49,7 +50,7 @@ class ShortLink(db.Model, links.ShortLink):
   visits_count = db.Column(db.Integer)
   visits_count_last_updated = db.Column(db.DateTime)
 
-  # the namespace property is used to abstract away the fact the "go" namespace is stored as null
+  # the namespace property is used to abstract away the fact the default namespace ("go" by default) is stored as null
   # in the database
   namespace = None
 
@@ -63,7 +64,7 @@ class ShortLink(db.Model, links.ShortLink):
   def get_by_prefix(organization, namespace, shortpath_prefix):
     links = ShortLink.query \
         .filter(ShortLink.organization == organization) \
-        .filter(ShortLink._ns == (namespace if namespace != 'go' else None)) \
+        .filter(ShortLink._ns == (namespace if namespace != DEFAULT_NAMESPACE else None)) \
         .filter(ShortLink.shortpath_prefix == shortpath_prefix) \
         .all()
 
@@ -90,7 +91,7 @@ class ShortLink(db.Model, links.ShortLink):
 
     self.key = _get_link_key(self.organization, self.namespace, self.shortpath)
 
-    self._ns = self.namespace if self.namespace != 'go' else None
+    self._ns = self.namespace if self.namespace != DEFAULT_NAMESPACE else None
 
     db.session.add(self)
     db.session.commit()

@@ -144,6 +144,7 @@ def home():
   namespaces = config.get_organization_config(current_user.organization).get('namespaces', [])
 
   return template.render({'csrf_token': generate_csrf(),
+                          'default_namespace': config.DEFAULT_NAMESPACE,
                           'namespaces': json.dumps(namespaces)})
 
 

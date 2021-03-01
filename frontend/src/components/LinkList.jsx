@@ -6,6 +6,7 @@ import {List} from 'immutable';
 import { CreateOutlined, Cancel, DeleteOutline, Reply } from '@material-ui/icons';
 import {PrimaryButton} from './shared/Buttons';
 import {getServiceBaseUrl} from '../utils'
+import { DEFAULT_NAMESPACE } from '../config';
 
 var validUrl = require('valid-url');
 
@@ -204,7 +205,7 @@ class KeywordCell extends React.Component {
     var shortlink = 'http://' + row.value;
 
     if (!this.props.goSupportedInCurrentSession) {
-      shortlink = shortlink.replace('http://go', getServiceBaseUrl());
+      shortlink = shortlink.replace(`http://${DEFAULT_NAMESPACE}`, getServiceBaseUrl());
     }
 
     return (
@@ -311,7 +312,7 @@ export class LinksTable extends React.Component {
       var data = List();
     } else {
       var data = this.props.links.map(
-          link => link.update('shortpath', shortpath => (link.get('namespace') || 'go') + '/' + shortpath));
+          link => link.update('shortpath', shortpath => (link.get('namespace') || DEFAULT_NAMESPACE) + '/' + shortpath));
     }
 
     // Note: For the moment, the default install doesn't track visit counts.

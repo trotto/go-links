@@ -60,6 +60,8 @@ config = config.updateIn(['header', 'links'], (links) => links.reduce((fullLinks
 
 export const getConfig = (keyPath) => config.getIn(keyPath.split('.'))
 
+export const DEFAULT_NAMESPACE = window._trotto.defaultNamespace;
+
 const setTitleAndFavicon = () => {
   const favicon = document.createElement('link');
   favicon.rel = 'shortcut icon';
