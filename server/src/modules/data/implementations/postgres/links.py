@@ -3,13 +3,15 @@ import datetime
 
 from main import db
 from modules.data.abstract import links
-from shared_helpers.config import DEFAULT_NAMESPACE
+from shared_helpers.config import get_default_namespace
 
 
 def _get_link_key(organization, namespace, shortpath):
   # go/17
 
-  ns_and_path = shortpath if namespace == DEFAULT_NAMESPACE or not namespace else f'{namespace}:{shortpath}'
+  ns_and_path = (shortpath
+                 if namespace == get_default_namespace(organization) or not namespace
+                 else f'{namespace}:{shortpath}')
 
   # keys were misformatted like `b'Z29vZ3MuY29t':roadmap` originally, and now this misformatting is
   # done explicitly rather than updating all existing rows
@@ -17,7 +19,7 @@ def _get_link_key(organization, namespace, shortpath):
 
 
 def set_namespace_prop(link):
-  link.namespace = link._ns or DEFAULT_NAMESPACE
+  link.namespace = link._ns or get_default_namespace(link.organization)
 
   return link
 
@@ -64,7 +66,7 @@ class ShortLink(db.Model, links.ShortLink):
   def get_by_prefix(organization, namespace, shortpath_prefix):
     links = ShortLink.query \
         .filter(ShortLink.organization == organization) \
-        .filter(ShortLink._ns == (namespace if namespace != DEFAULT_NAMESPACE else None)) \
+        .filter(ShortLink._ns == (namespace if namespace != get_default_namespace(organization) else None)) \
         .filter(ShortLink.shortpath_prefix == shortpath_prefix) \
         .all()
 
@@ -91,7 +93,7 @@ class ShortLink(db.Model, links.ShortLink):
 
     self.key = _get_link_key(self.organization, self.namespace, self.shortpath)
 
-    self._ns = self.namespace if self.namespace != DEFAULT_NAMESPACE else None
+    self._ns = self.namespace if self.namespace != get_default_namespace(self.organization) else None
 
     db.session.add(self)
     db.session.commit()

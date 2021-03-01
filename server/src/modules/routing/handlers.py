@@ -28,7 +28,7 @@ def check_namespace(user_org, shortpath):
       if shortpath_start in org_namespaces:
         return shortpath_start, shortpath_remainder
 
-  return config.DEFAULT_NAMESPACE, shortpath
+  return config.get_default_namespace(user_org), shortpath
 
 
 def queue_event(followed_at, shortlink_id, destination, accessed_via, email=None):
@@ -80,7 +80,7 @@ def get_go_link(path):
         return response
 
     create_link_params = {'sp': shortpath}
-    if namespace != config.DEFAULT_NAMESPACE:
+    if namespace != config.get_default_namespace(current_user.organization):
       create_link_params['ns'] = namespace
 
     return redirect(

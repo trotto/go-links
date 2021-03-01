@@ -12,7 +12,7 @@ from modules.links import helpers
 from modules.data import get_models
 from modules.users import helpers as user_helpers
 from shared_helpers import config
-from shared_helpers.config import DEFAULT_NAMESPACE
+from shared_helpers.config import get_default_namespace
 from shared_helpers.encoding import convert_entity_to_dict
 from shared_helpers.events import enqueue_event
 
@@ -101,7 +101,7 @@ def post_link():
   try:
     new_link = helpers.create_short_link(current_user.organization,
                                          object_data.get('owner', current_user.email),
-                                         object_data.get('namespace', DEFAULT_NAMESPACE),
+                                         object_data.get('namespace', get_default_namespace(current_user.organization)),
                                          object_data['shortpath'],
                                          object_data['destination'])
   except helpers.LinkCreationException as e:
