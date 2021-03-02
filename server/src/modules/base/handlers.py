@@ -156,4 +156,8 @@ def login_with_jwt():
   except jwt.ExpiredSignatureError:
     logging.warning('Attempt to use expired JWT: %s', token)
 
-  return redirect('/')
+  redirect_to = authentication.get_host_for_request(request)
+  if request.args.get('redirect_to', '').startswith(redirect_to + '/'):
+    redirect_to = request.args['redirect_to']
+
+  return redirect(redirect_to)

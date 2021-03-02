@@ -339,6 +339,34 @@ class TestJwtSignin(TrottoTestCase):
     self.assertIn('session=', response.headers.get('Set-Cookie', ''))
 
   @patch('modules.base.handlers.get_config', return_value={'sessions_secret': 'so_secret'})
+  def test_jwt_signin__with_valid_redirect_to(self, _):
+    token = _generate_signin_token('so_secret',
+                                   'googs.com',
+                                   30,
+                                   user_email='jo@googs.com')
+
+    response = self.testapp.get('/_/auth/jwt?%s' % (urlencode({'token': token,
+                                                               'redirect_to': 'http://localhost/roadmap'})))
+
+    self.assertEqual(302, response.status_int)
+    self.assertEqual('http://localhost/roadmap',
+                     response.headers['Location'])
+
+  @patch('modules.base.handlers.get_config', return_value={'sessions_secret': 'so_secret'})
+  def test_jwt_signin__with_invalid_redirect_to(self, _):
+    token = _generate_signin_token('so_secret',
+                                   'googs.com',
+                                   30,
+                                   user_email='jo@googs.com')
+
+    response = self.testapp.get('/_/auth/jwt?%s' % (urlencode({'token': token,
+                                                               'redirect_to': 'http://localhost.net/evil'})))
+
+    self.assertEqual(302, response.status_int)
+    self.assertEqual('http://localhost',
+                     response.headers['Location'])
+
+  @patch('modules.base.handlers.get_config', return_value={'sessions_secret': 'so_secret'})
   def test_jwt_signin__by_user_id__user_does_not_exist(self, _):
     response = self.testapp.get('/_/auth/jwt?token=%s' % (_generate_signin_token('so_secret',
                                                                                  'googs.com',
