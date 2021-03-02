@@ -120,8 +120,10 @@ def add_routes():
   from modules.users.handlers import routes as user_routes
   try:
     from commercial.blueprints import COMMERCIAL_BLUEPRINTS
+    from commercial.middleware import COMMERCIAL_MIDDLEWARE
   except ModuleNotFoundError:
     COMMERCIAL_BLUEPRINTS = []
+    COMMERCIAL_MIDDLEWARE = []
 
   app.register_blueprint(base_routes)
   app.register_blueprint(link_routes)
@@ -129,6 +131,9 @@ def add_routes():
   for blueprint in COMMERCIAL_BLUEPRINTS:
     app.register_blueprint(blueprint)
   app.register_blueprint(follow_routes)  # must be registered last since it matches any URL
+
+  for middleware_handler in COMMERCIAL_MIDDLEWARE:
+    app.before_request(middleware_handler)
 
 add_routes()
 
