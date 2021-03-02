@@ -1,6 +1,8 @@
 import base64
+import datetime
 import os
 
+from flask import session
 import yaml
 
 from shared_helpers import env
@@ -91,5 +93,23 @@ def get_path_to_oauth_secrets():
 
 
 def get_default_namespace(org_id):
-  return get_organization_config(org_id).get('default_namespace',
-                                             get_config_by_key_path(['default_namespace']) or 'go')
+  CACHE_DURATION_IN_DAYS = 1
+  default_namespace = None
+
+  try:
+    if session.get('org_default_ns_exp') and session.get('org_default_ns_exp') > datetime.datetime.utcnow():
+      default_namespace = session['org_default_ns']
+  except RuntimeError:
+    pass
+
+  if not default_namespace:
+    default_namespace = get_organization_config(org_id).get('default_namespace',
+                                                            get_config_by_key_path(['default_namespace']) or 'go')
+
+    try:
+      session['org_default_ns_exp'] = datetime.datetime.utcnow() + datetime.timedelta(days=CACHE_DURATION_IN_DAYS)
+      session['org_default_ns'] = default_namespace
+    except RuntimeError:
+      pass
+
+  return default_namespace
