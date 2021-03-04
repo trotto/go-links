@@ -155,8 +155,11 @@ def home():
 
 @app.route('/_scripts/config.js')
 def layout_config():
-  layout_json = json.dumps(config.get_config().get('layout', {}))
-  return f"window._trotto = window._trotto || {{}}; window._trotto.layout = {layout_json};"
+  _config = (config.get_organization_config(current_user.organization)
+             if current_user.is_authenticated
+             else config.get_config())
+
+  return f"window._trotto = window._trotto || {{}}; window._trotto.layout = {json.dumps(_config.get('layout', {}))};"
 
 
 @app.route('/_styles/<path:path>')
