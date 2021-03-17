@@ -144,13 +144,17 @@ def home():
                     if request.host == 'trot.to'
                     else '/_/auth/login')
 
+  from modules.organizations.helpers import get_org_settings
+
   template = JINJA_ENVIRONMENT.get_template('index.html')
 
   namespaces = config.get_organization_config(current_user.organization).get('namespaces', [])
+  admin_links = get_org_settings(current_user.organization).get('admin_links', [])
 
   return template.render({'csrf_token': generate_csrf(),
                           'default_namespace': config.get_default_namespace(current_user.organization),
-                          'namespaces': json.dumps(namespaces)})
+                          'namespaces': json.dumps(namespaces),
+                          'admin_links': json.dumps(admin_links)})
 
 
 @app.route('/_scripts/config.js')
