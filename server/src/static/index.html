@@ -40,7 +40,8 @@
                 alreadyAcceptedTerms: "{{ 'true' if alreadyAcceptedTerms else 'false' }}",
                 csrfToken: "{{ csrf_token }}",
                 defaultNamespace: "{{ default_namespace }}",
-                namespaces: {{ namespaces|safe }}
+                namespaces: {{ namespaces|safe }},
+                adminLinks: {{ admin_links|safe }}
             };
         </script>
     </head>

@@ -40,10 +40,14 @@ export class NavBar extends React.Component {
   }
 
   render() {
-    const navItems = getConfig('header.links').toJS()
+    let navItems = getConfig('header.links').toJS()
         .filter(item => this.props.links || item.id !== 'directory');
 
     if (this.props.userInfo !== undefined) {
+      if (this.props.userInfo && this.props.userInfo.get('admin')){
+        navItems = navItems.concat(window._trotto.adminLinks);
+      }
+
       navItems.push({
         text: !this.props.userInfo ? 'Sign In' : 'Sign Out',
         url: getServiceBaseUrl('default') + '/_/auth/' + (!this.props.userInfo ? 'login' : 'logout'),
