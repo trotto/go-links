@@ -36,6 +36,12 @@ def init_app_without_routes(disable_csrf=False):
   app.secret_key = config.get_config()['sessions_secret']
 
   app.config['SQLALCHEMY_DATABASE_URI'] = config.get_config()['postgres']['url']
+  if app.config['SQLALCHEMY_DATABASE_URI'].startswith('postgres://'):
+    # SQLAlchemy deprecated the `postgres` dialect, but it's still used by Heroku Postgres:
+    # https://help.heroku.com/ZKNTJQSK/why-is-sqlalchemy-1-4-x-not-connecting-to-heroku-postgres
+    app.config['SQLALCHEMY_DATABASE_URI'] = app.config['SQLALCHEMY_DATABASE_URI'].replace('postgres://',
+                                                                                          'postgresql://',
+                                                                                          1)
 
   if config.get_config()['postgres'].get('commercial_url'):
     app.config['SQLALCHEMY_BINDS'] = {'commercial': config.get_config()['postgres']['commercial_url']}
