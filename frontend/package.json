@@ -27,7 +27,7 @@
   "dependencies": {
     "@material-ui/core": "^4.11.0",
     "@material-ui/icons": "^4.9.1",
-    "axios": "^0.20.0",
+    "axios": "^0.21.1",
     "detect-browser": "^2.0.0",
     "hex-rgb": "^4.2.0",
     "immutable": "^3.8.1",
