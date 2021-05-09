@@ -13,6 +13,11 @@ from modules.users.helpers import get_or_create_user, get_user_by_id
 from shared_helpers import config
 from shared_helpers.services import validate_internal_request, get as service_get, InvalidInternalToken
 
+try:
+  from commercial.auth import handle_unsupported_signin
+except ModuleNotFoundError:
+  handle_unsupported_signin = None
+
 
 ADDITIONAL_ALLOWED_ORIGINS = config.get_config_by_key_path(['additional_allowed_origins']) or []
 
@@ -87,7 +92,17 @@ def login(authentication_method, user_id=None, user_email=None):
     logging.warning("User %s attempted to authenticate with method '%s'. Allowed methods are %s.",
                     user.id, authentication_method, allowed_authentication_methods)
 
-    abort(redirect(f'/_/auth/login?e=auth_not_allowed-{authentication_method}'))
+    unsupported_signin_redirect = f'/_/auth/login?e=auth_not_allowed-{authentication_method}'
+
+    if handle_unsupported_signin is not None:
+      redirect_override = handle_unsupported_signin(user.organization,
+                                                    authentication_method,
+                                                    allowed_authentication_methods)
+
+      if redirect_override:
+        unsupported_signin_redirect = redirect_override
+
+    abort(redirect(unsupported_signin_redirect))
 
   if not user.accepted_terms_at:
     # all login methods now have UI for consenting to terms
