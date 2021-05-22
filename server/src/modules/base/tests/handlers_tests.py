@@ -21,9 +21,31 @@ MULTIPLE_LOGIN_METHODS = [{'label': 'Sign in with Google',
                            'url': 'https://mylogin/login'}]
 
 
-class TestHandlers(TrottoTestCase):
+test_blueprint = Blueprint('test', __name__)
 
-  blueprints_under_test = [handlers.routes]
+@test_blueprint.route('/me')
+def get_me():
+  from flask_login import current_user
+
+  return jsonify(current_user.email)
+
+
+class AuthenticationTestCase(TrottoTestCase):
+
+  blueprints_under_test = [handlers.routes,
+                           test_blueprint]
+
+  def _assert_authentication_status(self, login_response, authenticated, expected_user=None):
+    user_info_response = self.testapp.get('/me',
+                                          headers={'Cookie': login_response.headers['Set-Cookie']},
+                                          expect_errors=not authenticated)
+
+    self.assertEqual(200 if authenticated else 500, user_info_response.status_code)
+    if authenticated:
+      self.assertEqual(expected_user, user_info_response.json)
+
+
+class TestHandlers(AuthenticationTestCase):
 
   def test_login_endpoint__no_upstream_host_header(self):
     response = self.testapp.get('/_/auth/login/google',
@@ -111,7 +133,8 @@ class TestHandlers(TrottoTestCase):
                                 expect_errors=True)
 
     self.assertEqual(500, response.status_int)
-    self.assertEqual(None, response.headers.get('Set-Cookie'))
+
+    self._assert_authentication_status(response, False)
 
   @patch('modules.base.handlers.get_config', return_value={})
   def test_login_via_test_token__no_test_token_config(self, _):
@@ -121,7 +144,8 @@ class TestHandlers(TrottoTestCase):
                                 expect_errors=True)
 
     self.assertEqual(500, response.status_int)
-    self.assertEqual(None, response.headers.get('Set-Cookie'))
+
+    self._assert_authentication_status(response, False)
 
   @patch('modules.base.handlers.get_config', return_value={'testing': {'secret': 'a_test_secret',
                                                                         'domains': ['example.com']}})
@@ -132,7 +156,8 @@ class TestHandlers(TrottoTestCase):
                                 expect_errors=True)
 
     self.assertEqual(500, response.status_int)
-    self.assertEqual(None, response.headers.get('Set-Cookie'))
+
+    self._assert_authentication_status(response, False)
 
   @patch('modules.base.handlers.get_config', return_value={'testing': {'secret': 'a_test_secret',
                                                                         'domains': ['example.com']}})
@@ -142,16 +167,8 @@ class TestHandlers(TrottoTestCase):
     response = self.testapp.get(f'/_/auth/oauth2_callback?test_token={token.decode("utf-8")}')
 
     self.assertEqual(302, response.status_int)
-    self.assertEqual(True, response.headers.get('Set-Cookie').startswith('session='))
 
-
-test_blueprint = Blueprint('test', __name__)
-
-@test_blueprint.route('/me')
-def get_me():
-  from flask_login import current_user
-
-  return jsonify(current_user.email)
+    self._assert_authentication_status(response, True, 'sam@example.com')
 
 
 def _generate_signin_token(secret, org, expires_in_seconds, user_id=None, user_email=None, method='custom_method'):
@@ -170,11 +187,7 @@ def _generate_signin_token(secret, org, expires_in_seconds, user_id=None, user_e
                     secret,
                     'HS256').decode('utf-8')
 
-
-class TestAuthenticationControls(TrottoTestCase):
-
-  blueprints_under_test = [handlers.routes,
-                           test_blueprint]
+class TestAuthenticationControls(AuthenticationTestCase):
 
   def setUp(self):
     super().setUp()
@@ -255,16 +268,13 @@ class TestAuthenticationControls(TrottoTestCase):
   def test_allowed_authentication_methods__configured__method_used_not_allowed(self):
     login_response = self._try_auth_method(['method1', 'method2'], 'google')
 
-    self.assertNotIn('Set-Cookie', login_response.headers)
+    self._assert_authentication_status(login_response, False)
 
     self.assertEqual('http://localhost/_/auth/login?e=auth_not_allowed-google',
                      login_response.headers.get('Location'))
 
 
-class TestJwtSignin(TrottoTestCase):
-
-  blueprints_under_test = [handlers.routes,
-                           test_blueprint]
+class TestJwtSignin(AuthenticationTestCase):
 
   def test_jwt_signin__no_token(self):
     response = self.testapp.get('/_/auth/jwt',
@@ -272,7 +282,7 @@ class TestJwtSignin(TrottoTestCase):
 
     self.assertEqual(400, response.status_int)
 
-    self.assertNotIn('session=', response.headers.get('Set-Cookie', ''))
+    self._assert_authentication_status(response, False)
 
   @patch('modules.base.handlers.get_config', return_value={'sessions_secret': 'so_secret'})
   def test_jwt_signin__malformed_token(self, _):
@@ -281,7 +291,7 @@ class TestJwtSignin(TrottoTestCase):
 
     self.assertEqual(400, response.status_int)
 
-    self.assertNotIn('session=', response.headers.get('Set-Cookie', ''))
+    self._assert_authentication_status(response, False)
 
   @patch('modules.base.handlers.get_config', return_value={'sessions_secret': 'so_secret'})
   def test_jwt_signin__token_signed_with_wrong_secret(self, _):
@@ -293,7 +303,7 @@ class TestJwtSignin(TrottoTestCase):
 
     self.assertEqual(400, response.status_int)
 
-    self.assertNotIn('session=', response.headers.get('Set-Cookie', ''))
+    self._assert_authentication_status(response, False)
 
   @patch('logging.warning')
   @patch('modules.base.handlers.get_config', return_value={'sessions_secret': 'so_secret'})
@@ -307,7 +317,7 @@ class TestJwtSignin(TrottoTestCase):
 
     self.assertEqual(302, response.status_int)
 
-    self.assertNotIn('session=', response.headers.get('Set-Cookie', ''))
+    self._assert_authentication_status(response, False)
 
     mock_log_warning.assert_called_once_with('Attempt to use expired JWT: %s',
                                              token)
@@ -322,7 +332,7 @@ class TestJwtSignin(TrottoTestCase):
 
     self.assertEqual(400, response.status_int)
 
-    self.assertNotIn('session=', response.headers.get('Set-Cookie', ''))
+    self._assert_authentication_status(response, False)
 
   @patch('logging.warning')
   @patch('modules.base.handlers.get_config', return_value={'sessions_secret': 'so_secret'})
@@ -336,7 +346,7 @@ class TestJwtSignin(TrottoTestCase):
 
     mock_log_warning.assert_not_called()
 
-    self.assertIn('session=', response.headers.get('Set-Cookie', ''))
+    self._assert_authentication_status(response, True, 'jo@googs.com')
 
   @patch('modules.base.handlers.get_config', return_value={'sessions_secret': 'so_secret'})
   def test_jwt_signin__with_valid_redirect_to(self, _):
@@ -352,6 +362,8 @@ class TestJwtSignin(TrottoTestCase):
     self.assertEqual('http://localhost/roadmap',
                      response.headers['Location'])
 
+    self._assert_authentication_status(response, True, 'jo@googs.com')
+
   @patch('modules.base.handlers.get_config', return_value={'sessions_secret': 'so_secret'})
   def test_jwt_signin__with_invalid_redirect_to(self, _):
     token = _generate_signin_token('so_secret',
@@ -366,6 +378,8 @@ class TestJwtSignin(TrottoTestCase):
     self.assertEqual('http://localhost',
                      response.headers['Location'])
 
+    self._assert_authentication_status(response, True, 'jo@googs.com')
+
   @patch('modules.base.handlers.get_config', return_value={'sessions_secret': 'so_secret'})
   def test_jwt_signin__by_user_id__user_does_not_exist(self, _):
     response = self.testapp.get('/_/auth/jwt?token=%s' % (_generate_signin_token('so_secret',
@@ -376,7 +390,7 @@ class TestJwtSignin(TrottoTestCase):
 
     self.assertEqual(400, response.status_int)
 
-    self.assertNotIn('session=', response.headers.get('Set-Cookie', ''))
+    self._assert_authentication_status(response, False)
 
   @patch('modules.base.handlers.get_config', return_value={'sessions_secret': 'so_secret'})
   def test_jwt_signin__by_user_id__successful_signin(self, _):
@@ -394,7 +408,4 @@ class TestJwtSignin(TrottoTestCase):
 
     self.assertEqual(302, login_response.status_int)
 
-    user_info_response = self.testapp.get('/me',
-                                          headers={'Cookie': login_response.headers['Set-Cookie']})
-
-    self.assertEqual('kay@googs.com', user_info_response.json)
+    self._assert_authentication_status(login_response, True, 'kay@googs.com')
