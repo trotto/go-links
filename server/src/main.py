@@ -1,11 +1,12 @@
+import datetime
 import json
 import logging
 import os
 import traceback
 
 import jinja2
-from flask import Flask, send_from_directory, redirect, request, jsonify
-from flask_login import LoginManager, current_user
+from flask import Flask, send_from_directory, redirect, request, jsonify, session
+from flask_login import LoginManager, current_user, logout_user
 from flask_sqlalchemy import SQLAlchemy as _BaseSQLAlchemy
 from flask_migrate import Migrate, upgrade as upgrade_db
 from flask_wtf.csrf import generate_csrf
@@ -28,6 +29,8 @@ JINJA_ENVIRONMENT = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.join(os.path.dirname(__file__), 'static')),
     extensions=['jinja2.ext.autoescape'],
     autoescape=True)
+
+SIGNIN_DURATION_IN_DAYS = 30
 
 
 def init_app_without_routes(disable_csrf=False):
@@ -84,6 +87,19 @@ def init_app_without_routes(disable_csrf=False):
 
   app.before_request(authentication.validate_user_authentication)
 
+  # ensure signins last for SIGNIN_DURATION_IN_DAYS even with browser restarts
+  app.permanent_session_lifetime = datetime.timedelta(days=SIGNIN_DURATION_IN_DAYS)
+  @app.before_request
+  def manage_durable_session():
+    session.permanent = True
+
+    if current_user.is_authenticated:
+      try:
+        if not session.get('last_signin') or (datetime.datetime.utcnow() - session['last_signin']) > datetime.timedelta(days=SIGNIN_DURATION_IN_DAYS):
+          logout_user()
+      except Exception as e:
+        logging.error(e)
+        logout_user()
 
   @app.route('/_/health_check')
   def health_check():

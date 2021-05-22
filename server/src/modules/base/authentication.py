@@ -3,7 +3,7 @@ import logging
 import os
 from urllib.parse import quote
 
-from flask import abort, request, redirect
+from flask import abort, request, redirect, session
 from flask_login import login_user, current_user
 from flask_wtf.csrf import validate_csrf
 from wtforms.validators import ValidationError
@@ -29,6 +29,7 @@ def login_test_user():
   if os.getenv('ENVIRONMENT') == 'test_env' and request.headers.get('TROTTO_USER_UNDER_TEST'):
     login_user(get_or_create_user(request.headers.get('TROTTO_USER_UNDER_TEST'),
                                   get_organization_id_for_email(request.headers.get('TROTTO_USER_UNDER_TEST'))))
+    session['last_signin'] = datetime.datetime.utcnow()
 
 
 def check_csrf():
@@ -110,6 +111,7 @@ def login(authentication_method, user_id=None, user_email=None):
     user.put()
 
   login_user(user)
+  session['last_signin'] = datetime.datetime.utcnow()
 
 
 def validate_user_authentication():
