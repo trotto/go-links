@@ -2,7 +2,7 @@ import jwt
 import logging
 from urllib.parse import urlencode
 
-from flask import Blueprint, abort, redirect, render_template, request, session, url_for
+from flask import Blueprint, Response, abort, redirect, render_template, request, session, url_for
 from flask_login import logout_user
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
@@ -161,3 +161,10 @@ def login_with_jwt():
     redirect_to = request.args['redirect_to']
 
   return redirect(redirect_to)
+
+@routes.route('/_/opensearch')
+def opensearch():
+  return Response(response=render_template('opensearch/manifest.xml'),
+                  status=200,
+                  mimetype="application/opensearchdescription+xml")
+
