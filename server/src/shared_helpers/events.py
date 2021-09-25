@@ -1,3 +1,5 @@
+from flask_login import current_user
+
 import time
 import uuid
 
@@ -7,7 +9,7 @@ except ModuleNotFoundError:
   EVENT_HANDLERS = None
 
 
-def enqueue_event(event_type, object_type, object_data, timestamp=None):
+def enqueue_event(org_id, event_type, object_type, object_data, timestamp=None):
   if not EVENT_HANDLERS:
     return
 
@@ -19,7 +21,12 @@ def enqueue_event(event_type, object_type, object_data, timestamp=None):
   event_object = {'id': event_id,
                   'type': event_type,
                   'created': event_timestamp,
+                  'organization': org_id,
                   'data': {'object': object_data}}
+
+  if current_user:
+    event_object['data']['user'] = {'object': 'user',
+                                    'email': current_user.email}
 
   for handler in EVENT_HANDLERS:
     handler(event_object)

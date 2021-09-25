@@ -3,6 +3,7 @@ import copy
 from flask import Blueprint, request, jsonify, abort
 from flask_login import current_user, login_required
 
+from modules.organizations.helpers import get_org_edit_mode
 from modules.users.helpers import get_users_by_organization, is_user_admin, get_user_by_id, get_admin_ids
 
 
@@ -10,8 +11,8 @@ routes = Blueprint('users', __name__,
                    template_folder='../../static/templates')
 
 
-def _user_info(user, admins_ids=None):
-  return {
+def _user_info(user, admins_ids=None, org_edit_mode=None):
+  user_info = {
     'id': user.id,
     'created': user.created.isoformat()[:19],
     'email': user.email,
@@ -21,12 +22,19 @@ def _user_info(user, admins_ids=None):
     'notifications': user.notifications or {}
   }
 
+  if org_edit_mode:
+    user_info['org_edit_mode'] = org_edit_mode
+
+  return user_info
+
 
 @routes.route('/_/api/users/<user_id>', methods=['GET'])
 @login_required
 def get_user(user_id):
   if user_id == 'me':
-    return jsonify(_user_info(current_user))
+    org_edit_mode = get_org_edit_mode(current_user.organization)
+
+    return jsonify(_user_info(current_user, None, org_edit_mode))
 
   user = get_user_by_id(int(user_id))
 

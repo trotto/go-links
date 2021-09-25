@@ -222,7 +222,8 @@ def upsert_short_link(organization, owner, namespace, shortpath, destination, up
   link_dict = convert_entity_to_dict(link, ['owner', 'shortpath', 'destination_url', 'organization'])
   link_dict['id'] = link.get_id()
 
-  enqueue_event('link.%s' % ('updated' if updated_link_object else 'created'),
+  enqueue_event(link.organization,
+                'link.%s' % ('updated' if updated_link_object else 'created'),
                 'link',
                 link_dict)
   return link

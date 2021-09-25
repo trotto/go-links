@@ -63,7 +63,8 @@ def get_organization_config(org_id):
                      'alias_to',
                      'default_namespace',
                      'layout',
-                     'namespaces']
+                     'namespaces',
+                     'webhook_endpoints']
 
   try:
     with open(os.path.join(CONFIGS_PARENT_DIR,
