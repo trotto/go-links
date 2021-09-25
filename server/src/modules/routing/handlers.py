@@ -31,8 +31,9 @@ def check_namespace(user_org, shortpath):
   return config.get_default_namespace(user_org), shortpath
 
 
-def queue_event(followed_at, shortlink_id, destination, accessed_via, email=None):
-  enqueue_event('link_follow.created',
+def queue_event(org_id, followed_at, shortlink_id, destination, accessed_via, email=None):
+  enqueue_event(org_id,
+                'link_follow.created',
                 'link_follow',
                 {'link_id': shortlink_id,
                  'user_email': email or current_user.email,
@@ -65,7 +66,8 @@ def get_go_link(path):
   matching_shortlink, destination = get_shortlink(current_user.organization, namespace, shortpath)
 
   if matching_shortlink:
-    queue_event(requested_at,
+    queue_event(matching_shortlink.organization,
+                requested_at,
                 matching_shortlink.get_id(),
                 destination,
                 request.args.get('s') or 'other')

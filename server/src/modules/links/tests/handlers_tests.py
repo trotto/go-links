@@ -298,6 +298,38 @@ class TestHandlers(TrottoTestCase):
 
     self.assertEqual(1, mock_is_user_admin.call_count)
 
+  @patch('modules.links.handlers.get_org_edit_mode', return_value='any_org_user')
+  def test_update_link__go_link_of_other_user__current_user_not_admin__open_edit_mode(self, _):
+    ShortLink(id=7,
+              organization='googs.com',
+              owner='kay@googs.com',
+              namespace='go',
+              shortpath='there',
+              shortpath_prefix='there',
+              destination_url='http://drive.com'
+              ).put()
+
+    response = self.testapp.put_json('/_/api/links/7',
+                                     {'destination': 'http://boop.com'},
+                                     headers={'TROTTO_USER_UNDER_TEST': 'rex@googs.com'})
+
+    self.assertEqual(200, response.status_int)
+
+    shortlink = ShortLink.get_by_id(7)
+
+    self.assertEqual('http://boop.com', shortlink.destination_url)
+
+    # user still shouldn't be able to delete the go link
+    response = self.testapp.delete('/_/api/links/7',
+                                   headers={'TROTTO_USER_UNDER_TEST': 'rex@googs.com'},
+                                   expect_errors=True)
+
+    self.assertEqual(403, response.status_int)
+
+    shortlink = ShortLink.get_by_id(7)
+
+    self.assertIsNotNone(shortlink)
+
   @patch('modules.users.helpers.is_user_admin', return_value=True)
   def test_update_link__go_link_of_other_user__current_user_is_admin_for_different_org(self, mock_is_user_admin):
     ShortLink(id=7,
@@ -404,7 +436,8 @@ class TestHandlers(TrottoTestCase):
 
     self.assertEqual(None, shortlink)
 
-    mock_enqueue_event.assert_called_once_with('link.deleted',
+    mock_enqueue_event.assert_called_once_with('googs.com',
+                                               'link.deleted',
                                                'link',
                                                {'shortpath': 'there',
                                                 'created': str(test_shortlink.created),

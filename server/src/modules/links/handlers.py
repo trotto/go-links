@@ -10,6 +10,7 @@ import jwt
 
 from modules.links import helpers
 from modules.data import get_models
+from modules.organizations.helpers import get_org_edit_mode
 from modules.users import helpers as user_helpers
 from shared_helpers import config
 from shared_helpers.config import get_default_namespace
@@ -66,12 +67,21 @@ def check_mutate_authorization(link_id, user_id=None):
   if not existing_link:
     return False
 
-  if (existing_link.owner != user.email
-      and not (user.organization == existing_link.organization
-               and user_helpers.is_user_admin(user))):
+  if user.organization != existing_link.organization:
     return False
 
-  return existing_link
+  if existing_link.owner == user.email:
+    return existing_link
+  elif user_helpers.is_user_admin(user):
+    return existing_link
+  # allow any user in org to edit a link's destination if the org's edit mode is `any_org_user`
+  elif request.method.upper() == 'PUT' and request.json:
+    update_keys = list(request.json.keys())
+    if (len(update_keys) == 1 and update_keys[0] == 'destination'
+        and get_org_edit_mode(user.organization) == 'any_org_user'):
+      return existing_link
+
+  return False
 
 
 def _get_link_response(link):
@@ -145,7 +155,8 @@ def delete(link_id):
 
   existing_link.delete()
 
-  enqueue_event('link.deleted',
+  enqueue_event(existing_link.organization,
+                'link.deleted',
                 'link',
                 convert_entity_to_dict(existing_link, PUBLIC_KEYS, get_field_conversion_fns()))
 

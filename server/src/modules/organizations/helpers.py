@@ -9,3 +9,7 @@ def get_org_settings(organization):
     return service_get('admin', f'/organizations/{quote(organization)}/settings')
   except config.ServiceNotConfiguredError:
     return {}
+
+
+def get_org_edit_mode(org_id):
+  return get_org_settings(org_id).get('edit_mode', 'owners_and_admins_only')
