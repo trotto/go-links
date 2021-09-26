@@ -64,7 +64,8 @@ def get_or_create_user(email, user_org):
     enqueue_event(user.organization,
                   'user.created',
                   'user',
-                  convert_entity_to_dict(user, ['id', 'email', 'organization']))
+                  convert_entity_to_dict(user, ['id', 'email', 'organization']),
+                  user=user)
 
   return user
 

@@ -9,7 +9,7 @@ except ModuleNotFoundError:
   EVENT_HANDLERS = None
 
 
-def enqueue_event(org_id, event_type, object_type, object_data, timestamp=None):
+def enqueue_event(org_id, event_type, object_type, object_data, timestamp=None, user=None):
   if not EVENT_HANDLERS:
     return
 
@@ -24,9 +24,11 @@ def enqueue_event(org_id, event_type, object_type, object_data, timestamp=None):
                   'organization': org_id,
                   'data': {'object': object_data}}
 
-  if current_user:
+  user_for_event = user or current_user
+
+  if user_for_event and hasattr(user_for_event, 'email'):
     event_object['data']['user'] = {'object': 'user',
-                                    'email': current_user.email}
+                                    'email': user_for_event.email}
 
   for handler in EVENT_HANDLERS:
     handler(event_object)

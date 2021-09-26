@@ -39,7 +39,7 @@ def queue_event(org_id, followed_at, shortlink_id, destination, accessed_via, em
                  'user_email': email or current_user.email,
                  'access_method': accessed_via,
                  'destination': destination},
-                followed_at)
+                timestamp=followed_at)
 
 
 def force_to_original_url():
