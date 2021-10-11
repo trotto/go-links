@@ -14,9 +14,10 @@ install_postgres: &install_postgres
       name: Install Postgres (for automated tests)
       # Note: For reasons unknown, just invoking psql as the `postgres` user with sudo resulted in a request for
       #       the `circleci` user password, which shouldn't happen in CircleCI. Hence use of su.
+      # See https://www.postgresql.org/download/linux/debian/
       command: |
         sudo apt update
-        sudo apt install lsb-core
+        sudo apt install lsb-release
         sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
         wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
         sudo apt update
@@ -46,7 +47,7 @@ run_e2e_tests: &run_e2e_tests
 jobs:
   build_and_deploy:
     docker:
-      - image: circleci/python:3.7.8-stretch-browsers
+      - image: circleci/python:3.7-bullseye-browsers
     steps:
       - checkout
       - run: sh .circleci/set_env_vars.sh
