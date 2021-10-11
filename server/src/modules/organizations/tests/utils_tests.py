@@ -26,3 +26,10 @@ class FunctionsTests(unittest.TestCase):
                      utils.get_organization_id_for_email('alex@itso.co'))
 
     mock_get_organization_config.assert_called_once_with('itso.co')
+
+  @patch('shared_helpers.config.get_organization_config', return_value={'alias_to': '1@gmail.com'})
+  def test_get_organization_id_for_email__aliased_email_for_generic_provider(self, mock_get_organization_config):
+    self.assertEqual('1@gmail.com',
+                     utils.get_organization_id_for_email('2@gmail.com'))
+
+    mock_get_organization_config.assert_called_once_with('2@gmail.com')
