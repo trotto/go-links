@@ -5,7 +5,7 @@ import os
 import traceback
 
 import jinja2
-from flask import Flask, send_from_directory, redirect, request, jsonify, session
+from flask import Flask, send_from_directory, redirect, render_template, request, jsonify, session
 from flask_login import LoginManager, current_user, logout_user
 from flask_sqlalchemy import SQLAlchemy as _BaseSQLAlchemy
 from flask_migrate import Migrate, upgrade as upgrade_db
@@ -24,11 +24,6 @@ if sentry_config:
                   integrations=[FlaskIntegration()],
                   traces_sample_rate=sentry_config.get('traces_sample_rate', 0.1))
 
-
-JINJA_ENVIRONMENT = jinja2.Environment(
-    loader=jinja2.FileSystemLoader(os.path.join(os.path.dirname(__file__), 'static')),
-    extensions=['jinja2.ext.autoescape'],
-    autoescape=True)
 
 SIGNIN_DURATION_IN_DAYS = 30
 
@@ -168,15 +163,14 @@ def home():
 
   from modules.organizations.helpers import get_org_settings
 
-  template = JINJA_ENVIRONMENT.get_template('index.html')
-
   namespaces = config.get_organization_config(current_user.organization).get('namespaces', [])
   admin_links = get_org_settings(current_user.organization).get('admin_links', [])
 
-  return template.render({'csrf_token': generate_csrf(),
-                          'default_namespace': config.get_default_namespace(current_user.organization),
-                          'namespaces': json.dumps(namespaces),
-                          'admin_links': json.dumps(admin_links)})
+  return render_template('index.html',
+                         csrf_token=generate_csrf(),
+                         default_namespace=config.get_default_namespace(current_user.organization),
+                         namespaces=json.dumps(namespaces),
+                         admin_links=json.dumps(admin_links))
 
 
 @app.route('/_scripts/config.js')
