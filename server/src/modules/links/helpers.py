@@ -110,14 +110,13 @@ def find_conflicting_link(organization, namespace, shortpath):
   return None
 
 
-def create_short_link(organization, owner, namespace, shortpath, destination):
-  return upsert_short_link(organization, owner, namespace, shortpath, destination, None)
+def create_short_link(organization, owner, namespace, shortpath, destination, validation_mode):
+  return upsert_short_link(organization, owner, namespace, shortpath, destination, None, validation_mode)
 
 
 def update_short_link(link_object):
-  return upsert_short_link(link_object.organization, link_object.owner,
-                           link_object.namespace, link_object.shortpath, link_object.destination_url,
-                           link_object)
+  return upsert_short_link(link_object.organization, link_object.owner, link_object.namespace, link_object.shortpath,
+                           link_object.destination_url, link_object)
 
 
 def check_namespaces(organization, namespace, shortpath):
@@ -136,17 +135,31 @@ def check_namespaces(organization, namespace, shortpath):
       raise LinkCreationException('"%s" is a reserved prefix for your organization' % (shortpath_parts[0]))
 
 
-def upsert_short_link(organization, owner, namespace, shortpath, destination, updated_link_object):
+SIMPLE_VALIDATION_MODE = 'simple'
+EXPANDED_VALIDATION_MODE = 'expanded'
+PATH_RESTRICTIONS_ERROR_SIMPLE = 'Keywords can include only letters, numbers, hyphens, "/", and "%s" placeholders'
+PATH_RESTRICTIONS_ERROR_EXPANDED = 'Provided keyword is invalid' # TODO: Include invalid char(s) in error
+
+
+def validate_shortpath(shortpath, validation_mode):
+  if validation_mode == SIMPLE_VALIDATION_MODE:
+    if shortpath != re.sub('[^0-9a-zA-Z\-\/%]', '', shortpath):
+      raise LinkCreationException(PATH_RESTRICTIONS_ERROR_SIMPLE)
+  elif validation_mode == EXPANDED_VALIDATION_MODE:
+    if type(validators.url('https://trot.to/'+shortpath)) is ValidationFailure:
+      raise LinkCreationException(PATH_RESTRICTIONS_ERROR_EXPANDED)
+  else:
+    raise ValueError(f'Unsupported validation mode {validation_mode}')
+
+
+def upsert_short_link(organization, owner, namespace, shortpath, destination, updated_link_object, validation_mode=EXPANDED_VALIDATION_MODE):
   shortpath = shortpath.strip().lower().strip('/')
-  destination = _encode_ascii_incompatible_chars(destination.strip())
+  destination = destination.strip()
 
   if not shortpath:
     raise LinkCreationException('You must provide a path')
 
-  PATH_RESTRICTIONS_ERROR = 'Keywords can include only letters, numbers, hyphens, "/", and "%s" placeholders'
-
-  if shortpath != re.sub('[^0-9a-zA-Z\-\/%]', '', shortpath):
-    raise LinkCreationException(PATH_RESTRICTIONS_ERROR)
+  validate_shortpath(shortpath, validation_mode)
 
   check_namespaces(organization, namespace, shortpath)
 
@@ -165,7 +178,7 @@ def upsert_short_link(organization, owner, namespace, shortpath, destination, up
 
   if '%' in shortpath:
     if '%' in shortpath and shortpath.count('%') != shortpath.count('%s'):
-      raise LinkCreationException(PATH_RESTRICTIONS_ERROR)
+      raise LinkCreationException(PATH_RESTRICTIONS_ERROR_SIMPLE)
 
     if '%s' in shortpath.split('/')[0]:
       raise LinkCreationException('"%s" placeholders must come after a "/". Example: "jira/%s"')

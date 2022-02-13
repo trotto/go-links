@@ -113,7 +113,8 @@ def post_link():
                                          object_data.get('owner', current_user.email),
                                          object_data.get('namespace', get_default_namespace(current_user.organization)),
                                          object_data['shortpath'],
-                                         object_data['destination'])
+                                         object_data['destination'],
+                                         request.args.get('validation', helpers.SIMPLE_VALIDATION_MODE))
   except helpers.LinkCreationException as e:
     return jsonify({
       'error': str(e)

@@ -48,7 +48,7 @@ class TestHandlers(TrottoTestCase):
                      json.loads(response.text))
 
     self.assertEqual(mock_create_short_link.call_args_list,
-                     [call('googs.com', 'kay@googs.com', 'go', 'there', 'http://example.com/there')])
+                     [call('googs.com', 'kay@googs.com', 'go', 'there', 'http://example.com/there', 'simple')])
 
   def test_create_link__no_patching__no_namespace_specified(self):
     self.testapp.post_json('/_/api/links',
@@ -224,6 +224,27 @@ class TestHandlers(TrottoTestCase):
     shortlink = ShortLink.get_by_id(7)
 
     self.assertEqual('http://boop.com', shortlink.destination_url)
+
+  def test_create_update_link__validation_override(self):
+    response = self.testapp.post_json('/_/api/links?validation=expanded',
+                                      {'shortpath': 'こんにちは',
+                                       'destination': 'https://www.trot.to'},
+                                      headers={'TROTTO_USER_UNDER_TEST': 'kay@googs.com'})
+
+    new_link_id = response.json.get('id')
+    self.assertIsNotNone(new_link_id)
+    shortlink = ShortLink.get_by_id(new_link_id)
+
+    self.assertEqual('https://www.trot.to', shortlink.destination_url)
+
+    self.testapp.put_json(f'/_/api/links/{new_link_id}',
+                          {'destination': 'https://github.com/trotto'},
+                          headers={'TROTTO_USER_UNDER_TEST': 'kay@googs.com'})
+
+    shortlink = ShortLink.get_by_id(new_link_id)
+
+    self.assertEqual('https://github.com/trotto', shortlink.destination_url)
+
 
   def test_created_and_modified_date_tracking(self):
     time_1 = datetime.datetime.utcnow() + datetime.timedelta(days=2)
