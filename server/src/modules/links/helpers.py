@@ -1,5 +1,5 @@
 import re
-from urllib.parse import urlparse, urlencode
+from urllib.parse import urlparse, urlencode, urlunparse
 
 import validators
 from validators.utils import ValidationFailure
@@ -152,6 +152,31 @@ def validate_shortpath(shortpath, validation_mode):
     raise ValueError(f'Unsupported validation mode {validation_mode}')
 
 
+"""Returns whether or not the provided destination is a valid URL using a bare hostname, like `http://go/directory`.
+
+This function is used to work around a limitation of the `validators` package where it doesn't recognize URLs using
+bare hostnames as valid. 
+"""
+def _is_valid_bare_hostname_destination(destination):
+  url_parts = urlparse(destination)
+
+  if not url_parts.netloc or '.' in url_parts.netloc:
+    return False
+
+  netloc_parts = url_parts.netloc.split(':', 1)
+  netloc_parts[0] = netloc_parts[0] + '.com'
+
+  url_parts = url_parts._replace(netloc=':'.join(netloc_parts))
+
+  with_tld = urlunparse(url_parts)
+
+  return type(validators.url(with_tld)) is not ValidationFailure
+
+
+def _validate_destination(destination):
+  if type(validators.url(destination)) is ValidationFailure and not _is_valid_bare_hostname_destination(destination):
+    raise LinkCreationException('You must provide a valid destination URL')
+
 def upsert_short_link(organization, owner, namespace, shortpath, destination, updated_link_object, validation_mode=EXPANDED_VALIDATION_MODE):
   shortpath = shortpath.strip().lower().strip('/')
   destination = destination.strip()
@@ -216,8 +241,7 @@ def upsert_short_link(organization, owner, namespace, shortpath, destination, up
     # default to HTTP (see Slack discussion)
     destination = 'http://' + destination
 
-  if type(validators.url(destination)) is ValidationFailure:
-    raise LinkCreationException('You must provide a valid destination URL')
+  _validate_destination(destination)
 
   if updated_link_object:
     link = updated_link_object

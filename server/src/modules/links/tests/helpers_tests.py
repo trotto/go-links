@@ -46,6 +46,27 @@ class TestUtilityFunctions(TrottoTestCase):
       'https://github.com/search?utf8=%E2%9C%93&q=party+parrot&type=',
       helpers._encode_ascii_incompatible_chars(u'https://github.com/search?utf8=%E2%9C%93&q=party+parrot&type='))
 
+  def test__validate_destination__valid__simple(self):
+    helpers.validate_destination('https://trot.to/getting-started')
+
+  def test__validate_destination__valid__ip(self):
+    helpers.validate_destination('http://142.251.33.14/search?q=trotto')
+
+  def test__validate_destination__bare_hostname(self):
+    helpers.validate_destination('http://go/directory')
+
+    helpers.validate_destination('http://intranet:8000/directory')
+
+    helpers.validate_destination('http://localhost:8000/directory')
+    helpers.validate_destination('http://localhost/directory')
+
+  def test__validate_destination__invalid(self):
+    with self.assertRaises(helpers.LinkCreationException) as cm:
+      helpers.validate_destination('http://>>/directory')
+
+    with self.assertRaises(helpers.LinkCreationException) as cm:
+      helpers.validate_destination('http://company directory')
+
 
 class TestOtherFunctions(TrottoTestCase):
 
