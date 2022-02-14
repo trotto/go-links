@@ -65,7 +65,6 @@ def get_organization_config(org_id):
                      'layout',
                      'namespaces',
                      'webhook_endpoints',
-                     'punctuation_sensitive',
                      'keywords']
 
   try:
