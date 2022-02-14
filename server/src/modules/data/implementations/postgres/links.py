@@ -40,6 +40,9 @@ class ShortLink(db.Model, links.ShortLink):
   _ns = db.Column('namespace',
                   db.String(30),
                   nullable=True)
+  display_shortpath = db.Column(db.String(200),
+                                index=True,
+                                nullable=True)
   shortpath = db.Column(db.String(200),
                         index=True,
                         nullable=False)

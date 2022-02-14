@@ -48,7 +48,7 @@ class TestHandlers(TrottoTestCase):
                      json.loads(response.text))
 
     self.assertEqual(mock_create_short_link.call_args_list,
-                     [call('googs.com', 'kay@googs.com', 'go', 'there', 'http://example.com/there')])
+                     [call('googs.com', 'kay@googs.com', 'go', 'there', 'http://example.com/there', 'simple')])
 
   def test_create_link__no_patching__no_namespace_specified(self):
     self.testapp.post_json('/_/api/links',
@@ -224,6 +224,27 @@ class TestHandlers(TrottoTestCase):
     shortlink = ShortLink.get_by_id(7)
 
     self.assertEqual('http://boop.com', shortlink.destination_url)
+
+  def test_create_update_link__validation_override(self):
+    response = self.testapp.post_json('/_/api/links?validation=expanded',
+                                      {'shortpath': 'こんにちは',
+                                       'destination': 'https://www.trot.to'},
+                                      headers={'TROTTO_USER_UNDER_TEST': 'kay@googs.com'})
+
+    new_link_id = response.json.get('id')
+    self.assertIsNotNone(new_link_id)
+    shortlink = ShortLink.get_by_id(new_link_id)
+
+    self.assertEqual('https://www.trot.to', shortlink.destination_url)
+
+    self.testapp.put_json(f'/_/api/links/{new_link_id}',
+                          {'destination': 'https://github.com/trotto'},
+                          headers={'TROTTO_USER_UNDER_TEST': 'kay@googs.com'})
+
+    shortlink = ShortLink.get_by_id(new_link_id)
+
+    self.assertEqual('https://github.com/trotto', shortlink.destination_url)
+
 
   def test_created_and_modified_date_tracking(self):
     time_1 = datetime.datetime.utcnow() + datetime.timedelta(days=2)
@@ -722,3 +743,52 @@ class TestLinkTransferHandlers(TrottoTestCase):
     self.assertEqual(302, response.status_int)
     self.assertEqual('http://localhost/_/auth/login?redirect_to=%2F_transfer%2Fmy_token%3F',
                      response.location)
+
+
+class TestKeywordPunctuationSensitivityConfig(TrottoTestCase):
+
+  blueprints_under_test = [handlers.routes]
+
+  TEST_KEYWORD = 'meeting-notes'
+  TEST_DESTINATION = 'https://docs.google.com/document/d/2Bd5X-6WFpRbafPgXax98GZenmCTZkTrNxotNvb8k2vI/edit'
+
+  def _create_link(self, keyword):
+    response = self.testapp.post_json('/_/api/links',
+                                      {'shortpath': keyword,
+                                       'destination': self.TEST_DESTINATION},
+                                      headers={'TROTTO_USER_UNDER_TEST': 'kay@googs.com'})
+
+    return response.json
+
+  @patch('shared_helpers.config.get_organization_config',
+         return_value={})
+  def test_keyword_punctuation_sensitivity__not_specified(self, _):
+    response = self._create_link(self.TEST_KEYWORD)
+
+    self.assertEqual(self.TEST_KEYWORD, response.get('shortpath'))
+
+    keyword_without_dashes = self.TEST_KEYWORD.replace('-', '')
+
+    response = self._create_link(keyword_without_dashes)
+
+    self.assertEqual(keyword_without_dashes, response.get('shortpath'))
+
+  @patch('shared_helpers.config.get_organization_config',
+         return_value={'keywords': {'punctuation_sensitive': False}})
+  def test_keyword_punctuation_sensitivity__insensitive(self, _):
+    response = self._create_link(self.TEST_KEYWORD)
+
+    self.assertEqual(self.TEST_KEYWORD, response.get('shortpath'))
+
+    keyword_without_dashes = self.TEST_KEYWORD.replace('-', '')
+
+    response = self._create_link(keyword_without_dashes)
+
+    self.assertIn(self.TEST_KEYWORD, response.get('error'))
+
+    response = self.testapp.get('/_/api/links',
+                                headers={'TROTTO_USER_UNDER_TEST': 'kay@googs.com'})
+
+    self.assertEqual(1, len(response.json))
+
+    self.assertEqual(self.TEST_KEYWORD, response.json[0]['shortpath'])

@@ -1,5 +1,6 @@
 import re
-from urllib.parse import urlparse, urlencode
+import string
+from urllib.parse import urlparse, urlencode, urlunparse
 
 import validators
 from validators.utils import ValidationFailure
@@ -18,7 +19,7 @@ class LinkCreationException(Exception):
   pass
 
 
-def _matches_pattern(provided_shortpath, candidate_match):
+def _matches_pattern(keywords_punctuation_sensitive, provided_shortpath, candidate_match):
   provided_shortpath_components = provided_shortpath.split('/')
   candidate_match_components = candidate_match.split('/')
 
@@ -30,13 +31,13 @@ def _matches_pattern(provided_shortpath, candidate_match):
   for i in range(len(provided_shortpath_components)):
     if candidate_match_components[i] == '%s':
       matching_formatting_args.append(provided_shortpath_components[i])
-    elif candidate_match_components[i] != provided_shortpath_components[i]:
+    elif candidate_match_components[i] != get_canonical_keyword(keywords_punctuation_sensitive, provided_shortpath_components[i]):
       return None
 
   return matching_formatting_args or None
 
 
-def derive_pattern_match(organization, namespace, shortpath):
+def derive_pattern_match(organization, keywords_punctuation_sensitive, namespace, shortpath):
   if '/' not in shortpath:  # paths without a second part can't be pattern-matching
     return None, None
 
@@ -48,7 +49,7 @@ def derive_pattern_match(organization, namespace, shortpath):
     if '%s' not in prefix_match.shortpath:
       continue
 
-    matching_formatting_args = _matches_pattern(shortpath, prefix_match.shortpath)
+    matching_formatting_args = _matches_pattern(keywords_punctuation_sensitive, shortpath, prefix_match.shortpath)
     if not matching_formatting_args:
       continue
     else:
@@ -73,15 +74,15 @@ def _encode_ascii_incompatible_chars(destination):
   return ''.join(_percent_encode_if_not_ascii_compatible(ch) for ch in destination)
 
 
-def get_shortlink(organization, namespace, shortpath):
+def get_shortlink(organization, keywords_punctuation_sensitive, namespace, shortpath):
   """Returns (shortlink_object, actual_destination)."""
-  perfect_match = models.ShortLink.get_by_full_path(organization, namespace, shortpath)
+  perfect_match = models.ShortLink.get_by_full_path(organization, namespace, get_canonical_keyword(keywords_punctuation_sensitive, shortpath))
 
   if perfect_match:
     return perfect_match, perfect_match.destination_url
 
   if not perfect_match:
-    return derive_pattern_match(organization, namespace, shortpath)
+    return derive_pattern_match(organization, keywords_punctuation_sensitive, namespace, shortpath)
 
 
 def find_conflicting_link(organization, namespace, shortpath):
@@ -110,14 +111,13 @@ def find_conflicting_link(organization, namespace, shortpath):
   return None
 
 
-def create_short_link(organization, owner, namespace, shortpath, destination):
-  return upsert_short_link(organization, owner, namespace, shortpath, destination, None)
+def create_short_link(organization, owner, namespace, shortpath, destination, validation_mode):
+  return upsert_short_link(organization, owner, namespace, shortpath, destination, None, validation_mode)
 
 
 def update_short_link(link_object):
-  return upsert_short_link(link_object.organization, link_object.owner,
-                           link_object.namespace, link_object.shortpath, link_object.destination_url,
-                           link_object)
+  return upsert_short_link(link_object.organization, link_object.owner, link_object.namespace, link_object.shortpath,
+                           link_object.destination_url, link_object)
 
 
 def check_namespaces(organization, namespace, shortpath):
@@ -136,17 +136,83 @@ def check_namespaces(organization, namespace, shortpath):
       raise LinkCreationException('"%s" is a reserved prefix for your organization' % (shortpath_parts[0]))
 
 
-def upsert_short_link(organization, owner, namespace, shortpath, destination, updated_link_object):
+SIMPLE_VALIDATION_MODE = 'simple'
+EXPANDED_VALIDATION_MODE = 'expanded'
+PATH_RESTRICTIONS_ERROR_SIMPLE = 'Keywords can include only letters, numbers, hyphens, "/", and "%s" placeholders'
+PATH_RESTRICTIONS_ERROR_EXPANDED = 'Provided keyword is invalid' # TODO: Include invalid char(s) in error
+KEYWORDS_PUNCTUATION_SENSITIVE_DEFAULT = True
+
+
+def validate_shortpath(shortpath, validation_mode):
+  if validation_mode == SIMPLE_VALIDATION_MODE:
+    if shortpath != re.sub('[^0-9a-zA-Z\-\/%]', '', shortpath):
+      raise LinkCreationException(PATH_RESTRICTIONS_ERROR_SIMPLE)
+  elif validation_mode == EXPANDED_VALIDATION_MODE:
+    if type(validators.url('https://trot.to/'+shortpath)) is ValidationFailure:
+      raise LinkCreationException(PATH_RESTRICTIONS_ERROR_EXPANDED)
+  else:
+    raise ValueError(f'Unsupported validation mode {validation_mode}')
+
+
+"""Returns whether or not the provided destination is a valid URL using a bare hostname, like `http://go/directory`.
+
+This function is used to work around a limitation of the `validators` package where it doesn't recognize URLs using
+bare hostnames as valid. 
+"""
+def _is_valid_bare_hostname_destination(destination):
+  url_parts = urlparse(destination)
+
+  if not url_parts.netloc or '.' in url_parts.netloc:
+    return False
+
+  netloc_parts = url_parts.netloc.split(':', 1)
+  netloc_parts[0] = netloc_parts[0] + '.com'
+
+  url_parts = url_parts._replace(netloc=':'.join(netloc_parts))
+
+  with_tld = urlunparse(url_parts)
+
+  return type(validators.url(with_tld)) is not ValidationFailure
+
+
+def _validate_destination(destination):
+  if type(validators.url(destination)) is ValidationFailure and not _is_valid_bare_hostname_destination(destination):
+    raise LinkCreationException('You must provide a valid destination URL')
+
+
+PUNCTUATION_SCRUBBED = string.punctuation.replace('/', '').replace('%', '')
+
+
+def _remove_punctuation(keyword):
+  return keyword.translate(str.maketrans('', '', PUNCTUATION_SCRUBBED))
+
+
+def are_keywords_punctuation_sensitive(org_id):
+  org_config = config.get_organization_config(org_id)
+  keywords_punctuation_sensitive = config.get_from_key_path(org_config, ['keywords', 'punctuation_sensitive'])
+
+  if keywords_punctuation_sensitive is None:
+    return KEYWORDS_PUNCTUATION_SENSITIVE_DEFAULT
+
+  return keywords_punctuation_sensitive
+
+
+def get_canonical_keyword(punctuation_sensitive, keyword):
+  return keyword if punctuation_sensitive else _remove_punctuation(keyword)
+
+
+def upsert_short_link(organization, owner, namespace, shortpath, destination, updated_link_object, validation_mode=EXPANDED_VALIDATION_MODE):
   shortpath = shortpath.strip().lower().strip('/')
-  destination = _encode_ascii_incompatible_chars(destination.strip())
+  destination = destination.strip()
 
   if not shortpath:
     raise LinkCreationException('You must provide a path')
 
-  PATH_RESTRICTIONS_ERROR = 'Keywords can include only letters, numbers, hyphens, "/", and "%s" placeholders'
+  validate_shortpath(shortpath, validation_mode)
 
-  if shortpath != re.sub('[^0-9a-zA-Z\-\/%]', '', shortpath):
-    raise LinkCreationException(PATH_RESTRICTIONS_ERROR)
+  display_shortpath = shortpath
+  keywords_punctuation_sensitive = are_keywords_punctuation_sensitive(organization)
+  shortpath = get_canonical_keyword(keywords_punctuation_sensitive, shortpath)
 
   check_namespaces(organization, namespace, shortpath)
 
@@ -165,7 +231,7 @@ def upsert_short_link(organization, owner, namespace, shortpath, destination, up
 
   if '%' in shortpath:
     if '%' in shortpath and shortpath.count('%') != shortpath.count('%s'):
-      raise LinkCreationException(PATH_RESTRICTIONS_ERROR)
+      raise LinkCreationException(PATH_RESTRICTIONS_ERROR_SIMPLE)
 
     if '%s' in shortpath.split('/')[0]:
       raise LinkCreationException('"%s" placeholders must come after a "/". Example: "jira/%s"')
@@ -174,11 +240,11 @@ def upsert_short_link(organization, owner, namespace, shortpath, destination, up
       raise LinkCreationException('The keyword and the destination must have the same number of "%s" placeholders')
 
   if not updated_link_object:
-    existing_link, _ = get_shortlink(organization, namespace, shortpath)
+    existing_link, _ = get_shortlink(organization, keywords_punctuation_sensitive, namespace, shortpath)
 
     if existing_link:
       error_message = 'That go link already exists. %s/%s points to %s' % (namespace,
-                                                                           shortpath,
+                                                                           existing_link.display_shortpath or existing_link.shortpath,
                                                                            existing_link.destination_url)
 
       if existing_link.shortpath != shortpath:
@@ -203,8 +269,7 @@ def upsert_short_link(organization, owner, namespace, shortpath, destination, up
     # default to HTTP (see Slack discussion)
     destination = 'http://' + destination
 
-  if type(validators.url(destination)) is ValidationFailure:
-    raise LinkCreationException('You must provide a valid destination URL')
+  _validate_destination(destination)
 
   if updated_link_object:
     link = updated_link_object
@@ -212,6 +277,7 @@ def upsert_short_link(organization, owner, namespace, shortpath, destination, up
     link_kwargs = {'organization': organization,
                    'owner': owner,
                    'namespace': namespace,
+                   'display_shortpath': display_shortpath,
                    'shortpath': shortpath,
                    'destination_url': destination,
                    'shortpath_prefix': shortpath.split('/')[0]}
@@ -226,6 +292,7 @@ def upsert_short_link(organization, owner, namespace, shortpath, destination, up
                 'link.%s' % ('updated' if updated_link_object else 'created'),
                 'link',
                 link_dict)
+
   return link
 
 

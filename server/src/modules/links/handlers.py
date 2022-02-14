@@ -85,13 +85,17 @@ def check_mutate_authorization(link_id, user_id=None):
 
 
 def _get_link_response(link):
-  return convert_entity_to_dict(link, PUBLIC_KEYS, get_field_conversion_fns())
+  link_response = convert_entity_to_dict(link, PUBLIC_KEYS, get_field_conversion_fns())
+
+  link_response['shortpath'] = getattr(link, 'display_shortpath') or link_response['shortpath']
+
+  return link_response
 
 
 @routes.route('/_/api/links', methods=['GET'])
 @login_required
 def get_links():
-  links = [convert_entity_to_dict(entity, PUBLIC_KEYS, get_field_conversion_fns())
+  links = [_get_link_response(entity)
            for entity in helpers.get_all_shortlinks_for_org(current_user.organization)]
 
   for link in links:
@@ -113,7 +117,8 @@ def post_link():
                                          object_data.get('owner', current_user.email),
                                          object_data.get('namespace', get_default_namespace(current_user.organization)),
                                          object_data['shortpath'],
-                                         object_data['destination'])
+                                         object_data['destination'],
+                                         request.args.get('validation', helpers.SIMPLE_VALIDATION_MODE))
   except helpers.LinkCreationException as e:
     return jsonify({
       'error': str(e)
@@ -122,7 +127,7 @@ def post_link():
   logging.info(f'{current_user.email} created go link with ID {new_link.id}')
 
   return jsonify(
-    convert_entity_to_dict(new_link, PUBLIC_KEYS, get_field_conversion_fns())
+    _get_link_response(new_link)
   ), 201
 
 
@@ -158,7 +163,7 @@ def delete(link_id):
   enqueue_event(existing_link.organization,
                 'link.deleted',
                 'link',
-                convert_entity_to_dict(existing_link, PUBLIC_KEYS, get_field_conversion_fns()))
+                _get_link_response(existing_link))
 
   return jsonify({})
 

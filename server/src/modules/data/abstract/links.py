@@ -7,6 +7,7 @@ class ShortLink(BaseModel):
   organization = str
   owner = str
   namespace = str
+  display_shortpath = str
   shortpath = str
   shortpath_prefix = str
   destination_url = str
@@ -15,7 +16,7 @@ class ShortLink(BaseModel):
 
   # TODO: Eliminate the need for this duplication with a better base class.
   _properties = ['id', 'created', 'modified',
-                 'organization', 'owner', 'namespace', 'shortpath', 'shortpath_prefix',
+                 'organization', 'owner', 'namespace', 'display_shortpath', 'shortpath', 'shortpath_prefix',
                  'destination_url', 'type', 'visits_count', 'visits_count_last_updated']
 
   def __eq__(self, other):
