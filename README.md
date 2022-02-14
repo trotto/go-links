@@ -47,6 +47,65 @@ See our deployment docs:
 - [Deploy to Heroku](http://www.trot.to/docs/deploy/deploy-to-heroku)
 - [Deploy with Docker](http://www.trot.to/docs/deploy/deploy-with-docker)
 
+### Local deployment with docker-compose
+
+#### Build and push image to a container registry
+
+There is no official docker image for go-links, so you need to build the image
+and push it to a container registry yourselves.
+Here's an example on how to do so:
+
+```
+docker build -t your_dockerhub_username/golinks:0.1 .
+docker push your_dockerhub_username/golinks:0.1
+```
+
+#### Add app.yml (and possibly client_secrets.json)
+
+Add `app.yml` to `server/src/config/` - here is an example:
+```
+sessions_secret: it_is_a_secret
+postgres:
+  url: "postgresql://postgres_username:postgres_password@db/golinks"
+```
+More details on `app.yml` can be found at [Deploy with Docker](http://www.trot.to/docs/deploy/deploy-with-docker)
+
+If you want to set up your own Google OAuth, then you can follow the instruction in Deploy with Docker.
+However you could also use the provided `server/src/local/client_secrets_local_only.json`.
+
+#### Create database and run migration
+
+Create database
+```
+docker-compose up db
+docker exec -it go-links_db_1 /bin/sh
+
+> psql -U postgres
+postgres=# CREATE DATABASE golinks;
+postgres=# \q
+> quit
+```
+
+Run migration
+```
+docker-compose up golinks
+docker exec -it go-links /bin/sh
+
+> cd /usr/src/app/server/src
+> export FLASK_APP=main.py
+> flask db upgrade
+```
+
+#### Run docker-compose
+
+Modify `docker-compose.yaml` as required, at least modify the go-links image path.
+
+```
+docker-compose up
+```
+
+On your browser go to: `http://localhost:9095`.
+
 ## Local development
 
 You can bring up a local instance of Trotto within a few minutes.
@@ -108,3 +167,4 @@ Now, you can access the local instance at http://localhost:5007.
 
 Most server-side and frontend changes should be picked up automatically, thanks to the Flask dev server and
 [React Hot Loader](https://github.com/gaearon/react-hot-loader).
+

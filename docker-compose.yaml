@@ -1,0 +1,21 @@
+version: '3.7'
+services:
+  db:
+    image: postgres:alpine
+    restart: always
+    environment:
+      - POSTGRES_USER=postgres_username
+      - POSTGRES_PASSWORD=postgres_password
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+
+  golinks:
+    depends_on:
+      - db
+    image: your_dockerhub_username/golinks:0.1
+    ports:
+      - "9095:8000"
+    restart: always
+    volumes:
+      - ./server/src/config/app.yml:/usr/src/app/server/src/config/app.yml
+      - ./server/src/local/client_secrets_local_only.json:/usr/src/app/server/src/config/client_secrets.json
