@@ -4,7 +4,7 @@ from urllib import parse
 from flask import Blueprint, request, redirect
 from flask_login import current_user
 
-from modules.links.helpers import get_shortlink
+from modules.links.helpers import get_shortlink, get_canonical_keyword, are_keywords_punctuation_sensitive
 from shared_helpers import config
 from shared_helpers.events import enqueue_event
 
@@ -18,7 +18,7 @@ routes = Blueprint('routing', __name__,
                    template_folder='../../static/templates')
 
 
-def check_namespace(user_org, shortpath):
+def check_namespace(user_org, shortpath, provided_shortpath):
   shortpath_parts = shortpath.split('/', 1)
   if len(shortpath_parts) > 1:
     org_namespaces = config.get_organization_config(user_org).get('namespaces')
@@ -26,9 +26,9 @@ def check_namespace(user_org, shortpath):
       shortpath_start, shortpath_remainder = shortpath_parts
 
       if shortpath_start in org_namespaces:
-        return shortpath_start, shortpath_remainder
+        return shortpath_start, shortpath_remainder, provided_shortpath.split('/', 1)[1]
 
-  return config.get_default_namespace(user_org), shortpath
+  return config.get_default_namespace(user_org), shortpath, provided_shortpath
 
 
 def queue_event(org_id, followed_at, shortlink_id, destination, accessed_via, email=None):
@@ -50,10 +50,6 @@ def force_to_original_url():
 def get_go_link(path):
   requested_at = time.time()
 
-  provided_shortpath = parse.unquote(path.strip('/'))
-  shortpath_parts = provided_shortpath.split('/', 1)
-  shortpath = '/'.join([shortpath_parts[0].lower()] + shortpath_parts[1:])
-
   if not getattr(current_user, 'email', None):
     if request.args.get('s') == 'crx' and request.args.get('sc'):
       # see: go/484356182846856
@@ -61,9 +57,16 @@ def get_go_link(path):
 
     return redirect('/_/auth/login?%s' % parse.urlencode({'redirect_to': request.full_path}))
 
-  namespace, shortpath = check_namespace(current_user.organization, shortpath)
+  provided_shortpath = parse.unquote(path.strip('/'))
+  shortpath_parts = provided_shortpath.split('/', 1)
 
-  matching_shortlink, destination = get_shortlink(current_user.organization, namespace, shortpath)
+  # note: we can't remove all punctuation here because punctuation may be part of a programmatic link parameter
+  keywords_punctuation_sensitive = are_keywords_punctuation_sensitive(current_user.organization)
+  shortpath = '/'.join([get_canonical_keyword(keywords_punctuation_sensitive, shortpath_parts[0].lower())] + shortpath_parts[1:])
+
+  namespace, shortpath, provided_shortpath = check_namespace(current_user.organization, shortpath, provided_shortpath)
+
+  matching_shortlink, destination = get_shortlink(current_user.organization, keywords_punctuation_sensitive, namespace, shortpath)
 
   if matching_shortlink:
     queue_event(matching_shortlink.organization,
@@ -81,7 +84,7 @@ def get_go_link(path):
       if response:
         return response
 
-    create_link_params = {'sp': shortpath}
+    create_link_params = {'sp': provided_shortpath.lower()}
     if namespace != config.get_default_namespace(current_user.organization):
       create_link_params['ns'] = namespace
 

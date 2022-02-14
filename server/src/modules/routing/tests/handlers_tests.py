@@ -2,6 +2,7 @@ from mock import patch
 
 from modules.data import get_models
 from modules.routing import handlers
+from modules.links import handlers as links_handlers
 from testing import TrottoTestCase
 
 
@@ -180,3 +181,83 @@ class TestRedirectHandler(TrottoTestCase):
     self.assertEqual(302, response.status_int)
 
     self.assertEqual('http://wiki.com', response.headers['Location'])
+
+
+class TestKeywordPunctuationSensitivity(TrottoTestCase):
+
+  blueprints_under_test = [handlers.routes, links_handlers.routes]
+
+  TEST_KEYWORD = 'meeting-notes'
+  TEST_DESTINATION = 'https://docs.google.com/document/d/2Bd5X-6WFpRbafPgXax98GZenmCTZkTrNxotNvb8k2vI/edit'
+
+  def _create_test_link(self, keyword=TEST_KEYWORD, destination=TEST_DESTINATION):
+    response = self.testapp.post_json('/_/api/links',
+                                      {'shortpath': keyword,
+                                       'destination': destination},
+                                      headers={'TROTTO_USER_UNDER_TEST': 'kay@googs.com'})
+
+    self.assertIsNotNone(response.json.get('id'))
+
+  def _get_redirect(self, keyword):
+    response = self.testapp.get('/' + keyword,
+                                headers={'TROTTO_USER_UNDER_TEST': 'rex@googs.com'})
+
+    self.assertEqual(302, response.status_int)
+
+    return response.headers['Location']
+
+  @patch('shared_helpers.config.get_organization_config',
+         return_value={})
+  def test_keyword_punctuation_sensitivity__not_specified(self, _):
+    self._create_test_link()
+
+    self.assertEqual(self.TEST_DESTINATION, self._get_redirect(self.TEST_KEYWORD))
+
+    keyword_without_dashes = self.TEST_KEYWORD.replace('-', '')
+    self.assertEqual(f'http://localhost:5007/?sp={keyword_without_dashes}', self._get_redirect(keyword_without_dashes))
+
+  @patch('shared_helpers.config.get_organization_config',
+         return_value={'keywords': {'punctuation_sensitive': False}})
+  def test_keyword_punctuation_sensitivity__insensitive(self, _):
+    self._create_test_link()
+
+    self.assertEqual(self.TEST_DESTINATION, self._get_redirect(self.TEST_KEYWORD))
+
+    keyword_without_dashes = self.TEST_KEYWORD.replace('-', '')
+    self.assertEqual(self.TEST_DESTINATION, self._get_redirect(keyword_without_dashes))
+
+    self.assertEqual(self.TEST_DESTINATION, self._get_redirect(keyword_without_dashes.upper()))
+
+  @patch('shared_helpers.config.get_organization_config',
+         return_value={'keywords': {'punctuation_sensitive': False}})
+  def test_keyword_punctuation_sensitivity__insensitive__hierachical_link(self, _):
+    keyword = 'meeting-notes/2022-02-11'
+
+    self._create_test_link(keyword)
+
+    self.assertEqual(self.TEST_DESTINATION, self._get_redirect(keyword))
+
+    keyword_without_dashes = keyword.replace('-', '')
+    self.assertEqual(self.TEST_DESTINATION, self._get_redirect(keyword_without_dashes))
+
+  @patch('shared_helpers.config.get_organization_config',
+         return_value={'keywords': {'punctuation_sensitive': False}})
+  def test_keyword_punctuation_sensitivity__insensitive__programmatic_link(self, _):
+    keyword = 'my-drive/quick-search/%s'
+    destination = 'https://drive.google.com/drive/search?q=%s'
+
+    self._create_test_link(keyword, destination)
+
+    request_path = keyword.replace('%s', '2022-roadmap') # query includes punctuation
+    expected_destination = destination.replace('%s', '2022-roadmap')
+
+    self.assertEqual(expected_destination, self._get_redirect(request_path))
+
+    request_path_without_dashes = keyword.replace('-', '').replace('%s', '2022-roadmap')
+    self.assertEqual(expected_destination, self._get_redirect(request_path_without_dashes))
+
+  @patch('shared_helpers.config.get_organization_config',
+         return_value={'keywords': {'punctuation_sensitive': False}})
+  def test_keyword_punctuation_sensitivity__insensitive__no_such_link(self, _):
+    # autofilled link should retain punctuation
+    self.assertEqual(f'http://localhost:5007/?sp={self.TEST_KEYWORD}', self._get_redirect(self.TEST_KEYWORD))

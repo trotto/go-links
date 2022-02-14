@@ -47,25 +47,25 @@ class TestUtilityFunctions(TrottoTestCase):
       helpers._encode_ascii_incompatible_chars(u'https://github.com/search?utf8=%E2%9C%93&q=party+parrot&type='))
 
   def test__validate_destination__valid__simple(self):
-    helpers.validate_destination('https://trot.to/getting-started')
+    helpers._validate_destination('https://trot.to/getting-started')
 
   def test__validate_destination__valid__ip(self):
-    helpers.validate_destination('http://142.251.33.14/search?q=trotto')
+    helpers._validate_destination('http://142.251.33.14/search?q=trotto')
 
   def test__validate_destination__bare_hostname(self):
-    helpers.validate_destination('http://go/directory')
+    helpers._validate_destination('http://go/directory')
 
-    helpers.validate_destination('http://intranet:8000/directory')
+    helpers._validate_destination('http://intranet:8000/directory')
 
-    helpers.validate_destination('http://localhost:8000/directory')
-    helpers.validate_destination('http://localhost/directory')
+    helpers._validate_destination('http://localhost:8000/directory')
+    helpers._validate_destination('http://localhost/directory')
 
   def test__validate_destination__invalid(self):
     with self.assertRaises(helpers.LinkCreationException) as cm:
-      helpers.validate_destination('http://>>/directory')
+      helpers._validate_destination('http://>>/directory')
 
     with self.assertRaises(helpers.LinkCreationException) as cm:
-      helpers.validate_destination('http://company directory')
+      helpers._validate_destination('http://company directory')
 
 
 class TestOtherFunctions(TrottoTestCase):
@@ -165,57 +165,57 @@ class TestOtherFunctions(TrottoTestCase):
 
   def test_derive_pattern_match__one_level_shortlink(self):
     self.assertEqual((None, None),
-                     helpers.derive_pattern_match('1.com', 'go', 'notes'))
+                     helpers.derive_pattern_match('1.com', True, 'go', 'notes'))
 
   def test_derive_pattern_match__same_shortlink_different_companies(self):
     self.assertEqual((ShortLink.get_by_id(15), 'http://drive5.com/roadmap'),
-                     helpers.derive_pattern_match('2.com', 'go', 'drive/roadmap'))
+                     helpers.derive_pattern_match('2.com', True, 'go', 'drive/roadmap'))
 
     self.assertEqual((ShortLink.get_by_id(15), 'http://drive5.com/roadmap'),
-                     helpers.derive_pattern_match('2.com', 'go', 'drive/roadmap'))
+                     helpers.derive_pattern_match('2.com', True, 'go', 'drive/roadmap'))
 
     self.assertEqual((ShortLink.get_by_id(16), 'http://drive6.com/roadmap'),
-                     helpers.derive_pattern_match('1.com', 'go', 'drive/roadmap'))
+                     helpers.derive_pattern_match('1.com', True, 'go', 'drive/roadmap'))
 
     self.assertEqual((ShortLink.get_by_id(16), 'http://drive6.com/roadmap'),
-                     helpers.derive_pattern_match('1.com', 'go', 'drive/roadmap'))
+                     helpers.derive_pattern_match('1.com', True, 'go', 'drive/roadmap'))
 
     self.assertEqual((None, None),
-                     helpers.derive_pattern_match('3.com', 'go', 'drive/roadmap'))
+                     helpers.derive_pattern_match('3.com', True, 'go', 'drive/roadmap'))
 
   def test_derive_pattern_match__go_link_exists_for_one_company_but_not_other(self):
     self.assertEqual((None, None),
-                     helpers.derive_pattern_match('1.com', 'go', 'paper/kpis'))
+                     helpers.derive_pattern_match('1.com', True, 'go', 'paper/kpis'))
 
     self.assertEqual((ShortLink.get_by_id(114), 'http://paper.com/kpis'),
-                     helpers.derive_pattern_match('2.com', 'go', 'paper/kpis'))
+                     helpers.derive_pattern_match('2.com', True, 'go', 'paper/kpis'))
 
   def test_derive_pattern_match__multi_level_pattern(self):
     self.assertEqual((ShortLink.get_by_id(116), 'http://looker.com/1/search/sales'),
-                     helpers.derive_pattern_match('1.com', 'go', 'looker/1/sales'))
+                     helpers.derive_pattern_match('1.com', True, 'go', 'looker/1/sales'))
 
     # no looker/%s shortlink exists:
     self.assertEqual((None, None),
-                     helpers.derive_pattern_match('1.com', 'go', 'looker/sales'))
+                     helpers.derive_pattern_match('1.com', True, 'go', 'looker/sales'))
 
   def test_get_shortlink__link_does_not_exist(self):
     self.assertEqual((None, None),
-                     helpers.get_shortlink('1.com', 'go', 'slack'))
+                     helpers.get_shortlink('1.com', True, 'go', 'slack'))
 
   def test_get_shortlink__simple_go_link(self):
     self.assertEqual((ShortLink.get_by_id(14), 'http://drive4.com'),
-                     helpers.get_shortlink('1.com', 'go', 'drive'))
+                     helpers.get_shortlink('1.com', True, 'go', 'drive'))
 
   def test_get_shortlink__go_link_with_placeholder(self):
     self.assertEqual((ShortLink.get_by_id(116), 'http://looker.com/7/search/users'),
-                     helpers.get_shortlink('1.com', 'go', 'looker/7/users'))
+                     helpers.get_shortlink('1.com', True, 'go', 'looker/7/users'))
 
   def test_get_shortlink__same_shortlink_different_companies__alternate_namespace(self):
     self.assertEqual((ShortLink.get_by_id(117), 'https://1.drive.com/eng'),
-                     helpers.get_shortlink('1.com', 'eng', 'drive'))
+                     helpers.get_shortlink('1.com', True, 'eng', 'drive'))
 
     self.assertEqual((ShortLink.get_by_id(118), 'https://2.drive.com/eng'),
-                     helpers.get_shortlink('2.com', 'eng', 'drive'))
+                     helpers.get_shortlink('2.com', True, 'eng', 'drive'))
 
   @patch('modules.links.helpers.upsert_short_link', return_value='mock_return')
   def test_update_short_link(self, mock_upsert_short_link):
@@ -366,25 +366,25 @@ class TestHierarchicalLinks(TrottoTestCase):
 
   def test_get_shortlink__hierarchical_link_exists(self):
     self.assertEqual((ShortLink.get_by_id(16), 'http://www.trot.to/docs'),
-                     helpers.get_shortlink('1.com', 'go', 'trotto/docs'))
+                     helpers.get_shortlink('1.com', True, 'go', 'trotto/docs'))
 
     self.assertEqual((ShortLink.get_by_id(17), 'http://fr.trot.to'),
-                     helpers.get_shortlink('1.com', 'go', 'trotto/fr/t'))
+                     helpers.get_shortlink('1.com', True, 'go', 'trotto/fr/t'))
 
   def test_get_shortlink__hierarchical_link_exists_in_other_org(self):
     self.assertEqual((None, None),
-                     helpers.get_shortlink('2.com', 'go', 'trotto/docs'))
+                     helpers.get_shortlink('2.com', True, 'go', 'trotto/docs'))
 
   def test_get_shortlink__hierarchical_link_does_not_exist(self):
     self.assertEqual((None, None),
-                     helpers.get_shortlink('1.com', 'go', 'trotto/jots'))
+                     helpers.get_shortlink('1.com', True, 'go', 'trotto/jots'))
 
   def test_get_shortlink__hierarchical_link_does_not_exist__subpath_exists(self):
     self.assertEqual((None, None),
-                     helpers.get_shortlink('1.com', 'go', 'trotto'))
+                     helpers.get_shortlink('1.com', True, 'go', 'trotto'))
 
     self.assertEqual((None, None),
-                     helpers.get_shortlink('1.com', 'go', 'trotto/fr'))
+                     helpers.get_shortlink('1.com', True, 'go', 'trotto/fr'))
 
   def test_create_short_link__conflicting_programmatic_link(self):
     with self.assertRaises(helpers.LinkCreationException) as cm:
