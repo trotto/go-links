@@ -99,7 +99,7 @@ def get_default_namespace(org_id):
   default_namespace = None
 
   try:
-    if session.get('org_default_ns_exp') and session.get('org_default_ns_exp') > datetime.datetime.utcnow():
+    if session.get('org_default_ns_exp') and session.get('org_default_ns_exp').replace(tzinfo=None) > datetime.datetime.utcnow():
       default_namespace = session['org_default_ns']
   except RuntimeError:
     pass
