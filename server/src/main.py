@@ -90,7 +90,7 @@ def init_app_without_routes(disable_csrf=False):
 
     if current_user.is_authenticated:
       try:
-        if not session.get('last_signin') or (datetime.datetime.utcnow() - session['last_signin']) > datetime.timedelta(days=SIGNIN_DURATION_IN_DAYS):
+        if not session.get('last_signin') or (datetime.datetime.utcnow() - session['last_signin'].replace(tzinfo=None)) > datetime.timedelta(days=SIGNIN_DURATION_IN_DAYS):
           logout_user()
       except Exception as e:
         logging.error(e)
