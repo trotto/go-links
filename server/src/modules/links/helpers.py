@@ -1,3 +1,4 @@
+import logging
 import re
 import string
 from urllib.parse import urlparse, urlencode, urlunparse
@@ -74,15 +75,37 @@ def _encode_ascii_incompatible_chars(destination):
   return ''.join(_percent_encode_if_not_ascii_compatible(ch) for ch in destination)
 
 
-def get_shortlink(organization, keywords_punctuation_sensitive, namespace, shortpath):
+def get_shortlink(organization, keywords_punctuation_sensitive, alternative_resolution_mode, namespace, keyword):
   """Returns (shortlink_object, actual_destination)."""
-  perfect_match = models.ShortLink.get_by_full_path(organization, namespace, get_canonical_keyword(keywords_punctuation_sensitive, shortpath))
+  canonical_keyword = get_canonical_keyword(keywords_punctuation_sensitive, keyword)
+  perfect_match = models.ShortLink.get_by_full_path(organization, namespace, canonical_keyword)
 
   if perfect_match:
     return perfect_match, perfect_match.destination_url
 
-  if not perfect_match:
-    return derive_pattern_match(organization, keywords_punctuation_sensitive, namespace, shortpath)
+  matching_programmatic_link, destination = derive_pattern_match(organization, keywords_punctuation_sensitive, namespace, keyword)
+  if matching_programmatic_link:
+    return matching_programmatic_link, destination
+
+  if alternative_resolution_mode:
+    keyword_parts = canonical_keyword.split('/')
+    if len(keyword_parts) > 1:
+      perfect_prefix_match = models.ShortLink.get_by_full_path(organization, namespace, keyword_parts[0])
+
+      if perfect_prefix_match:
+        return perfect_prefix_match, perfect_prefix_match.destination_url+'/'.join(keyword_parts[1:])
+    else:
+      # search for prefix match and, if found, resolve with empty string for placeholders
+      prefix_matches = models.ShortLink.get_by_prefix(organization, namespace, keyword_parts[0])
+
+      if len(prefix_matches) > 1:
+        logging.error('Multiple prefix matches for keyword %s in org %s, which is using alternative resolution mode', organization, keyword)
+        # fall through to the first match
+
+      if len(prefix_matches) > 0:
+        return prefix_matches[0], prefix_matches[0].destination_url.replace('%s', '')
+
+  return None, None
 
 
 def find_conflicting_link(organization, namespace, shortpath):
@@ -141,6 +164,7 @@ EXPANDED_VALIDATION_MODE = 'expanded'
 PATH_RESTRICTIONS_ERROR_SIMPLE = 'Keywords can include only letters, numbers, hyphens, "/", and "%s" placeholders'
 PATH_RESTRICTIONS_ERROR_EXPANDED = 'Provided keyword is invalid' # TODO: Include invalid char(s) in error
 KEYWORDS_PUNCTUATION_SENSITIVE_DEFAULT = True
+ALTERNATIVE_KEYWORD_RESOLUTION_MODE = 'alternative'
 
 
 def validate_shortpath(shortpath, validation_mode):
@@ -187,14 +211,17 @@ def _remove_punctuation(keyword):
   return keyword.translate(str.maketrans('', '', PUNCTUATION_SCRUBBED))
 
 
-def are_keywords_punctuation_sensitive(org_id):
-  org_config = config.get_organization_config(org_id)
+def are_keywords_punctuation_sensitive(org_config):
   keywords_punctuation_sensitive = config.get_from_key_path(org_config, ['keywords', 'punctuation_sensitive'])
 
   if keywords_punctuation_sensitive is None:
     return KEYWORDS_PUNCTUATION_SENSITIVE_DEFAULT
 
   return keywords_punctuation_sensitive
+
+
+def is_using_alternative_keyword_resolution(org_config):
+  return ALTERNATIVE_KEYWORD_RESOLUTION_MODE == config.get_from_key_path(org_config, ['keywords', 'resolution_mode'])
 
 
 def get_canonical_keyword(punctuation_sensitive, keyword):
@@ -211,7 +238,9 @@ def upsert_short_link(organization, owner, namespace, shortpath, destination, up
   validate_shortpath(shortpath, validation_mode)
 
   display_shortpath = shortpath
-  keywords_punctuation_sensitive = are_keywords_punctuation_sensitive(organization)
+  org_config = config.get_organization_config(organization)
+  alternative_resolution_mode = is_using_alternative_keyword_resolution(org_config)
+  keywords_punctuation_sensitive = are_keywords_punctuation_sensitive(org_config)
   shortpath = get_canonical_keyword(keywords_punctuation_sensitive, shortpath)
 
   check_namespaces(organization, namespace, shortpath)
@@ -221,6 +250,10 @@ def upsert_short_link(organization, owner, namespace, shortpath, destination, up
 
   shortpath_parts = shortpath.split('/')
   if len(shortpath_parts) > 1:
+    if alternative_resolution_mode:
+      if shortpath_parts[1] != '%s':
+        raise LinkCreationException('Only "%s" placeholders are allowed after the first "/" in a keyword')
+
     placeholder_found = False
 
     for part in shortpath_parts[1:]:
@@ -240,7 +273,7 @@ def upsert_short_link(organization, owner, namespace, shortpath, destination, up
       raise LinkCreationException('The keyword and the destination must have the same number of "%s" placeholders')
 
   if not updated_link_object:
-    existing_link, _ = get_shortlink(organization, keywords_punctuation_sensitive, namespace, shortpath)
+    existing_link, _ = get_shortlink(organization, keywords_punctuation_sensitive, alternative_resolution_mode, namespace, shortpath)
 
     if existing_link:
       error_message = 'That go link already exists. %s/%s points to %s' % (namespace,

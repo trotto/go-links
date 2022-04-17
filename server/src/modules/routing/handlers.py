@@ -4,7 +4,7 @@ from urllib import parse
 from flask import Blueprint, request, redirect
 from flask_login import current_user
 
-from modules.links.helpers import get_shortlink, get_canonical_keyword, are_keywords_punctuation_sensitive
+from modules.links.helpers import get_shortlink, get_canonical_keyword, are_keywords_punctuation_sensitive, is_using_alternative_keyword_resolution
 from shared_helpers import config
 from shared_helpers.events import enqueue_event
 
@@ -60,13 +60,19 @@ def get_go_link(path):
   provided_shortpath = parse.unquote(path.strip('/'))
   shortpath_parts = provided_shortpath.split('/', 1)
 
+  org_config = config.get_organization_config(current_user.organization)
   # note: we can't remove all punctuation here because punctuation may be part of a programmatic link parameter
-  keywords_punctuation_sensitive = are_keywords_punctuation_sensitive(current_user.organization)
+  alternative_resolution_mode = is_using_alternative_keyword_resolution(org_config)
+  keywords_punctuation_sensitive = are_keywords_punctuation_sensitive(org_config)
   shortpath = '/'.join([get_canonical_keyword(keywords_punctuation_sensitive, shortpath_parts[0].lower())] + shortpath_parts[1:])
 
   namespace, shortpath, provided_shortpath = check_namespace(current_user.organization, shortpath, provided_shortpath)
 
-  matching_shortlink, destination = get_shortlink(current_user.organization, keywords_punctuation_sensitive, namespace, shortpath)
+  matching_shortlink, destination = get_shortlink(current_user.organization,
+                                                  keywords_punctuation_sensitive,
+                                                  alternative_resolution_mode,
+                                                  namespace,
+                                                  shortpath)
 
   if matching_shortlink:
     queue_event(matching_shortlink.organization,

@@ -200,22 +200,22 @@ class TestOtherFunctions(TrottoTestCase):
 
   def test_get_shortlink__link_does_not_exist(self):
     self.assertEqual((None, None),
-                     helpers.get_shortlink('1.com', True, 'go', 'slack'))
+                     helpers.get_shortlink('1.com', True, False, 'go', 'slack'))
 
   def test_get_shortlink__simple_go_link(self):
     self.assertEqual((ShortLink.get_by_id(14), 'http://drive4.com'),
-                     helpers.get_shortlink('1.com', True, 'go', 'drive'))
+                     helpers.get_shortlink('1.com', True, False, 'go', 'drive'))
 
   def test_get_shortlink__go_link_with_placeholder(self):
     self.assertEqual((ShortLink.get_by_id(116), 'http://looker.com/7/search/users'),
-                     helpers.get_shortlink('1.com', True, 'go', 'looker/7/users'))
+                     helpers.get_shortlink('1.com', True, False, 'go', 'looker/7/users'))
 
   def test_get_shortlink__same_shortlink_different_companies__alternate_namespace(self):
     self.assertEqual((ShortLink.get_by_id(117), 'https://1.drive.com/eng'),
-                     helpers.get_shortlink('1.com', True, 'eng', 'drive'))
+                     helpers.get_shortlink('1.com', True, False, 'eng', 'drive'))
 
     self.assertEqual((ShortLink.get_by_id(118), 'https://2.drive.com/eng'),
-                     helpers.get_shortlink('2.com', True, 'eng', 'drive'))
+                     helpers.get_shortlink('2.com', True, False, 'eng', 'drive'))
 
   @patch('modules.links.helpers.upsert_short_link', return_value='mock_return')
   def test_update_short_link(self, mock_upsert_short_link):
@@ -366,25 +366,25 @@ class TestHierarchicalLinks(TrottoTestCase):
 
   def test_get_shortlink__hierarchical_link_exists(self):
     self.assertEqual((ShortLink.get_by_id(16), 'http://www.trot.to/docs'),
-                     helpers.get_shortlink('1.com', True, 'go', 'trotto/docs'))
+                     helpers.get_shortlink('1.com', True, False, 'go', 'trotto/docs'))
 
     self.assertEqual((ShortLink.get_by_id(17), 'http://fr.trot.to'),
-                     helpers.get_shortlink('1.com', True, 'go', 'trotto/fr/t'))
+                     helpers.get_shortlink('1.com', True, False, 'go', 'trotto/fr/t'))
 
   def test_get_shortlink__hierarchical_link_exists_in_other_org(self):
     self.assertEqual((None, None),
-                     helpers.get_shortlink('2.com', True, 'go', 'trotto/docs'))
+                     helpers.get_shortlink('2.com', True, False, 'go', 'trotto/docs'))
 
   def test_get_shortlink__hierarchical_link_does_not_exist(self):
     self.assertEqual((None, None),
-                     helpers.get_shortlink('1.com', True, 'go', 'trotto/jots'))
+                     helpers.get_shortlink('1.com', True, False, 'go', 'trotto/jots'))
 
   def test_get_shortlink__hierarchical_link_does_not_exist__subpath_exists(self):
     self.assertEqual((None, None),
-                     helpers.get_shortlink('1.com', True, 'go', 'trotto'))
+                     helpers.get_shortlink('1.com', True, False, 'go', 'trotto'))
 
     self.assertEqual((None, None),
-                     helpers.get_shortlink('1.com', True, 'go', 'trotto/fr'))
+                     helpers.get_shortlink('1.com', True, False, 'go', 'trotto/fr'))
 
   def test_create_short_link__conflicting_programmatic_link(self):
     with self.assertRaises(helpers.LinkCreationException) as cm:

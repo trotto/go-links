@@ -1,6 +1,8 @@
 import base64
+from dataclasses import dataclass
 import datetime
 import json
+from typing import List
 
 from freezegun import freeze_time
 import jwt
@@ -125,6 +127,40 @@ class TestHandlers(TrottoTestCase):
     self.assertEqual(201, response.status_int)
 
     self.assertEqual('joe@googs.com', response.json['owner'])
+
+  def test_create_link__multipart_keyword(self):
+    @dataclass
+    class TestCase:
+      resolution_mode: str
+      keywords: List[str]
+      expected_error_string: str
+
+    for test_case in [
+      TestCase(resolution_mode=None, keywords=['example', 'example/%s'], expected_error_string=None),
+      TestCase(resolution_mode=None, keywords=['example', 'example/part2'], expected_error_string=None),
+      TestCase(resolution_mode='alternative',
+               keywords=['example', 'example/%s'],
+               expected_error_string='A conflicting go link already exists'),
+      TestCase(resolution_mode='alternative',
+               keywords=['example', 'example/part2'],
+               expected_error_string='Only "%s" placeholders'),
+    ]:
+      self.tearDown()
+      self.setUp()
+
+      with patch('shared_helpers.config.get_organization_config',
+                 return_value={'keywords': {'resolution_mode': test_case.resolution_mode}}):
+        response = None
+        for keyword in test_case.keywords:
+          response = self.testapp.post_json('/_/api/links',
+                                            {'shortpath': keyword,
+                                             'destination': 'http://example.com/'+keyword},
+                                            headers={'TROTTO_USER_UNDER_TEST': 'kay@googs.com'})
+
+        if test_case.expected_error_string:
+          self.assertIn(test_case.expected_error_string, response.json.get('error'))
+        else:
+          self.assertEqual(None, response.json.get('error'))
 
   def test_get_shortlinks_for_user(self):
     modified_datetime = datetime.datetime.utcnow() + datetime.timedelta(days=2)

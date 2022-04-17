@@ -1,4 +1,6 @@
 from mock import patch
+from dataclasses import dataclass
+from urllib import parse
 
 from modules.data import get_models
 from modules.routing import handlers
@@ -182,9 +184,7 @@ class TestRedirectHandler(TrottoTestCase):
 
     self.assertEqual('http://wiki.com', response.headers['Location'])
 
-
-class TestKeywordPunctuationSensitivity(TrottoTestCase):
-
+class RoutingTestCase(TrottoTestCase):
   blueprints_under_test = [handlers.routes, links_handlers.routes]
 
   TEST_KEYWORD = 'meeting-notes'
@@ -205,6 +205,8 @@ class TestKeywordPunctuationSensitivity(TrottoTestCase):
     self.assertEqual(302, response.status_int)
 
     return response.headers['Location']
+
+class TestKeywordPunctuationSensitivity(RoutingTestCase):
 
   @patch('shared_helpers.config.get_organization_config',
          return_value={})
@@ -261,3 +263,67 @@ class TestKeywordPunctuationSensitivity(TrottoTestCase):
   def test_keyword_punctuation_sensitivity__insensitive__no_such_link(self, _):
     # autofilled link should retain punctuation
     self.assertEqual(f'http://localhost:5007/?sp={self.TEST_KEYWORD}', self._get_redirect(self.TEST_KEYWORD))
+
+
+class TestAlternativeKeywordResolutionMode(RoutingTestCase):
+  @dataclass
+  class TestCase:
+    resolution_mode: str
+    requested_keyword: str
+    expected_redirect: str
+
+  def test_alternative_keyword_resolution_mode__extra_path_parts(self):
+    TEST_KEYWORD = 'example'
+    TEST_DESTINATION = 'https://example.com/'
+
+    self._create_test_link(TEST_KEYWORD, TEST_DESTINATION)
+
+    TEST_KEYWORD_WITH_EXTRA_PARTS = TEST_KEYWORD+'/extra1/extra2'
+
+    for test_case in [
+      self.TestCase(resolution_mode=None, requested_keyword=TEST_KEYWORD, expected_redirect=TEST_DESTINATION),
+      self.TestCase(resolution_mode=None,
+                    requested_keyword=TEST_KEYWORD_WITH_EXTRA_PARTS,
+                    expected_redirect='http://localhost:5007/?'+parse.urlencode({'sp': TEST_KEYWORD_WITH_EXTRA_PARTS})),
+      self.TestCase(resolution_mode='alternative', requested_keyword=TEST_KEYWORD, expected_redirect=TEST_DESTINATION),
+      self.TestCase(resolution_mode='alternative',
+                    requested_keyword=TEST_KEYWORD_WITH_EXTRA_PARTS,
+                    expected_redirect=TEST_DESTINATION+'extra1/extra2'),
+    ]:
+      with patch('shared_helpers.config.get_organization_config',
+                 return_value={'keywords': {'resolution_mode': test_case.resolution_mode}}):
+        self.assertEqual(test_case.expected_redirect, self._get_redirect(test_case.requested_keyword))
+
+  def test_alternative_keyword_resolution_mode__programmatic_link_without_provided_params(self):
+    TEST_KEYWORD_1 = 'example/%s'
+    TEST_DESTINATION_1 = 'https://example.com/?param=%s'
+
+    TEST_KEYWORD_2 = 'example2/%s/%s'
+    TEST_DESTINATION_2 = 'https://example.com/?param1=%s&param2=%s'
+
+    self._create_test_link(TEST_KEYWORD_1, TEST_DESTINATION_1)
+    self._create_test_link(TEST_KEYWORD_2, TEST_DESTINATION_2)
+
+    TEST_KEYWORD_1_WITHOUT_PARAMS = TEST_KEYWORD_1.replace('%s', '').strip('/')
+    TEST_KEYWORD_2_WITHOUT_PARAMS = TEST_KEYWORD_2.replace('%s', '').strip('/')
+
+    for test_case in [
+      self.TestCase(resolution_mode=None,
+                    requested_keyword=TEST_KEYWORD_1.replace('%s', 'hello'),
+                    expected_redirect=TEST_DESTINATION_1.replace('%s', 'hello')),
+      self.TestCase(resolution_mode=None,
+                    requested_keyword=TEST_KEYWORD_1_WITHOUT_PARAMS,
+                    expected_redirect='http://localhost:5007/?'+parse.urlencode({'sp': TEST_KEYWORD_1_WITHOUT_PARAMS})),
+      self.TestCase(resolution_mode='alternative',
+                    requested_keyword=TEST_KEYWORD_1.replace('%s', 'hello'),
+                    expected_redirect=TEST_DESTINATION_1.replace('%s', 'hello')),
+      self.TestCase(resolution_mode='alternative',
+                    requested_keyword=TEST_KEYWORD_1_WITHOUT_PARAMS,
+                    expected_redirect=TEST_DESTINATION_1.replace('%s', '')),
+      self.TestCase(resolution_mode='alternative',
+                    requested_keyword=TEST_KEYWORD_2_WITHOUT_PARAMS,
+                    expected_redirect=TEST_DESTINATION_2.replace('%s', '')),
+    ]:
+      with patch('shared_helpers.config.get_organization_config',
+                 return_value={'keywords': {'resolution_mode': test_case.resolution_mode}}):
+        self.assertEqual(test_case.expected_redirect, self._get_redirect(test_case.requested_keyword))
