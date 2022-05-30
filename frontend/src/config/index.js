@@ -33,10 +33,6 @@ const DEFAULT_CONFIG = {
 };
 
 const DEFAULT_NAV_ITEMS = {
-  directory: {
-    text: 'Directory',
-    url: '#/directory'
-  },
   howItWorks: {
     text: 'How It Works',
     url: 'https://www.trot.to/how-it-works',
