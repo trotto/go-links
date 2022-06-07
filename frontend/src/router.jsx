@@ -15,7 +15,7 @@ export class TrottoRouter extends React.Component {
                 history={hashHistory}>
           <Route component={App}>
             <Route component={MainLayoutContainer}>
-              <Route path="/" component={LinksTableContainer}/>
+              <Route path="/" component={null}/>
               <Route path="/create" component={null}/>
               <Route path="/directory" component={LinksTableContainer}/>
             </Route>

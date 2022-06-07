@@ -32,7 +32,14 @@ export class MainLayout extends React.Component {
           <div>
             <ButterbarContainer />
             <NavBar userInfo={this.props.userInfo} links={this.props.links} location={this.props.location} />
-            <LinkFormContainer location={this.props.location} />
+
+            {function(props) {
+              if (['/', '/create', '/directory'].indexOf(props.location.pathname) !== -1) {
+                return <LinkFormContainer location={props.location} />;
+              }
+
+            }(this.props)}
+
             <div style={{width: '100%', marginTop: '20px'}}>
               {this.props.children}
             </div>
