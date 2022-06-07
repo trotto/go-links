@@ -50,7 +50,9 @@ class TestUserHandlers(TrottoTestCase):
                       'role': None,
                       'admin': False,
                       'notifications': {'some_announcement': 'dismissed'},
-                      'org_edit_mode': 'owners_and_admins_only'})
+                      'org_edit_mode': 'owners_and_admins_only',
+                      'read_only_mode': None,
+                      'info_bar': None})
 
     response = self.testapp.get('/_/api/users/me',
                                 headers={'TROTTO_USER_UNDER_TEST': 'ray@googs.com'})
@@ -63,7 +65,9 @@ class TestUserHandlers(TrottoTestCase):
                       'role': None,
                       'admin': False,
                       'notifications': {},
-                      'org_edit_mode': 'owners_and_admins_only'})
+                      'org_edit_mode': 'owners_and_admins_only',
+                      'read_only_mode': None,
+                      'info_bar': None})
 
   @patch('modules.users.handlers.is_user_admin', return_value=True)
   def test_user_info_endpoint__by_user_id__is_admin(self, mock_is_user_admin):

@@ -7,6 +7,7 @@ import { CreateOutlined, Cancel, DeleteOutline, Reply } from '@material-ui/icons
 import {PrimaryButton} from './shared/Buttons';
 import {getServiceBaseUrl} from '../utils'
 import { DEFAULT_NAMESPACE } from '../config';
+import * as getters from "../getters";
 
 var validUrl = require('valid-url');
 
@@ -280,9 +281,9 @@ export class LinksTable extends React.Component {
         Header: "Destination",
         accessor: "destination_url",
         Cell: row => {
-          const fullCRUD = this.props.userInfo &&
+          const fullCRUD = !this.props.readOnlyMode && this.props.userInfo &&
               (this.props.userInfo.get('admin') || row.original.owner === this.props.userInfo.get('email'));
-          const editable = fullCRUD || (this.props.userInfo && this.props.userInfo.get('org_edit_mode') === 'any_org_user');
+          const editable = !this.props.readOnlyMode && (fullCRUD || (this.props.userInfo && this.props.userInfo.get('org_edit_mode') === 'any_org_user'));
 
           return <EditableDestinationContainer
                     key={row.original.id + '-' + row.value}
@@ -390,7 +391,8 @@ export const LinksTableContainer = connect(
         links: state.get('links') || List(),
         defaultLinkSearchTerm: state.get('defaultLinkSearchTerm'),
         userInfo: state.get('userInfo'),
-        goSupportedInCurrentSession: state.get('goSupportedInCurrentSession')
+        readOnlyMode: getters.readOnlyMode(state),
+        goSupportedInCurrentSession: state.get('goSupportedInCurrentSession'),
       };
     },
     actions

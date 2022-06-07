@@ -239,6 +239,10 @@ def upsert_short_link(organization, owner, namespace, shortpath, destination, up
 
   display_shortpath = shortpath
   org_config = config.get_organization_config(organization)
+
+  if org_config.get('read_only_mode') and not updated_link_object and validation_mode != EXPANDED_VALIDATION_MODE:
+    raise LinkCreationException('Your organization is in read-only mode.')
+
   alternative_resolution_mode = is_using_alternative_keyword_resolution(org_config)
   keywords_punctuation_sensitive = are_keywords_punctuation_sensitive(org_config)
   shortpath = get_canonical_keyword(keywords_punctuation_sensitive, shortpath)

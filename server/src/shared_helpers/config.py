@@ -65,7 +65,9 @@ def get_organization_config(org_id):
                      'layout',
                      'namespaces',
                      'webhook_endpoints',
-                     'keywords']
+                     'keywords',
+                     'read_only_mode',
+                     'info_bar']
 
   try:
     with open(os.path.join(CONFIGS_PARENT_DIR,

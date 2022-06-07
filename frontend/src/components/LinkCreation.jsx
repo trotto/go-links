@@ -1,5 +1,6 @@
 import React from 'react';
 import {connect} from 'react-redux';
+import Alert from '@material-ui/lab/Alert';
 import {CopyToClipboard} from 'react-copy-to-clipboard';
 import * as actions from '../actions';
 import * as getters from '../getters';
@@ -24,6 +25,7 @@ function mapStateToProps(state) {
     goSupportedInCurrentSession: state.get('goSupportedInCurrentSession'),
     userLoggedIn: getters.userLoggedIn(state),
     userInfo: state.get('userInfo'),
+    readOnlyMode: getters.readOnlyMode(state),
     namespaces: state.get('namespaces')
   };
 }
@@ -173,8 +175,20 @@ export class LinkForm extends React.Component {
       messageComponent = <SuccessMessage>{messageText}</SuccessMessage>;
     }
 
+    const infoBar = this.props.userInfo && this.props.userInfo.get('info_bar');
+
     return (
         <div className="container" id="link-form">
+          {infoBar && (
+            <div className="row" style={{marginTop: '-60px', marginBottom: '30px'}}>
+              <div className="col-md-8 col-md-offset-2">
+                <Alert severity="info" icon={false}>
+                  <div style={{fontSize: '1.5rem'}} dangerouslySetInnerHTML={{__html: infoBar}}>
+                  </div>
+                </Alert>
+              </div>
+            </div>
+          )}
           {'/create' !== this.props.location.pathname ? null : <NewUserIntroContainer />}
           <div className="row">
             <div className="col-md-3 col-md-offset-2">
@@ -185,6 +199,7 @@ export class LinkForm extends React.Component {
                        : <NamespaceSelectorContainer shortlinkInput={this.shortlinkInput} />}
                  </div>
                  <input
+                     disabled={this.props.readOnlyMode}
                      className="form-control"
                      ref={(input) => { this.shortlinkInput = input; }}
                      style={{width: '0px', flexGrow: '1'}}
@@ -202,6 +217,7 @@ export class LinkForm extends React.Component {
             <div className="col-md-4">
                 <div style={{width: '100%', display: 'flex'}}>
                   <input
+                     disabled={this.props.readOnlyMode}
                      className="form-control"
                      ref={(input) => { this.destinationInput = input; }}
                      style={{width: '0px', flexGrow: '1'}}
@@ -250,6 +266,7 @@ export class LinkForm extends React.Component {
                 </div>
                 <div>
                   <PrimaryButton
+                      disabled={this.props.readOnlyMode}
                       id="link-submit-button"
                       data-test-id="shortlink-submit-button"
                       type="submit" className="btn btn-default"
