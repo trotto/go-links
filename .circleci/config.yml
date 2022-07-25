@@ -9,6 +9,23 @@ install_node_tooling: &install_node_tooling
         sudo apt update &&
         sudo apt install yarn &&
         curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.35.3/install.sh | bash
+install_postgres: &install_postgres
+  - run:
+      name: Install Postgres (for automated tests)
+      # Note: For reasons unknown, just invoking psql as the `postgres` user with sudo resulted in a request for
+      #       the `circleci` user password, which shouldn't happen in CircleCI. Hence use of su.
+      # See https://www.postgresql.org/download/linux/debian/
+      command: |
+        sudo apt update
+        sudo apt install lsb-release
+        sudo sh -c 'echo "deb http://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list'
+        wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add -
+        sudo apt update
+        sudo apt install postgresql-12
+        sudo pg_ctlcluster 12 main start
+        sudo su - postgres -c 'psql -c "CREATE USER circleci; ALTER USER circleci Superuser;"'
+        sudo mv .circleci/pg_hba.conf /etc/postgresql/12/main/pg_hba.conf
+        sudo pg_ctlcluster 12 main restart
 build_frontend: &build_frontend
   - run:
       name: Build frontend bundle
@@ -30,7 +47,7 @@ run_e2e_tests: &run_e2e_tests
 jobs:
   build_and_deploy:
     docker:
-      - image: circleci/python:3.7.8-stretch-browsers
+      - image: circleci/python:3.7-bullseye-browsers
     steps:
       - checkout
       - run: sh .circleci/set_env_vars.sh
@@ -39,16 +56,16 @@ jobs:
       - run: tar zxf $HOME/google-cloud-sdk-303.0.0-linux-x86_64.tar.gz -C $HOME
       - run: CLOUDSDK_CORE_DISABLE_PROMPTS=1 $HOME/google-cloud-sdk/install.sh
       - run: echo 'source ${HOME}/google-cloud-sdk/path.bash.inc' >> $BASH_ENV
-      - run: gcloud components install cloud-datastore-emulator beta
       - run: gcloud components update
+      - <<: *install_postgres
       # install deps locally to enable unit testing
       - run: curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
       - run: sudo python get-pip.py
       - run: sudo pip install -r ${SERVER_CODE_ROOT}/src/requirements.txt
       - run: sudo pip install -r ${SERVER_CODE_ROOT}/dev_requirements.txt
       # Retrieve our secrets from the CircleCI environment
-      - run: echo $APP_SECRETS | base64 --decode > ${SERVER_SRC_ROOT}/config.zip
-      - run: unzip -o ${SERVER_SRC_ROOT}/config.zip -d ${SERVER_SRC_ROOT}
+      - run: echo $APP_YML_BASE64 | base64 --decode > ${SERVER_SRC_ROOT}/config/app.yml
+      - run: echo $CLIENT_SECRETS_BASE64 | base64 --decode > ${SERVER_SRC_ROOT}/config/client_secrets.json
       # Deployment service account needs these roles:
       # - App Engine Deployer (to deploy new versions)
       # - App Engine Service Admin (to change versions)
@@ -56,7 +73,7 @@ jobs:
       # - Storage Object Creator (to upload app files)
       # - Storage Object Viewer (to list app files)
       - run: echo $DEPLOYER_CLIENT_SECRETS | base64 --decode > ${HOME}/deployer_client_secrets.json
-      - run: cd ${SERVER_CODE_ROOT} && sh run_tests/cloud_datastore.sh
+      - run: cd ${SERVER_CODE_ROOT} && bash run_tests/run.sh
       - <<: *install_node_tooling
       - <<: *build_frontend
       - run: gcloud auth activate-service-account --key-file ${HOME}/deployer_client_secrets.json

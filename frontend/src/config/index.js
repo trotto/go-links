@@ -1,6 +1,6 @@
 import {fromJS, List} from 'immutable';
 
-const CUSTOM_CONFIG = window._trotto.layout;
+const CUSTOM_CONFIG = fromJS(window._trotto.layout);
 
 const DEFAULT_CONFIG = {
   palette: {
@@ -44,7 +44,13 @@ const DEFAULT_NAV_ITEMS = {
   }
 };
 
-let config = fromJS(DEFAULT_CONFIG).mergeDeep(fromJS(CUSTOM_CONFIG));
+let config = fromJS(DEFAULT_CONFIG).mergeDeep(CUSTOM_CONFIG);
+
+if (CUSTOM_CONFIG.getIn(['header', 'links'])) {
+  // `mergeDeep` merges lists instead of replacing them
+  config = config.setIn(['header', 'links'], CUSTOM_CONFIG.getIn(['header', 'links']));
+}
+
 config = config.updateIn(['header', 'links'], (links) => links.reduce((fullLinks, link) => {
   if (typeof link === 'string') {
     if (!DEFAULT_NAV_ITEMS[link]) {
@@ -59,6 +65,8 @@ config = config.updateIn(['header', 'links'], (links) => links.reduce((fullLinks
 }, List()));
 
 export const getConfig = (keyPath) => config.getIn(keyPath.split('.'))
+
+export const DEFAULT_NAMESPACE = window._trotto.defaultNamespace;
 
 const setTitleAndFavicon = () => {
   const favicon = document.createElement('link');

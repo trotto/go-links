@@ -40,10 +40,14 @@ export class NavBar extends React.Component {
   }
 
   render() {
-    const navItems = getConfig('header.links').toJS()
+    let navItems = getConfig('header.links').toJS()
         .filter(item => this.props.links || item.id !== 'directory');
 
     if (this.props.userInfo !== undefined) {
+      if (this.props.userInfo && this.props.userInfo.get('admin')){
+        navItems = navItems.concat(window._trotto.adminLinks);
+      }
+
       navItems.push({
         text: !this.props.userInfo ? 'Sign In' : 'Sign Out',
         url: getServiceBaseUrl('default') + '/_/auth/' + (!this.props.userInfo ? 'login' : 'logout'),
@@ -57,7 +61,7 @@ export class NavBar extends React.Component {
             <div className="col-md-8 col-md-offset-2">
               <div style={{width: '100%', display: 'flex', justifyContent: 'space-between'}}>
                 <a className="unstyled-link" href="#/">
-                  <div style={{display: 'flex', alignItems: 'center'}}>
+                  <div style={{display: 'flex', alignItems: 'center', flexWrap: 'wrap'}}>
                     <img style={getConfig('header.logo.css').toJS()} src={getConfig('header.logo.url')} />
                     <div style={{marginLeft: '7px', color: 'black', textDecoration: 'none',
                                  fontSize: '1.6em', opacity: '0.7'}}>
@@ -67,7 +71,7 @@ export class NavBar extends React.Component {
                 </a>
                 <div className="nav-container"
                      style={{display: 'flex', flexDirection: 'column', alignItems: 'flex-end',
-                             justifyContent: 'flex-end'}}>
+                             justifyContent: 'flex-end', flexShrink: 0}}>
                   <nav className="nav-collapse">
                     <ul>
                       {navItems.map(itemData =>

@@ -1,6 +1,8 @@
 import base64
+from dataclasses import dataclass
 import datetime
 import json
+from typing import List
 
 from freezegun import freeze_time
 import jwt
@@ -24,7 +26,9 @@ class TestHandlers(TrottoTestCase):
                                modified=datetime.datetime(2018, 11, 1),
                                organization='googs.com',
                                owner='kay@googs.com',
+                               namespace='go',
                                shortpath='there',
+                               shortpath_prefix='there',
                                destination_url='http://example.com/there')
 
     mock_create_short_link.return_value = mock_shortlink
@@ -34,19 +38,21 @@ class TestHandlers(TrottoTestCase):
                                        'destination': 'http://example.com/there'},
                                       headers={'TROTTO_USER_UNDER_TEST': 'kay@googs.com'})
 
-    self.assertEqual({'id': 123,
+    self.assertEqual({'id': '123',
                       'created': '2018-10-01 00:00:00',
                       'modified': '2018-11-01 00:00:00',
                       'owner': 'kay@googs.com',
+                      'namespace': 'go',
                       'shortpath': 'there',
                       'destination_url': 'http://example.com/there',
+                      'type': None,
                       'visits_count': 0},
                      json.loads(response.text))
 
     self.assertEqual(mock_create_short_link.call_args_list,
-                     [call('googs.com', 'kay@googs.com', 'there', 'http://example.com/there')])
+                     [call('googs.com', 'kay@googs.com', 'go', 'there', 'http://example.com/there', 'simple')])
 
-  def test_create_link__no_patching(self):
+  def test_create_link__no_patching__no_namespace_specified(self):
     self.testapp.post_json('/_/api/links',
                            {'shortpath': 'favorites',
                             'destination': 'http://example.com'},
@@ -58,6 +64,43 @@ class TestHandlers(TrottoTestCase):
 
     shortlink = shortlinks[0]
 
+    self.assertEqual(None, shortlink._ns)  # namespace of "go" is null in the database
+    self.assertEqual('favorites', shortlink.shortpath)
+    self.assertEqual('http://example.com', shortlink.destination_url)
+
+  def test_create_link__no_patching__go_namespace_specified(self):
+    self.testapp.post_json('/_/api/links',
+                           {'namespace': 'go',
+                            'shortpath': 'favorites',
+                            'destination': 'http://example.com'},
+                           headers={'TROTTO_USER_UNDER_TEST': 'kay@googs.com'})
+
+    shortlinks = ShortLink._get_all()
+
+    self.assertEqual(1, len(shortlinks))
+
+    shortlink = shortlinks[0]
+
+    self.assertEqual(None, shortlink._ns)  # namespace of "go" is null in the database
+    self.assertEqual('favorites', shortlink.shortpath)
+    self.assertEqual('http://example.com', shortlink.destination_url)
+
+  @patch('shared_helpers.config.get_organization_config',
+         side_effect=lambda org: {'namespaces': ['eng', 'prod']} if org == 'googs.com' else {})
+  def test_create_link__config_patching_only__other_namespace_specified(self, _):
+    self.testapp.post_json('/_/api/links',
+                           {'namespace': 'eng',
+                            'shortpath': 'favorites',
+                            'destination': 'http://example.com'},
+                           headers={'TROTTO_USER_UNDER_TEST': 'kay@googs.com'})
+
+    shortlinks = ShortLink._get_all()
+
+    self.assertEqual(1, len(shortlinks))
+
+    shortlink = shortlinks[0]
+
+    self.assertEqual('eng', shortlink._ns)
     self.assertEqual('favorites', shortlink.shortpath)
     self.assertEqual('http://example.com', shortlink.destination_url)
 
@@ -85,6 +128,40 @@ class TestHandlers(TrottoTestCase):
 
     self.assertEqual('joe@googs.com', response.json['owner'])
 
+  def test_create_link__multipart_keyword(self):
+    @dataclass
+    class TestCase:
+      resolution_mode: str
+      keywords: List[str]
+      expected_error_string: str
+
+    for test_case in [
+      TestCase(resolution_mode=None, keywords=['example', 'example/%s'], expected_error_string=None),
+      TestCase(resolution_mode=None, keywords=['example', 'example/part2'], expected_error_string=None),
+      TestCase(resolution_mode='alternative',
+               keywords=['example', 'example/%s'],
+               expected_error_string='A conflicting go link already exists'),
+      TestCase(resolution_mode='alternative',
+               keywords=['example', 'example/part2'],
+               expected_error_string='Only "%s" placeholders'),
+    ]:
+      self.tearDown()
+      self.setUp()
+
+      with patch('shared_helpers.config.get_organization_config',
+                 return_value={'keywords': {'resolution_mode': test_case.resolution_mode}}):
+        response = None
+        for keyword in test_case.keywords:
+          response = self.testapp.post_json('/_/api/links',
+                                            {'shortpath': keyword,
+                                             'destination': 'http://example.com/'+keyword},
+                                            headers={'TROTTO_USER_UNDER_TEST': 'kay@googs.com'})
+
+        if test_case.expected_error_string:
+          self.assertIn(test_case.expected_error_string, response.json.get('error'))
+        else:
+          self.assertEqual(None, response.json.get('error'))
+
   def test_get_shortlinks_for_user(self):
     modified_datetime = datetime.datetime.utcnow() + datetime.timedelta(days=2)
 
@@ -93,49 +170,86 @@ class TestHandlers(TrottoTestCase):
                 created=datetime.datetime(2018, 10, 1),
                 organization='googs.com',
                 owner='kay@googs.com',
+                namespace='go',
                 shortpath='there',
+                shortpath_prefix='there',
                 destination_url='http://example.com'
                 ).put()
       ShortLink(id=2,
                 created=datetime.datetime(2018, 11, 1),
                 organization='googs.com',
                 owner='jay@googs.com',
+                # no namespace explicitly set,
                 shortpath='here',
+                shortpath_prefix='here',
                 destination_url='http://gmail.com'
                 ).put()
       ShortLink(id=3,
                 organization='widgets.com',
                 owner='el@widgets.com',
+                namespace='go',
                 shortpath='elsewhere',
+                shortpath_prefix='elsewhere',
                 destination_url='http://drive.com'
                 ).put()
+      ShortLink(id=4,
+                created=datetime.datetime(2019, 11, 1),
+                organization='googs.com',
+                owner='jay@googs.com',
+                namespace='eng',
+                shortpath='1',
+                shortpath_prefix='1',
+                destination_url='http://1.com').put()
+      ShortLink(id=5,
+                organization='widgets.com',
+                owner='el@widgets.com',
+                namespace='eng',
+                shortpath='2',
+                shortpath_prefix='2',
+                destination_url='http://2.com').put()
 
     response = self.testapp.get('/_/api/links',
                                 headers={'TROTTO_USER_UNDER_TEST': 'kay@googs.com'})
 
-    self.assertEqual([{'id': 1,
-                       'created': '2018-10-01 00:00:00',
-                       'modified': str(modified_datetime),
-                       'mine': True,
-                       'owner': 'kay@googs.com',
-                       'shortpath': 'there',
-                       'destination_url': 'http://example.com',
-                       'visits_count': 0},
-                      {'id': 2,
-                       'created': '2018-11-01 00:00:00',
-                       'modified': str(modified_datetime),
-                       'mine': False,
-                       'owner': 'jay@googs.com',
-                       'shortpath': 'here',
-                       'destination_url': 'http://gmail.com',
-                       'visits_count': 0}],
-                     json.loads(response.text))
+    self.assertCountEqual([{'id': '1',
+                            'created': '2018-10-01 00:00:00',
+                            'modified': str(modified_datetime),
+                            'mine': True,
+                            'owner': 'kay@googs.com',
+                            'namespace': 'go',
+                            'shortpath': 'there',
+                            'destination_url': 'http://example.com',
+                            'type': None,
+                            'visits_count': 0},
+                           {'id': '2',
+                            'created': '2018-11-01 00:00:00',
+                            'modified': str(modified_datetime),
+                            'mine': False,
+                            'owner': 'jay@googs.com',
+                            'namespace': 'go',
+                            'shortpath': 'here',
+                            'destination_url': 'http://gmail.com',
+                            'type': None,
+                            'visits_count': 0},
+                           {'id': '4',
+                            'created': '2019-11-01 00:00:00',
+                            'modified': str(modified_datetime),
+                            'mine': False,
+                            'owner': 'jay@googs.com',
+                            'namespace': 'eng',
+                            'shortpath': '1',
+                            'destination_url': 'http://1.com',
+                            'type': None,
+                            'visits_count': 0}],
+                          json.loads(response.text))
 
   def test_update_link__go_link__successful(self):
     ShortLink(id=7,
               organization='googs.com',
               owner='kay@googs.com',
+              namespace='go',
               shortpath='there',
+              shortpath_prefix='there',
               destination_url='http://example.com'
               ).put()
 
@@ -147,9 +261,30 @@ class TestHandlers(TrottoTestCase):
 
     self.assertEqual('http://boop.com', shortlink.destination_url)
 
+  def test_create_update_link__validation_override(self):
+    response = self.testapp.post_json('/_/api/links?validation=expanded',
+                                      {'shortpath': 'こんにちは',
+                                       'destination': 'https://www.trot.to'},
+                                      headers={'TROTTO_USER_UNDER_TEST': 'kay@googs.com'})
+
+    new_link_id = response.json.get('id')
+    self.assertIsNotNone(new_link_id)
+    shortlink = ShortLink.get_by_id(new_link_id)
+
+    self.assertEqual('https://www.trot.to', shortlink.destination_url)
+
+    self.testapp.put_json(f'/_/api/links/{new_link_id}',
+                          {'destination': 'https://github.com/trotto'},
+                          headers={'TROTTO_USER_UNDER_TEST': 'kay@googs.com'})
+
+    shortlink = ShortLink.get_by_id(new_link_id)
+
+    self.assertEqual('https://github.com/trotto', shortlink.destination_url)
+
+
   def test_created_and_modified_date_tracking(self):
     time_1 = datetime.datetime.utcnow() + datetime.timedelta(days=2)
-    time_2 = datetime.datetime.utcnow() + datetime.timedelta(days=4)
+    time_2 = time_1 + datetime.timedelta(days=2)
 
     with freeze_time(time_1):
       self.testapp.post_json('/_/api/links',
@@ -182,7 +317,9 @@ class TestHandlers(TrottoTestCase):
     ShortLink(id=7,
               organization='googs.com',
               owner='kay@googs.com',
+              namespace='go',
               shortpath='there',
+              shortpath_prefix='there',
               destination_url='http://drive.com'
               ).put()
 
@@ -202,7 +339,9 @@ class TestHandlers(TrottoTestCase):
     ShortLink(id=7,
               organization='googs.com',
               owner='kay@googs.com',
+              namespace='go',
               shortpath='there',
+              shortpath_prefix='there',
               destination_url='http://drive.com'
               ).put()
 
@@ -216,12 +355,46 @@ class TestHandlers(TrottoTestCase):
 
     self.assertEqual(1, mock_is_user_admin.call_count)
 
+  @patch('modules.links.handlers.get_org_edit_mode', return_value='any_org_user')
+  def test_update_link__go_link_of_other_user__current_user_not_admin__open_edit_mode(self, _):
+    ShortLink(id=7,
+              organization='googs.com',
+              owner='kay@googs.com',
+              namespace='go',
+              shortpath='there',
+              shortpath_prefix='there',
+              destination_url='http://drive.com'
+              ).put()
+
+    response = self.testapp.put_json('/_/api/links/7',
+                                     {'destination': 'http://boop.com'},
+                                     headers={'TROTTO_USER_UNDER_TEST': 'rex@googs.com'})
+
+    self.assertEqual(200, response.status_int)
+
+    shortlink = ShortLink.get_by_id(7)
+
+    self.assertEqual('http://boop.com', shortlink.destination_url)
+
+    # user still shouldn't be able to delete the go link
+    response = self.testapp.delete('/_/api/links/7',
+                                   headers={'TROTTO_USER_UNDER_TEST': 'rex@googs.com'},
+                                   expect_errors=True)
+
+    self.assertEqual(403, response.status_int)
+
+    shortlink = ShortLink.get_by_id(7)
+
+    self.assertIsNotNone(shortlink)
+
   @patch('modules.users.helpers.is_user_admin', return_value=True)
   def test_update_link__go_link_of_other_user__current_user_is_admin_for_different_org(self, mock_is_user_admin):
     ShortLink(id=7,
               organization='widgets.com',
               owner='kc@widgets.com',
+              namespace='go',
               shortpath='there',
+              shortpath_prefix='there',
               destination_url='http://drive.com'
               ).put()
 
@@ -240,7 +413,9 @@ class TestHandlers(TrottoTestCase):
     ShortLink(id=7,
               organization='googs.com',
               owner='kay@googs.com',
+              namespace='go',
               shortpath='there',
+              shortpath_prefix='there',
               destination_url='http://drive.com'
               ).put()
 
@@ -260,7 +435,9 @@ class TestHandlers(TrottoTestCase):
     ShortLink(id=7,
               organization='googs.com',
               owner='kay@googs.com',
+              namespace='go',
               shortpath='there',
+              shortpath_prefix='there',
               destination_url='http://drive.com'
               ).put()
 
@@ -281,7 +458,9 @@ class TestHandlers(TrottoTestCase):
     ShortLink(id=7,
               organization='googs.com',
               owner='kay@googs.com',
+              namespace='go',
               shortpath='there',
+              shortpath_prefix='there',
               destination_url='http://drive.com'
               ).put()
 
@@ -298,7 +477,9 @@ class TestHandlers(TrottoTestCase):
     test_shortlink = ShortLink(id=7,
                                organization='googs.com',
                                owner='kay@googs.com',
+                               namespace='go',
                                shortpath='there',
+                               shortpath_prefix='there',
                                destination_url='http://drive.com')
     test_shortlink.put()
 
@@ -312,15 +493,18 @@ class TestHandlers(TrottoTestCase):
 
     self.assertEqual(None, shortlink)
 
-    mock_enqueue_event.assert_called_once_with('link.deleted',
+    mock_enqueue_event.assert_called_once_with('googs.com',
+                                               'link.deleted',
                                                'link',
                                                {'shortpath': 'there',
                                                 'created': str(test_shortlink.created),
                                                 'modified': str(test_shortlink.modified),
-                                                'id': 7,
+                                                'id': '7',
                                                 'visits_count': 0,
                                                 'owner': 'kay@googs.com',
-                                                'destination_url': 'http://drive.com'})
+                                                'namespace': 'go',
+                                                'destination_url': 'http://drive.com',
+                                                'type': None})
 
 
 @patch('shared_helpers.config.get_config', return_value={'sessions_secret': 'the_secret',
@@ -333,11 +517,13 @@ class TestLinkTransferHandlers(TrottoTestCase):
 
     self.test_user = User(id=777,
                           email='kay@googs.com',
+                          organization='googs.com',
                           domain_type='corporate')
     self.test_user.put()
 
     # admin user
     User(email='sam@googs.com',
+         organization='googs.com',
          domain_type='corporate'
          ).put()
 
@@ -345,6 +531,7 @@ class TestLinkTransferHandlers(TrottoTestCase):
                                     organization='googs.com',
                                     owner=self.test_user.email,
                                     shortpath='there',
+                                    shortpath_prefix='there',
                                     destination_url='http://drive.com')
     self.test_shortlink.put()
 
@@ -493,6 +680,7 @@ class TestLinkTransferHandlers(TrottoTestCase):
   def test_use_transfer_link__owner_does_not_match(self, _):
     User(id=20,
          email='al@googs.com',
+         organization='googs.com',
          domain_type='corporate'
          ).put()
 
@@ -514,6 +702,7 @@ class TestLinkTransferHandlers(TrottoTestCase):
   def test_use_transfer_link__token_from_user_without_access(self, _):
     User(id=20,
          email='al@googs.com',
+         organization='googs.com',
          domain_type='corporate'
          ).put()
 
@@ -590,3 +779,52 @@ class TestLinkTransferHandlers(TrottoTestCase):
     self.assertEqual(302, response.status_int)
     self.assertEqual('http://localhost/_/auth/login?redirect_to=%2F_transfer%2Fmy_token%3F',
                      response.location)
+
+
+class TestKeywordPunctuationSensitivityConfig(TrottoTestCase):
+
+  blueprints_under_test = [handlers.routes]
+
+  TEST_KEYWORD = 'meeting-notes'
+  TEST_DESTINATION = 'https://docs.google.com/document/d/2Bd5X-6WFpRbafPgXax98GZenmCTZkTrNxotNvb8k2vI/edit'
+
+  def _create_link(self, keyword):
+    response = self.testapp.post_json('/_/api/links',
+                                      {'shortpath': keyword,
+                                       'destination': self.TEST_DESTINATION},
+                                      headers={'TROTTO_USER_UNDER_TEST': 'kay@googs.com'})
+
+    return response.json
+
+  @patch('shared_helpers.config.get_organization_config',
+         return_value={})
+  def test_keyword_punctuation_sensitivity__not_specified(self, _):
+    response = self._create_link(self.TEST_KEYWORD)
+
+    self.assertEqual(self.TEST_KEYWORD, response.get('shortpath'))
+
+    keyword_without_dashes = self.TEST_KEYWORD.replace('-', '')
+
+    response = self._create_link(keyword_without_dashes)
+
+    self.assertEqual(keyword_without_dashes, response.get('shortpath'))
+
+  @patch('shared_helpers.config.get_organization_config',
+         return_value={'keywords': {'punctuation_sensitive': False}})
+  def test_keyword_punctuation_sensitivity__insensitive(self, _):
+    response = self._create_link(self.TEST_KEYWORD)
+
+    self.assertEqual(self.TEST_KEYWORD, response.get('shortpath'))
+
+    keyword_without_dashes = self.TEST_KEYWORD.replace('-', '')
+
+    response = self._create_link(keyword_without_dashes)
+
+    self.assertIn(self.TEST_KEYWORD, response.get('error'))
+
+    response = self.testapp.get('/_/api/links',
+                                headers={'TROTTO_USER_UNDER_TEST': 'kay@googs.com'})
+
+    self.assertEqual(1, len(response.json))
+
+    self.assertEqual(self.TEST_KEYWORD, response.json[0]['shortpath'])

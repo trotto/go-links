@@ -1,4 +1,5 @@
 import os
+from urllib.parse import quote
 
 import jinja2
 
@@ -7,16 +8,10 @@ from modules.organizations.utils import get_organization_id_for_email
 from shared_helpers import config
 from shared_helpers.encoding import convert_entity_to_dict
 from shared_helpers.events import enqueue_event
+from shared_helpers.services import get as service_get
 
 
 models = get_models('users')
-
-
-JINJA_ENVIRONMENT = jinja2.Environment(
-  loader=jinja2.FileSystemLoader(os.path.join(os.path.dirname(__file__), '../../static/templates')),
-  extensions=['jinja2.ext.autoescape'],
-  autoescape=True)
-
 
 class LoginEmailException(Exception):
   pass
@@ -32,6 +27,10 @@ def _extract_domain_type(email):
 
 def get_user_by_id(user_id):
   return models.User.get_by_id(user_id)
+
+
+def get_users_by_organization(org_id):
+  return models.User.query.filter(models.User.organization == org_id)
 
 
 def get_or_create_user(email, user_org):
@@ -55,14 +54,31 @@ def get_or_create_user(email, user_org):
     user.organization = user.extract_organization()
     user.put()
 
-    enqueue_event('user.created',
+    enqueue_event(user.organization,
+                  'user.created',
                   'user',
-                  convert_entity_to_dict(user, ['id', 'email', 'organization']))
+                  convert_entity_to_dict(user, ['id', 'email', 'organization']),
+                  user=user)
 
   return user
 
 
-def is_user_admin(user):
+def get_admin_ids(organization):
+  try:
+    return [user['id'] for user
+            in service_get('admin', f'/organizations/{quote(organization)}/users?role=admin')]
+  except config.ServiceNotConfiguredError:
+    return None
+
+
+def is_user_admin(user, organization=None):
+  if organization and organization != user.organization:
+    return False
+
+  admin_ids = get_admin_ids(user.organization)
+  if admin_ids is not None:
+    return user.id in admin_ids
+
   org_config = config.get_organization_config(user.organization)
 
   return user.email in org_config.get('admins', []) if org_config else False

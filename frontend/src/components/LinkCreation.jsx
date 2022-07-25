@@ -1,11 +1,14 @@
 import React from 'react';
 import {connect} from 'react-redux';
+import Alert from '@material-ui/lab/Alert';
 import {CopyToClipboard} from 'react-copy-to-clipboard';
 import * as actions from '../actions';
 import * as getters from '../getters';
+import Select from 'react-select';
 import {ReduxManagedStateComponent} from './Abstract'
 import {PrimaryButton, SecondaryButton} from './shared/Buttons';
 import {SuccessMessage, ErrorMessage} from './shared/Messages';
+import { DEFAULT_NAMESPACE } from '../config';
 
 
 function mapStateToProps(state) {
@@ -21,7 +24,9 @@ function mapStateToProps(state) {
     linkCreatedOnThisPageload: state.get('linkCreatedOnThisPageload'),
     goSupportedInCurrentSession: state.get('goSupportedInCurrentSession'),
     userLoggedIn: getters.userLoggedIn(state),
-    userInfo: state.get('userInfo')
+    userInfo: state.get('userInfo'),
+    readOnlyMode: getters.readOnlyMode(state),
+    namespaces: state.get('namespaces')
   };
 }
 
@@ -66,6 +71,55 @@ export const NewUserIntroContainer = connect(
     mapStateToProps,
     actions
 )(NewUserIntro);
+
+
+export class NamespaceSelector extends ReduxManagedStateComponent {
+
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      componentId: 'namespaceSelector',
+      defaults: {}
+    };
+  }
+
+  handleSelectChange(selectedOption) {
+    this.props.updateNewLinkFieldWithString('namespace', selectedOption.value);
+
+    this.props.shortlinkInput.focus();
+  }
+
+  render() {
+    var widthInEm = 0.65 * Math.max(...this.props.namespaces.map(ns => ns.length));
+    var style = {display: 'flex', alignItems: 'center', textAlign: 'right'};
+
+    return (
+        <div style={style}>
+          <div id="ns-selector" style={{width: widthInEm + 'em'}}>
+            <Select
+              name="ns"
+              value={this.props.newLinkData.get('namespace') || DEFAULT_NAMESPACE}
+              onChange={this.handleSelectChange.bind(this)}
+              options={this.props.namespaces.toArray().map((namespace) =>  ({value: namespace, label: namespace }))}
+              searchable={true}
+              noResultsText={null}
+              clearable={false}
+              arrowRenderer={() => <span style={{width: '0'}}></span>}
+              style={{cursor: 'pointer'}}
+            />
+          </div>
+          <div style={{padding: '0 3px 0 7px'}}>
+            /
+          </div>
+        </div>
+    )
+  }
+}
+export const NamespaceSelectorContainer = connect(
+    mapStateToProps,
+    actions
+)(NamespaceSelector);
 
 
 export class LinkForm extends React.Component {
@@ -121,18 +175,31 @@ export class LinkForm extends React.Component {
       messageComponent = <SuccessMessage>{messageText}</SuccessMessage>;
     }
 
+    const infoBar = this.props.userInfo && this.props.userInfo.get('info_bar');
+
     return (
         <div className="container" id="link-form">
+          {infoBar && (
+            <div className="row" style={{marginTop: '-60px', marginBottom: '30px'}}>
+              <div className="col-md-8 col-md-offset-2">
+                <Alert severity="info" icon={false}>
+                  <div style={{fontSize: '1.5rem'}} dangerouslySetInnerHTML={{__html: infoBar}}>
+                  </div>
+                </Alert>
+              </div>
+            </div>
+          )}
           {'/create' !== this.props.location.pathname ? null : <NewUserIntroContainer />}
           <div className="row">
             <div className="col-md-3 col-md-offset-2">
               <div style={{width: '100%', display: 'flex', alignItems: 'center'}}>
                  <div style={{paddingRight: '5px'}}>
-                   <div>
-                     go/
-                   </div>
+                   {this.props.namespaces.size === 1 ?
+                       <div>{DEFAULT_NAMESPACE}/</div>
+                       : <NamespaceSelectorContainer shortlinkInput={this.shortlinkInput} />}
                  </div>
                  <input
+                     disabled={this.props.readOnlyMode}
                      className="form-control"
                      ref={(input) => { this.shortlinkInput = input; }}
                      style={{width: '0px', flexGrow: '1'}}
@@ -150,6 +217,7 @@ export class LinkForm extends React.Component {
             <div className="col-md-4">
                 <div style={{width: '100%', display: 'flex'}}>
                   <input
+                     disabled={this.props.readOnlyMode}
                      className="form-control"
                      ref={(input) => { this.destinationInput = input; }}
                      style={{width: '0px', flexGrow: '1'}}
@@ -174,6 +242,7 @@ export class LinkForm extends React.Component {
                     <a href={!this.props.linkCreationMessage ? '' : this.props.linkCreationMessage.get('tootsLink')}
                        data-test-id="new-shortlink-anchor-tag"
                        target="_blank"
+                       rel="noopener noreferrer"
                        style={{display: !this.props.linkCreationMessage || !this.props.linkCreationMessage.get('tootsLink') ? 'none' : 'block',marginLeft:'5px',marginRight:'5px',fontWeight:'bold'}}
                     >
                     {!this.props.linkCreationMessage || !this.props.linkCreationMessage.get('tootsLink')
@@ -197,6 +266,7 @@ export class LinkForm extends React.Component {
                 </div>
                 <div>
                   <PrimaryButton
+                      disabled={this.props.readOnlyMode}
                       id="link-submit-button"
                       data-test-id="shortlink-submit-button"
                       type="submit" className="btn btn-default"

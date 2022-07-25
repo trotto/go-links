@@ -1,0 +1,10 @@
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/"
+    xmlns:moz="http://www.mozilla.org/2006/browser/search/">
+    <ShortName>Go Links</ShortName>
+    <Description>Access, search, and share team resources as quickly as you can say them.</Description>
+    <InputEncoding>UTF-8</InputEncoding>
+    <Image width="16" height="16" type="image/x-icon">{{ url_for('static_files', path='favicon.ico', _external=True) }}</Image>
+    <Url type="text/html" template="{{ url_for('routing.get_go_link', path='{searchTerms}', _external=True) | replace('%7B', '{') | replace('%7D', '}') }}"></Url>
+    <!-- <Url type="application/x-suggestions+json" template="[suggestionURL]"/> -->
+    <moz:SearchForm>{{ url_for('home', _external=True) }}</moz:SearchForm>
+</OpenSearchDescription>

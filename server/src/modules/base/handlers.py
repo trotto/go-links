@@ -1,18 +1,22 @@
-import datetime
 import jwt
 import logging
-import pickle
+from urllib.parse import urlencode
 
-from flask import Blueprint, redirect, request, session, url_for
-from flask_login import login_user, logout_user
+from flask import Blueprint, Response, abort, redirect, render_template, request, session, url_for
+from flask_login import logout_user
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
 
-from modules.base import authentication
+from modules.base import authentication, errors
 from modules.organizations.utils import get_organization_id_for_email
-from modules.users.helpers import get_or_create_user
-from shared_helpers.config import get_config, get_path_to_oauth_secrets
+from shared_helpers.config import get_config, get_path_to_oauth_secrets, get_config_by_key_path
 from shared_helpers import utils
+
+
+LOGIN_METHODS = [{'label': 'Sign in with Google',
+                  'image': '/_images/auth/google_signin_button.png',
+                  'url': '/_/auth/login/google'}
+                 ] + (get_config_by_key_path(['authentication', 'methods']) or [])
 
 
 routes = Blueprint('base', __name__,
@@ -21,10 +25,8 @@ routes = Blueprint('base', __name__,
 
 def get_google_login_url(oauth_redirect_uri=None, redirect_to_after_oauth=None):
   if not oauth_redirect_uri:
-    oauth_redirect_uri = '%s%s' % (
-      'http://localhost:9095' if request.host.startswith('localhost')
-      else authentication.get_host_for_request(request),
-      '/_/auth/oauth2_callback')
+    oauth_redirect_uri = '%s%s' % (authentication.get_host_for_request(request),
+                                   '/_/auth/oauth2_callback')
 
   if not redirect_to_after_oauth:
     redirect_to_after_oauth = 'http://localhost:5007' if request.host.startswith('localhost') else '/'
@@ -46,21 +48,21 @@ def get_google_login_url(oauth_redirect_uri=None, redirect_to_after_oauth=None):
 
 @routes.route('/_/auth/login')
 def login():
-  redirect_to = request.args.get('redirect_to', None)
+  redirect_to = authentication.get_host_for_request(request)
+  if request.args.get('redirect_to', None):
+    redirect_to += request.args.get('redirect_to', None)
 
-  return redirect(get_google_login_url(None, redirect_to))
+  error_message = None
+  if request.args.get('e', None):
+    error_message = errors.get_error_message_from_code(request.args.get('e', None))
 
+  if error_message or len(LOGIN_METHODS) > 1:
+    return render_template('auth/login_selector.html',
+                           login_methods=LOGIN_METHODS,
+                           redirect_to=urlencode({'redirect_to': redirect_to}),
+                           error_message=error_message)
 
-def login_email(user_email):
-  user = get_or_create_user(user_email,
-                            get_organization_id_for_email(user_email))
-
-  if not user.accepted_terms_at:
-    # all login methods now have UI for consenting to terms
-    user.accepted_terms_at = datetime.datetime.utcnow()
-    user.put()
-
-  login_user(user)
+  return redirect(f"/_/auth/login/google?{urlencode({'redirect_to': redirect_to})}")
 
 
 @routes.route('/_/auth/logout')
@@ -68,6 +70,11 @@ def logout():
   logout_user()
 
   return redirect('http://localhost:5007/' if request.host.startswith('localhost') else '/')
+
+
+@routes.route('/_/auth/login/google')
+def login_google():
+  return redirect(get_google_login_url(None, request.args.get('redirect_to', None)))
 
 
 def login_via_test_token():
@@ -81,9 +88,16 @@ def login_via_test_token():
     raise Exception('Invalid test user %s, with test token: %s' % (payload['user_email'],
                                                                    request.args.get('test_token')))
 
-  login_email(payload['user_email'])
+  authentication.login('test_token', user_email=payload['user_email'])
 
   return True
+
+
+def _redirect():
+  if session.get('redirect_to_after_oauth', '').startswith(authentication.get_host_for_request(request) + '/'):
+    return redirect(session.get('redirect_to_after_oauth'))
+
+  return redirect('/')
 
 
 @routes.route('/_/auth/oauth2_callback')
@@ -106,8 +120,51 @@ def oauth2_callback():
   except (FlowExchangeError, ValueError) as e:
     logging.warning(e)
     # user declined to auth; move on
-    return redirect(session.get('redirect_to_after_oauth', '/'))
+    return _redirect()
 
-  login_email(authentication.get_user_email(credentials))
+  user_email = authentication.get_user_email(credentials)
 
-  return redirect(session.get('redirect_to_after_oauth', '/'))
+  if user_email:
+    authentication.login('google', user_email=user_email)
+
+  return _redirect()
+
+
+@routes.route('/_/auth/jwt')
+def login_with_jwt():
+  token = request.args.get('token')
+
+  if not token:
+    return abort(400)
+
+  try:
+    user_info = jwt.decode(token, get_config()['sessions_secret'], algorithms=['HS256'])
+
+    if 'id' in user_info:
+      authentication.login(user_info['method'], user_id=user_info['id'])
+    else:
+      if get_organization_id_for_email(user_info['email']) != user_info['organization']:
+        logging.warning('Attempt to use JWT with mismatched org: %s', token)
+
+        return abort(400)
+
+      authentication.login(user_info['method'], user_email=user_info['email'])
+  except jwt.DecodeError:
+    logging.warning('Attempt to use invalid JWT: %s', token)
+
+    return abort(400)
+  except jwt.ExpiredSignatureError:
+    logging.warning('Attempt to use expired JWT: %s', token)
+
+  redirect_to = authentication.get_host_for_request(request)
+  if request.args.get('redirect_to', '').startswith(redirect_to + '/'):
+    redirect_to = request.args['redirect_to']
+
+  return redirect(redirect_to)
+
+@routes.route('/_/opensearch')
+def opensearch():
+  return Response(response=render_template('opensearch/manifest.xml'),
+                  status=200,
+                  mimetype="application/opensearchdescription+xml")
+

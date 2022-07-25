@@ -17,6 +17,8 @@
 
         <link rel="canonical" href="https://trot.to/">
         <link rel="alternate" type="application/rss+xml" title="RSS" href="/feed.xml">
+        <link rel="search" type="application/opensearchdescription+xml" title="Go Links" href="{{ url_for('base.opensearch') }}">
+
         <link rel="chrome-webstore-item" href="https://chrome.google.com/webstore/detail/nkeoojidblilnkcbbmfhaeebndapehjk">
         <link href="//fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css">
         <link href="//fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic" rel="stylesheet" type="text/css">
@@ -38,7 +40,10 @@
         <script>
             window._trotto = {
                 alreadyAcceptedTerms: "{{ 'true' if alreadyAcceptedTerms else 'false' }}",
-                csrfToken: "{{ csrf_token }}"
+                csrfToken: "{{ csrf_token }}",
+                defaultNamespace: "{{ default_namespace }}",
+                namespaces: {{ namespaces|safe }},
+                adminLinks: {{ admin_links|safe }}
             };
         </script>
     </head>

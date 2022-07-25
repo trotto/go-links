@@ -10,7 +10,8 @@ const {
   signIn,
   createGoLink,
   getPrettyUniqueEmail,
-  getPrettyUniqueString
+  getPrettyUniqueString,
+  TEST_INSTANCE_BASE
 } = require('../utils');
 
 
@@ -50,7 +51,11 @@ describe('links', () => {
   test('an unauthenticated user should be sent to signin when requesting a go link', async () => {
     const response = await goToPath(page, '/links');
 
-    expect((await page.url()).startsWith('https://accounts.google.com')).toBe(true);
+    const pageUrl = await page.url();
+
+    // this behavior varies depending on the number of auth methods configured
+    expect(pageUrl.startsWith('https://accounts.google.com') || pageUrl.startsWith(`${TEST_INSTANCE_BASE}/_/auth/login`))
+        .toBe(true);
     expect(response.status()).toEqual(200);
   });
 

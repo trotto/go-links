@@ -14,6 +14,14 @@ export const userLoggedIn = createSelector(
 );
 
 
+export const readOnlyMode = createSelector(
+    userInfo,
+    (userInfo) => {
+      return userInfo && userInfo.get('read_only_mode');
+    }
+);
+
+
 export const linksById = createSelector(
     links,
     (links) => {

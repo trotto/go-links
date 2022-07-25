@@ -46,6 +46,27 @@ class TestUtilityFunctions(TrottoTestCase):
       'https://github.com/search?utf8=%E2%9C%93&q=party+parrot&type=',
       helpers._encode_ascii_incompatible_chars(u'https://github.com/search?utf8=%E2%9C%93&q=party+parrot&type='))
 
+  def test__validate_destination__valid__simple(self):
+    helpers._validate_destination('https://trot.to/getting-started')
+
+  def test__validate_destination__valid__ip(self):
+    helpers._validate_destination('http://142.251.33.14/search?q=trotto')
+
+  def test__validate_destination__bare_hostname(self):
+    helpers._validate_destination('http://go/directory')
+
+    helpers._validate_destination('http://intranet:8000/directory')
+
+    helpers._validate_destination('http://localhost:8000/directory')
+    helpers._validate_destination('http://localhost/directory')
+
+  def test__validate_destination__invalid(self):
+    with self.assertRaises(helpers.LinkCreationException) as cm:
+      helpers._validate_destination('http://>>/directory')
+
+    with self.assertRaises(helpers.LinkCreationException) as cm:
+      helpers._validate_destination('http://company directory')
+
 
 class TestOtherFunctions(TrottoTestCase):
 
@@ -61,6 +82,7 @@ class TestOtherFunctions(TrottoTestCase):
       ShortLink(id=13,
                 organization='2.com',
                 owner='jay@2.com',
+                namespace='go',
                 shortpath='drive',
                 shortpath_prefix='drive',
                 destination_url='http://drive3.com'),
@@ -69,6 +91,7 @@ class TestOtherFunctions(TrottoTestCase):
       ShortLink(id=14,
                 organization='1.com',
                 owner='kay@1.com',
+                namespace='go',
                 shortpath='drive',
                 shortpath_prefix='drive',
                 destination_url='http://drive4.com'),
@@ -77,6 +100,7 @@ class TestOtherFunctions(TrottoTestCase):
       ShortLink(id=15,
                 organization='2.com',
                 owner='jay@2.com',
+                namespace='go',
                 shortpath='drive/%s',
                 shortpath_prefix='drive',
                 destination_url='http://drive5.com/%s'),
@@ -85,6 +109,7 @@ class TestOtherFunctions(TrottoTestCase):
       ShortLink(id=16,
                 organization='1.com',
                 owner='kay@1.com',
+                namespace='go',
                 shortpath='drive/%s',
                 shortpath_prefix='drive',
                 destination_url='http://drive6.com/%s'),
@@ -93,6 +118,7 @@ class TestOtherFunctions(TrottoTestCase):
       ShortLink(id=114,
                 organization='2.com',
                 owner='jay@2.com',
+                namespace='go',
                 shortpath='paper/%s',
                 shortpath_prefix='paper',
                 destination_url='http://paper.com/%s'),
@@ -101,6 +127,7 @@ class TestOtherFunctions(TrottoTestCase):
       ShortLink(id=115,
                 organization='1.com',
                 owner='jay@1.com',
+                namespace='go',
                 shortpath='sfdc/%s',
                 shortpath_prefix='sfdc',
                 destination_url='http://sfdc.com/%s'),
@@ -109,9 +136,28 @@ class TestOtherFunctions(TrottoTestCase):
       ShortLink(id=116,
                 organization='1.com',
                 owner='jay@1.com',
+                namespace='go',
                 shortpath='looker/%s/%s',
                 shortpath_prefix='looker',
                 destination_url='http://looker.com/%s/search/%s'),
+
+      # company1 - eng/drive
+      ShortLink(id=117,
+                organization='1.com',
+                owner='jay@1.com',
+                namespace='eng',
+                shortpath='drive',
+                shortpath_prefix='drive',
+                destination_url='https://1.drive.com/eng'),
+
+      # company2 - eng/drive
+      ShortLink(id=118,
+                organization='2.com',
+                owner='jay@2.com',
+                namespace='eng',
+                shortpath='drive',
+                shortpath_prefix='drive',
+                destination_url='https://2.drive.com/eng')
     ]
 
     for link in test_shortlinks:
@@ -119,67 +165,57 @@ class TestOtherFunctions(TrottoTestCase):
 
   def test_derive_pattern_match__one_level_shortlink(self):
     self.assertEqual((None, None),
-                     helpers.derive_pattern_match('1.com', 'notes'))
+                     helpers.derive_pattern_match('1.com', True, 'go', 'notes'))
 
   def test_derive_pattern_match__same_shortlink_different_companies(self):
     self.assertEqual((ShortLink.get_by_id(15), 'http://drive5.com/roadmap'),
-                     helpers.derive_pattern_match('2.com', 'drive/roadmap'))
+                     helpers.derive_pattern_match('2.com', True, 'go', 'drive/roadmap'))
 
     self.assertEqual((ShortLink.get_by_id(15), 'http://drive5.com/roadmap'),
-                     helpers.derive_pattern_match('2.com', 'drive/roadmap'))
+                     helpers.derive_pattern_match('2.com', True, 'go', 'drive/roadmap'))
 
     self.assertEqual((ShortLink.get_by_id(16), 'http://drive6.com/roadmap'),
-                     helpers.derive_pattern_match('1.com', 'drive/roadmap'))
+                     helpers.derive_pattern_match('1.com', True, 'go', 'drive/roadmap'))
 
     self.assertEqual((ShortLink.get_by_id(16), 'http://drive6.com/roadmap'),
-                     helpers.derive_pattern_match('1.com', 'drive/roadmap'))
+                     helpers.derive_pattern_match('1.com', True, 'go', 'drive/roadmap'))
 
     self.assertEqual((None, None),
-                     helpers.derive_pattern_match('3.com', 'drive/roadmap'))
+                     helpers.derive_pattern_match('3.com', True, 'go', 'drive/roadmap'))
 
   def test_derive_pattern_match__go_link_exists_for_one_company_but_not_other(self):
     self.assertEqual((None, None),
-                     helpers.derive_pattern_match('1.com', 'paper/kpis'))
+                     helpers.derive_pattern_match('1.com', True, 'go', 'paper/kpis'))
 
     self.assertEqual((ShortLink.get_by_id(114), 'http://paper.com/kpis'),
-                     helpers.derive_pattern_match('2.com', 'paper/kpis'))
+                     helpers.derive_pattern_match('2.com', True, 'go', 'paper/kpis'))
+
   def test_derive_pattern_match__multi_level_pattern(self):
     self.assertEqual((ShortLink.get_by_id(116), 'http://looker.com/1/search/sales'),
-                     helpers.derive_pattern_match('1.com', 'looker/1/sales'))
+                     helpers.derive_pattern_match('1.com', True, 'go', 'looker/1/sales'))
 
     # no looker/%s shortlink exists:
     self.assertEqual((None, None),
-                     helpers.derive_pattern_match('1.com', 'looker/sales'))
+                     helpers.derive_pattern_match('1.com', True, 'go', 'looker/sales'))
 
   def test_get_shortlink__link_does_not_exist(self):
     self.assertEqual((None, None),
-                     helpers.get_shortlink('1.com', 'slack'))
+                     helpers.get_shortlink('1.com', True, False, 'go', 'slack'))
 
   def test_get_shortlink__simple_go_link(self):
     self.assertEqual((ShortLink.get_by_id(14), 'http://drive4.com'),
-                     helpers.get_shortlink('1.com', 'drive'))
+                     helpers.get_shortlink('1.com', True, False, 'go', 'drive'))
 
   def test_get_shortlink__go_link_with_placeholder(self):
     self.assertEqual((ShortLink.get_by_id(116), 'http://looker.com/7/search/users'),
-                     helpers.get_shortlink('1.com', 'looker/7/users'))
+                     helpers.get_shortlink('1.com', True, False, 'go', 'looker/7/users'))
 
-  def assert_entity_attributes(self, expected_attributes, entity):
-    actual_attributes = {attr_name: getattr(entity, attr_name) for attr_name in expected_attributes.keys()}
+  def test_get_shortlink__same_shortlink_different_companies__alternate_namespace(self):
+    self.assertEqual((ShortLink.get_by_id(117), 'https://1.drive.com/eng'),
+                     helpers.get_shortlink('1.com', True, False, 'eng', 'drive'))
 
-    self.assertEqual(expected_attributes,
-                     actual_attributes)
-
-  def test_create_shortlink__successful_go_link_creation(self):
-    new_link = helpers.create_short_link('1.com', 'kay@1.com', 'there', 'example.com')
-
-    self.assert_entity_attributes({'organization': '1.com',
-                                   'owner': 'kay@1.com',
-                                   'shortpath': 'there',
-                                   'shortpath_prefix': 'there',
-                                   'destination_url': 'http://example.com',
-                                   'visits_count': None,
-                                   'visits_count_last_updated': None},
-                                  new_link)
+    self.assertEqual((ShortLink.get_by_id(118), 'https://2.drive.com/eng'),
+                     helpers.get_shortlink('2.com', True, False, 'eng', 'drive'))
 
   @patch('modules.links.helpers.upsert_short_link', return_value='mock_return')
   def test_update_short_link(self, mock_upsert_short_link):
@@ -191,27 +227,56 @@ class TestOtherFunctions(TrottoTestCase):
                      helpers.update_short_link(shortlink))
 
     self.assertEqual(mock_upsert_short_link.call_args_list,
-                     [call('1.com', 'jay@1.com', 'sfdc/%s', 'http://sfdc1000.com/%s', shortlink)])
+                     [call('1.com', 'jay@1.com', 'go', 'sfdc/%s', 'http://sfdc1000.com/%s', shortlink)])
 
   def test_create_shortlink__go_link_already_exists(self):
     with self.assertRaises(helpers.LinkCreationException) as cm:
-      helpers.create_short_link('1.com', 'kay@1.com', 'drive', 'drive1000.com')
+      helpers.create_short_link('1.com', 'kay@1.com', 'go', 'drive', 'drive1000.com', 'simple')
 
     self.assertEqual('That go link already exists. go/drive points to http://drive4.com',
                      str(cm.exception))
 
   def test_create_shortlink__owner_does_not_match_org(self):
     with self.assertRaises(helpers.LinkCreationException) as cm:
-      helpers.create_short_link('1.com', 'kay@g.com', 'drive', 'drive1000.com')
+      helpers.create_short_link('1.com', 'kay@g.com', 'go', 'drive', 'drive1000.com', 'simple')
 
     self.assertEqual("The go link's owner must be in the go link's organization",
                      str(cm.exception))
 
-  def test_create_shortlink__successful_go_link_creation_with_same_link_at_other_company(self):
-    new_link = helpers.create_short_link('1.com', 'kay@1.com', 'paper/%s', 'paper2.com/search/%s')
+  def test_get_all_shortlinks_for_org(self):
+    expected_shortlinks = [ShortLink.get_by_id(id) for id in [14, 16, 115, 116, 117]]
+
+    self.assertEqual(sorted(expected_shortlinks, key=lambda link: link.id),
+                     sorted(helpers.get_all_shortlinks_for_org('1.com'), key=lambda link: link.id))
+
+
+class TestOtherFunctionsEmptyDatabase(TrottoTestCase):
+
+  def assert_entity_attributes(self, expected_attributes, entity):
+    actual_attributes = {attr_name: getattr(entity, attr_name) for attr_name in expected_attributes.keys()}
+
+    self.assertEqual(expected_attributes,
+                     actual_attributes)
+
+  def test_create_shortlink__successful_go_link_creation(self):
+    new_link = helpers.create_short_link('1.com', 'kay@1.com', 'go', 'there', 'example.com', 'simple')
 
     self.assert_entity_attributes({'organization': '1.com',
                                    'owner': 'kay@1.com',
+                                   'namespace': 'go',
+                                   'shortpath': 'there',
+                                   'shortpath_prefix': 'there',
+                                   'destination_url': 'http://example.com',
+                                   'visits_count': None,
+                                   'visits_count_last_updated': None},
+                                  new_link)
+
+  def test_create_shortlink__successful_go_link_creation_with_same_link_at_other_company(self):
+    new_link = helpers.create_short_link('1.com', 'kay@1.com', 'go', 'paper/%s', 'paper2.com/search/%s', 'simple')
+
+    self.assert_entity_attributes({'organization': '1.com',
+                                   'owner': 'kay@1.com',
+                                   'namespace': 'go',
                                    'shortpath': 'paper/%s',
                                    'shortpath_prefix': 'paper',
                                    'destination_url': 'http://paper2.com/search/%s',
@@ -219,10 +284,125 @@ class TestOtherFunctions(TrottoTestCase):
                                    'visits_count_last_updated': None},
                                   new_link)
 
-  def test_get_all_shortlinks_for_org(self):
-    ids_of_expected_shortlinks = [14, 16, 115, 116]
+  def test_create_short_link__keyword_with_underscore__simple_validation(self):
+    with self.assertRaises(helpers.LinkCreationException) as cm:
+      helpers.create_short_link('1.com', 'kay@1.com', 'go', 'home_page', 'https://www.trot.to', 'simple')
 
-    expected_shortlinks = [ShortLink.get_by_id(id) for id in ids_of_expected_shortlinks]
+    self.assertEqual(helpers.PATH_RESTRICTIONS_ERROR_SIMPLE,
+                     str(cm.exception))
 
-    self.assertEqual(sorted(expected_shortlinks, key=lambda link: link.id),
-                     sorted(helpers.get_all_shortlinks_for_org('1.com'), key=lambda link: link.id))
+  def test_create_short_link__non_ascii_keyword__simple_validation(self):
+    with self.assertRaises(helpers.LinkCreationException) as cm:
+      helpers.create_short_link('1.com', 'kay@1.com', 'go', u'こんにちは', 'https://www.trot.to', 'simple')
+
+    self.assertEqual(helpers.PATH_RESTRICTIONS_ERROR_SIMPLE,
+                     str(cm.exception))
+
+  def test_create_short_link__invalid_keyword__expanded_validation(self):
+    with self.assertRaises(helpers.LinkCreationException) as cm:
+      helpers.create_short_link('1.com', 'kay@1.com', 'gohan', 'homepage>', 'https://www.trot.to', 'expanded')
+
+    self.assertEqual(helpers.PATH_RESTRICTIONS_ERROR_EXPANDED,
+                     str(cm.exception))
+
+  def test_create_short_link__keyword_with_underscore__expanded_validation(self):
+    new_link = helpers.create_short_link('1.com', 'kay@1.com', 'go', 'home_page', 'https://www.trot.to', 'expanded')
+
+    self.assert_entity_attributes({'organization': '1.com',
+                                   'owner': 'kay@1.com',
+                                   'namespace': 'go',
+                                   'shortpath': 'home_page',
+                                   'shortpath_prefix': 'home_page',
+                                   'destination_url': 'https://www.trot.to',
+                                   'visits_count': None,
+                                   'visits_count_last_updated': None},
+                                  new_link)
+
+  def test_create_short_link__non_ascii_keyword__expanded_validation(self):
+    new_link = helpers.create_short_link('1.com', 'kay@1.com', 'go', u'こんにちは', 'https://www.trot.to', 'expanded')
+
+    self.assert_entity_attributes({'organization': '1.com',
+                                   'owner': 'kay@1.com',
+                                   'namespace': 'go',
+                                   'shortpath': u'こんにちは',
+                                   'shortpath_prefix': u'こんにちは',
+                                   'destination_url': 'https://www.trot.to',
+                                   'visits_count': None,
+                                   'visits_count_last_updated': None},
+                                  new_link)
+
+
+class TestHierarchicalLinks(TrottoTestCase):
+
+  def setUp(self):
+    super().setUp()
+
+    ShortLink(id=16,
+              organization='1.com',
+              owner='kay@1.com',
+              namespace='go',
+              shortpath='trotto/docs',
+              shortpath_prefix='trotto',
+              destination_url='http://www.trot.to/docs'
+              ).put()
+
+    ShortLink(id=17,
+              organization='1.com',
+              owner='kay@1.com',
+              namespace='go',
+              shortpath='trotto/fr/t',
+              shortpath_prefix='trotto',
+              destination_url='http://fr.trot.to'
+              ).put()
+
+    ShortLink(id=18,
+              organization='1.com',
+              owner='jay@1.com',
+              namespace='go',
+              shortpath='drive/%s',
+              shortpath_prefix='drive',
+              destination_url='http://drive.com/%s'
+              ).put()
+
+  def test_get_shortlink__hierarchical_link_exists(self):
+    self.assertEqual((ShortLink.get_by_id(16), 'http://www.trot.to/docs'),
+                     helpers.get_shortlink('1.com', True, False, 'go', 'trotto/docs'))
+
+    self.assertEqual((ShortLink.get_by_id(17), 'http://fr.trot.to'),
+                     helpers.get_shortlink('1.com', True, False, 'go', 'trotto/fr/t'))
+
+  def test_get_shortlink__hierarchical_link_exists_in_other_org(self):
+    self.assertEqual((None, None),
+                     helpers.get_shortlink('2.com', True, False, 'go', 'trotto/docs'))
+
+  def test_get_shortlink__hierarchical_link_does_not_exist(self):
+    self.assertEqual((None, None),
+                     helpers.get_shortlink('1.com', True, False, 'go', 'trotto/jots'))
+
+  def test_get_shortlink__hierarchical_link_does_not_exist__subpath_exists(self):
+    self.assertEqual((None, None),
+                     helpers.get_shortlink('1.com', True, False, 'go', 'trotto'))
+
+    self.assertEqual((None, None),
+                     helpers.get_shortlink('1.com', True, False, 'go', 'trotto/fr'))
+
+  def test_create_short_link__conflicting_programmatic_link(self):
+    with self.assertRaises(helpers.LinkCreationException) as cm:
+      helpers.create_short_link('1.com', 'kay@1.com', 'go', 'drive/recent', 'drive.com/recent', 'simple')
+
+    self.assertEqual('A conflicting go link already exists. go/drive/%s points to http://drive.com/%s',
+                     str(cm.exception))
+
+  def test_create_short_link__conflicting_hierarchical_link(self):
+    with self.assertRaises(helpers.LinkCreationException) as cm:
+      helpers.create_short_link('1.com', 'kay@1.com', 'go', 'trotto/%s', 'https://www.trot.to/q=%s', 'simple')
+
+    self.assertEqual('A conflicting go link already exists. go/trotto/docs points to http://www.trot.to/docs',
+                     str(cm.exception))
+
+  def test_create_short_link__non_placeholder_after_placeholder(self):
+    with self.assertRaises(helpers.LinkCreationException) as cm:
+      helpers.create_short_link('1.com', 'kay@1.com', 'go', 'trotto/%s/q', 'https://www.trot.to/q=%s', 'simple')
+
+    self.assertEqual('After the first "%s" placeholder, you can only have additional placeholders',
+                     str(cm.exception))

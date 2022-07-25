@@ -6,6 +6,8 @@ import {List} from 'immutable';
 import { CreateOutlined, Cancel, DeleteOutline, Reply } from '@material-ui/icons';
 import {PrimaryButton} from './shared/Buttons';
 import {getServiceBaseUrl} from '../utils'
+import { DEFAULT_NAMESPACE } from '../config';
+import * as getters from "../getters";
 
 var validUrl = require('valid-url');
 
@@ -121,7 +123,7 @@ class EditableDestination extends React.Component {
     return (
         <div style={{display: 'flex', width: '100%', justifyContent: 'space-between', alignItems: 'center'}}>
           <div style={{display: 'flex', alignItems: 'center', cursor: this.props.editable ? 'pointer' : 'default',
-                       flexGrow: 1}}
+                       width: 0, flexGrow: 1}}
                onClick={!this.props.editable ? () => {} : this.setEditingLinkId.bind(this, this.props.id)}
                onMouseOver={this.setMousedOver.bind(this, true)}
                onMouseOut={this.setMousedOver.bind(this, false)}
@@ -143,7 +145,7 @@ class EditableDestination extends React.Component {
             <div style={inputWrapperStyle}>
               <input
                 id={'edit-input-' + this.props.id}
-                style={{flexGrow: '1', padding: '4px 7px 4px 2px',
+                style={{width: 0, flexGrow: '1', padding: '4px 7px 4px 2px',
                         borderColor: 'transparent', backgroundColor: 'transparent',
                         cursor: this.props.editable ? 'pointer' : 'default'}}
                 value={this.getDisplayUrl()}
@@ -162,9 +164,8 @@ class EditableDestination extends React.Component {
               }
             </div>
           </div>
-          {!this.props.editable ? null :
-              <div style={{paddingLeft: '5px', display: 'flex',
-                           alignItems: 'center'}}
+          {this.props.fullCRUD && !currentlyBeingEdited &&
+              <div style={{paddingLeft: '5px', display: 'flex', alignItems: 'center'}}
               >
                 <DeleteOutline
                     titleAccess={`Delete ${this.props.link.shortpath}`}
@@ -205,7 +206,7 @@ class KeywordCell extends React.Component {
     var shortlink = 'http://' + row.value;
 
     if (!this.props.goSupportedInCurrentSession) {
-      shortlink = shortlink.replace('http://go', getServiceBaseUrl());
+      shortlink = shortlink.replace(`http://${DEFAULT_NAMESPACE}`, getServiceBaseUrl());
     }
 
     return (
@@ -214,6 +215,7 @@ class KeywordCell extends React.Component {
          >
            <a href={shortlink}
               target="_blank"
+              rel="noopener noreferrer"
               style={{width: '0', flexGrow: '1', overflow: 'hidden'}}
            >
              {row.value}
@@ -261,14 +263,15 @@ export class LinksTable extends React.Component {
       alignItems: 'center',
       justifyContent: 'start',
       paddingRight: '15px',
-      paddingLeft: '15px'
+      paddingLeft: '15px',
+      height: 'inherit'
     };
 
     var COLUMNS = [
       {
         Header: "Shortlink",
         accessor: "shortpath",
-        maxWidth: '200',
+        maxWidth: '120',
         style: DEFAULT_CELL_STYLING,
         Cell: row => {
           return <KeywordCell row={row} goSupportedInCurrentSession={this.props.goSupportedInCurrentSession} />
@@ -278,8 +281,9 @@ export class LinksTable extends React.Component {
         Header: "Destination",
         accessor: "destination_url",
         Cell: row => {
-          const editable = this.props.userInfo &&
+          const fullCRUD = !this.props.readOnlyMode && this.props.userInfo &&
               (this.props.userInfo.get('admin') || row.original.owner === this.props.userInfo.get('email'));
+          const editable = !this.props.readOnlyMode && (fullCRUD || (this.props.userInfo && this.props.userInfo.get('org_edit_mode') === 'any_org_user'));
 
           return <EditableDestinationContainer
                     key={row.original.id + '-' + row.value}
@@ -287,6 +291,7 @@ export class LinksTable extends React.Component {
                     id={row.original.id}
                     link={row.original}
                     editable={editable}
+                    fullCRUD={fullCRUD}
                     setEditingLinkId={this.setEditingLinkId.bind(this)}
           />
         }
@@ -294,12 +299,14 @@ export class LinksTable extends React.Component {
       {
         Header: "Owner",
         accessor: "owner",
-        maxWidth: '200',
+        maxWidth: '120',
         style: DEFAULT_CELL_STYLING,
         // doing this because justify-content style specified with `style` key gets reverted to default when
         // resizing (possible bug in library)
-        Cell: row => <div style={{display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'flex-start'}}>
-                       {row.value}
+        Cell: row => <div style={{display: 'flex', width: '100%', alignItems: 'center', justifyContent: 'flex-start'}}
+                          title={row.value}
+                     >
+                       {row.value.split('@')[0]}
                      </div>
       }
     ];
@@ -308,7 +315,7 @@ export class LinksTable extends React.Component {
       var data = List();
     } else {
       var data = this.props.links.map(
-          link => link.update('shortpath', shortpath => 'go' + '/' + shortpath));
+          link => link.update('shortpath', shortpath => (link.get('namespace') || DEFAULT_NAMESPACE) + '/' + shortpath));
     }
 
     // Note: For the moment, the default install doesn't track visit counts.
@@ -322,7 +329,7 @@ export class LinksTable extends React.Component {
         maxWidth: '100',
         Cell: row => {
           return <CountCell
-              style={DEFAULT_CELL_STYLING}
+              style={Object.assign({}, DEFAULT_CELL_STYLING, {height: '100%'})}
               row={row}
               visitCountsProgress={this.props.visitCountsProgress}
           />
@@ -384,7 +391,8 @@ export const LinksTableContainer = connect(
         links: state.get('links') || List(),
         defaultLinkSearchTerm: state.get('defaultLinkSearchTerm'),
         userInfo: state.get('userInfo'),
-        goSupportedInCurrentSession: state.get('goSupportedInCurrentSession')
+        readOnlyMode: getters.readOnlyMode(state),
+        goSupportedInCurrentSession: state.get('goSupportedInCurrentSession'),
       };
     },
     actions

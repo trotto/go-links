@@ -17,11 +17,17 @@
 
 from datetime import datetime
 
+try:
+  from commercial.data.utils import allocate_id
+except ModuleNotFoundError:
+  allocate_id = None
+
 
 class BaseModel(object):
   id = int
   created = datetime
   modified = datetime
+  modified_override = None
 
   def __init__(self, **kwargs):
     self._set_attributes(kwargs)
@@ -41,6 +47,9 @@ class BaseModel(object):
     return self.id
 
   def put(self):
-    self.modified = datetime.utcnow()
+    self.modified = self.modified_override or datetime.utcnow()
     if not self.id:
       self.created = datetime.utcnow()
+
+    if not self.id and allocate_id:
+      self.id = allocate_id(self)

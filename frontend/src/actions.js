@@ -1,6 +1,7 @@
 import { Map, List, fromJS } from 'immutable';
 import { browserHistory } from 'react-router';
 import fetch from 'isomorphic-fetch'
+import { DEFAULT_NAMESPACE } from './config';
 import {getServiceBaseUrl} from './utils';
 
 
@@ -69,10 +70,6 @@ export function clearNewLinkData() {
 export function setLinkCreationMessage(messageType, html, tootsLink) {
 
   return function (dispatch, getState) {
-    html = !getState().core.get('goSupportedInCurrentSession')
-        ? html
-        : html.replace('https://trot.to/', 'http://go/').replace('trot.to/', 'go/');
-
     dispatch({
       type: 'SET_LINK_CREATION_MESSAGE',
       messageType,
@@ -125,16 +122,16 @@ export function receiveSaveResult(responseJson) {
 
       dispatch(setLinkCreatedOnThisPageload(responseJson));
 
-      var host = 'http://go';
+      var host = 'http://' + (responseJson.namespace || DEFAULT_NAMESPACE);
 
       if (!getState().core.get('goSupportedInCurrentSession')) {
-        host = host.replace('http://go', getServiceBaseUrl());
+        host = host.replace(`http://${DEFAULT_NAMESPACE}`, getServiceBaseUrl());
       }
 
       dispatch(setLinkCreationMessage(
           'good_news',
           'Success! New go link created:',
-          'http://go/' + responseJson.shortpath
+          host + '/' + responseJson.shortpath
       ));
     }
   }

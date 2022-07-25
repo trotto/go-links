@@ -6,6 +6,8 @@ from modules.data.abstract.base import BaseModel
 class ShortLink(BaseModel):
   organization = str
   owner = str
+  namespace = str
+  display_shortpath = str
   shortpath = str
   shortpath_prefix = str
   destination_url = str
@@ -14,8 +16,8 @@ class ShortLink(BaseModel):
 
   # TODO: Eliminate the need for this duplication with a better base class.
   _properties = ['id', 'created', 'modified',
-                 'organization', 'owner', 'shortpath', 'shortpath_prefix',
-                 'destination_url', 'visits_count', 'visits_count_last_updated']
+                 'organization', 'owner', 'namespace', 'display_shortpath', 'shortpath', 'shortpath_prefix',
+                 'destination_url', 'type', 'visits_count', 'visits_count_last_updated']
 
   def __eq__(self, other):
     for property in self._properties:
