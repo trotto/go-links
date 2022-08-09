@@ -204,8 +204,8 @@ This function is used to work around a limitation of the `validators` package wh
 """
 def _is_valid_idn_destination(destination):
   clean_url = re.sub('\-\-+', '-', destination)
-  return validators.url(clean_url) is not ValidationFailure
 
+  return type(validators.url(clean_url)) is not ValidationFailure
 
 def _validate_destination(destination):
   if type(validators.url(destination)) is ValidationFailure and not _is_valid_bare_hostname_destination(destination) and not _is_valid_idn_destination(destination):
