@@ -47,7 +47,7 @@ run_e2e_tests: &run_e2e_tests
 jobs:
   build_and_deploy:
     docker:
-      - image: circleci/python:3.7-bullseye-browsers
+      - image: cimg/python:3.7-browsers
     steps:
       - checkout
       - run: sh .circleci/set_env_vars.sh
@@ -60,7 +60,7 @@ jobs:
       - <<: *install_postgres
       # install deps locally to enable unit testing
       - run: curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-      - run: sudo python get-pip.py
+      - run: sudo python3 get-pip.py
       - run: sudo pip install -r ${SERVER_CODE_ROOT}/src/requirements.txt
       - run: sudo pip install -r ${SERVER_CODE_ROOT}/dev_requirements.txt
       # Retrieve our secrets from the CircleCI environment
