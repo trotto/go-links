@@ -59,10 +59,15 @@ jobs:
       - run: gcloud components update
       - <<: *install_postgres
       # install deps locally to enable unit testing
+      - run:
+          name: Create Python virtual env for use with all commands
+          command: |
+            python3 -m venv venv
+            echo "source $(pwd)/venv/bin/activate" >> $BASH_ENV
       - run: curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-      - run: sudo python3 get-pip.py
-      - run: sudo pip install -r ${SERVER_CODE_ROOT}/src/requirements.txt
-      - run: sudo pip install -r ${SERVER_CODE_ROOT}/dev_requirements.txt
+      - run: python3 get-pip.py
+      - run: pip install -r ${SERVER_CODE_ROOT}/src/requirements.txt
+      - run: pip install -r ${SERVER_CODE_ROOT}/dev_requirements.txt
       # Retrieve our secrets from the CircleCI environment
       - run: echo $APP_YML_BASE64 | base64 --decode > ${SERVER_SRC_ROOT}/config/app.yml
       - run: echo $CLIENT_SECRETS_BASE64 | base64 --decode > ${SERVER_SRC_ROOT}/config/client_secrets.json
