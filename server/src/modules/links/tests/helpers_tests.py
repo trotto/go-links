@@ -59,6 +59,13 @@ class TestUtilityFunctions(TrottoTestCase):
 
     helpers._validate_destination('http://localhost:8000/directory')
     helpers._validate_destination('http://localhost/directory')
+ 
+  def test__validate_destination__idn(self):
+    helpers._validate_destination('https://double--hyphen.example.com/some/path')
+
+    helpers._validate_destination('https://double--1-hyphen.example.com/other/path')
+    
+    helpers._validate_destination('https://triple-3---2--hyphen.example.com/other/path')
 
   def test__validate_destination__invalid(self):
     with self.assertRaises(helpers.LinkCreationException) as cm:

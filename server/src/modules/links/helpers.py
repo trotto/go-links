@@ -198,9 +198,17 @@ def _is_valid_bare_hostname_destination(destination):
 
   return type(validators.url(with_tld)) is not ValidationFailure
 
+"""Returns whether or not the provided destination is a valid URL using double hyphen, like `https://double--hyphen.example.com/some/path`.
+
+This function is used to work around a limitation of the `validators` package where it doesn't recognize URLs with double hypens valid
+"""
+def _is_valid_idn_destination(destination):
+  clean_url = re.sub('\-\-+', '-', destination)
+
+  return type(validators.url(clean_url)) is not ValidationFailure
 
 def _validate_destination(destination):
-  if type(validators.url(destination)) is ValidationFailure and not _is_valid_bare_hostname_destination(destination):
+  if type(validators.url(destination)) is ValidationFailure and not _is_valid_bare_hostname_destination(destination) and not _is_valid_idn_destination(destination):
     raise LinkCreationException('You must provide a valid destination URL')
 
 
