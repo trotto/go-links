@@ -27,7 +27,8 @@ test_blueprint = Blueprint('test', __name__)
 def get_me():
   from flask_login import current_user
 
-  return jsonify(current_user.email)
+  return jsonify({'email': current_user.email,
+                  'org': current_user.organization})
 
 
 class AuthenticationTestCase(TrottoTestCase):
@@ -35,14 +36,16 @@ class AuthenticationTestCase(TrottoTestCase):
   blueprints_under_test = [handlers.routes,
                            test_blueprint]
 
-  def _assert_authentication_status(self, login_response, authenticated, expected_user=None):
+  def _assert_authentication_status(self, login_response, authenticated, expected_user_email=None, expected_user_org=None):
     user_info_response = self.testapp.get('/me',
                                           headers={'Cookie': login_response.headers['Set-Cookie']},
                                           expect_errors=not authenticated)
 
     self.assertEqual(200 if authenticated else 500, user_info_response.status_code)
     if authenticated:
-      self.assertEqual(expected_user, user_info_response.json)
+      self.assertEqual({'email': expected_user_email,
+                        'org': expected_user_org},
+                       user_info_response.json)
 
 
 class TestHandlers(AuthenticationTestCase):
@@ -168,7 +171,7 @@ class TestHandlers(AuthenticationTestCase):
 
     self.assertEqual(302, response.status_int)
 
-    self._assert_authentication_status(response, True, 'sam@example.com')
+    self._assert_authentication_status(response, True, 'sam@example.com', 'example.com')
 
 
 def _generate_signin_token(secret, org, expires_in_seconds, user_id=None, user_email=None, method='custom_method'):
@@ -219,7 +222,9 @@ class TestAuthenticationControls(AuthenticationTestCase):
     self.assertEqual(200,
                      response.status_int)
 
-    self.assertEqual('kay@googs.com', response.json)
+    self.assertEqual({'email': 'kay@googs.com',
+                      'org': 'googs.com'},
+                     response.json)
 
   def test_enabled_status__true(self):
     self.test_user.enabled = True
@@ -231,7 +236,9 @@ class TestAuthenticationControls(AuthenticationTestCase):
     self.assertEqual(200,
                      response.status_int)
 
-    self.assertEqual('kay@googs.com', response.json)
+    self.assertEqual({'email': 'kay@googs.com',
+                      'org': 'googs.com'},
+                     response.json)
 
   def _try_auth_method(self, configured_methods, try_method):
     token = _generate_signin_token('so_secret',
@@ -255,7 +262,9 @@ class TestAuthenticationControls(AuthenticationTestCase):
     user_info_response = self.testapp.get('/me',
                                           headers={'Cookie': login_response.headers['Set-Cookie']})
 
-    self.assertEqual('kay@googs.com', user_info_response.json)
+    self.assertEqual({'email': 'kay@googs.com',
+                      'org': 'googs.com'},
+                     user_info_response.json)
 
   def test_allowed_authentication_methods__configured__method_used_allowed(self):
     login_response = self._try_auth_method(['google', 'method2'], 'google')
@@ -263,7 +272,9 @@ class TestAuthenticationControls(AuthenticationTestCase):
     user_info_response = self.testapp.get('/me',
                                           headers={'Cookie': login_response.headers['Set-Cookie']})
 
-    self.assertEqual('kay@googs.com', user_info_response.json)
+    self.assertEqual({'email': 'kay@googs.com',
+                      'org': 'googs.com'},
+                     user_info_response.json)
 
   def test_allowed_authentication_methods__configured__method_used_not_allowed(self):
     login_response = self._try_auth_method(['method1', 'method2'], 'google')
@@ -322,18 +333,6 @@ class TestJwtSignin(AuthenticationTestCase):
     mock_log_warning.assert_called_once_with('Attempt to use expired JWT: %s',
                                              token)
 
-  @patch('modules.base.handlers.get_config', return_value={'sessions_secret': 'so_secret'})
-  def test_jwt_signin__valid_token__mismatched_org(self, _):
-    response = self.testapp.get('/_/auth/jwt?token=%s' % (_generate_signin_token('so_secret',
-                                                                                 'other.com',
-                                                                                 30,
-                                                                                 user_email='jo@googs.com')),
-                                expect_errors=True)
-
-    self.assertEqual(400, response.status_int)
-
-    self._assert_authentication_status(response, False)
-
   @patch('logging.warning')
   @patch('modules.base.handlers.get_config', return_value={'sessions_secret': 'so_secret'})
   def test_jwt_signin__valid_token__successful_signin(self, _, mock_log_warning):
@@ -346,7 +345,23 @@ class TestJwtSignin(AuthenticationTestCase):
 
     mock_log_warning.assert_not_called()
 
-    self._assert_authentication_status(response, True, 'jo@googs.com')
+    self._assert_authentication_status(response, True, 'jo@googs.com', 'googs.com')
+
+  @patch('logging.warning')
+  @patch('modules.base.handlers.get_config', return_value={'sessions_secret': 'so_secret'})
+  def test_jwt_signin__valid_token__user_domain_not_same_as_org_domain(self, _, mock_log_warning):
+    response = self.testapp.get('/_/auth/jwt?token=%s' % (_generate_signin_token('so_secret',
+                                                                                 'googs.com',
+                                                                                 30,
+                                                                                 user_email='jo@other.com')))
+
+    # this is still a valid login: the identity service is responsible for verifying the user is a
+    # member of an org, even if a user's email domain doesn't match the org domain
+    self.assertEqual(302, response.status_int)
+
+    mock_log_warning.assert_not_called()
+
+    self._assert_authentication_status(response, True, 'jo@other.com', 'googs.com')
 
   @patch('modules.base.handlers.get_config', return_value={'sessions_secret': 'so_secret'})
   def test_jwt_signin__with_valid_redirect_to(self, _):
@@ -362,7 +377,7 @@ class TestJwtSignin(AuthenticationTestCase):
     self.assertEqual('http://localhost/roadmap',
                      response.headers['Location'])
 
-    self._assert_authentication_status(response, True, 'jo@googs.com')
+    self._assert_authentication_status(response, True, 'jo@googs.com', 'googs.com')
 
   @patch('modules.base.handlers.get_config', return_value={'sessions_secret': 'so_secret'})
   def test_jwt_signin__with_invalid_redirect_to(self, _):
@@ -378,7 +393,7 @@ class TestJwtSignin(AuthenticationTestCase):
     self.assertEqual('http://localhost',
                      response.headers['Location'])
 
-    self._assert_authentication_status(response, True, 'jo@googs.com')
+    self._assert_authentication_status(response, True, 'jo@googs.com', 'googs.com')
 
   @patch('modules.base.handlers.get_config', return_value={'sessions_secret': 'so_secret'})
   def test_jwt_signin__by_user_id__user_does_not_exist(self, _):
@@ -408,4 +423,4 @@ class TestJwtSignin(AuthenticationTestCase):
 
     self.assertEqual(302, login_response.status_int)
 
-    self._assert_authentication_status(login_response, True, 'kay@googs.com')
+    self._assert_authentication_status(login_response, True, 'kay@googs.com', 'googs.com')

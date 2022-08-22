@@ -113,7 +113,8 @@ def post_link():
     abort(403)
 
   try:
-    new_link = helpers.create_short_link(current_user.organization,
+    new_link = helpers.create_short_link(current_user,
+                                         current_user.organization,
                                          object_data.get('owner', current_user.email),
                                          object_data.get('namespace', get_default_namespace(current_user.organization)),
                                          object_data['shortpath'],
@@ -142,7 +143,7 @@ def put(link_id):
   existing_link.destination_url = object_data['destination']
 
   try:
-    return jsonify(_get_link_response(helpers.update_short_link(existing_link)))
+    return jsonify(_get_link_response(helpers.update_short_link(current_user, existing_link)))
   except helpers.LinkCreationException as e:
     return jsonify({
       'error': str(e),

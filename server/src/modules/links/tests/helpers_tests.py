@@ -9,6 +9,7 @@ from mock import patch, call
 from modules.data import get_models
 from modules.links import helpers
 from testing import TrottoTestCase
+from modules.data.abstract.users import User
 
 
 ShortLink = get_models('links').ShortLink
@@ -73,6 +74,10 @@ class TestUtilityFunctions(TrottoTestCase):
 
     with self.assertRaises(helpers.LinkCreationException) as cm:
       helpers._validate_destination('http://company directory')
+
+
+def _get_user(user_email):
+  return User(email=user_email)
 
 
 class TestOtherFunctions(TrottoTestCase):
@@ -231,21 +236,21 @@ class TestOtherFunctions(TrottoTestCase):
     shortlink.destination_url = 'http://sfdc1000.com/%s'
 
     self.assertEqual('mock_return',
-                     helpers.update_short_link(shortlink))
+                     helpers.update_short_link(_get_user('jay@1.com'), shortlink))
 
     self.assertEqual(mock_upsert_short_link.call_args_list,
-                     [call('1.com', 'jay@1.com', 'go', 'sfdc/%s', 'http://sfdc1000.com/%s', shortlink)])
+                     [call(_get_user('jay@1.com'), '1.com', 'jay@1.com', 'go', 'sfdc/%s', 'http://sfdc1000.com/%s', shortlink)])
 
   def test_create_shortlink__go_link_already_exists(self):
     with self.assertRaises(helpers.LinkCreationException) as cm:
-      helpers.create_short_link('1.com', 'kay@1.com', 'go', 'drive', 'drive1000.com', 'simple')
+      helpers.create_short_link(_get_user('kay@1.com'), '1.com', 'kay@1.com', 'go', 'drive', 'drive1000.com', 'simple')
 
     self.assertEqual('That go link already exists. go/drive points to http://drive4.com',
                      str(cm.exception))
 
   def test_create_shortlink__owner_does_not_match_org(self):
     with self.assertRaises(helpers.LinkCreationException) as cm:
-      helpers.create_short_link('1.com', 'kay@g.com', 'go', 'drive', 'drive1000.com', 'simple')
+      helpers.create_short_link(_get_user('kay@g.com'), '1.com', 'kay@g.com', 'go', 'drive', 'drive1000.com', 'simple')
 
     self.assertEqual("The go link's owner must be in the go link's organization",
                      str(cm.exception))
@@ -266,7 +271,7 @@ class TestOtherFunctionsEmptyDatabase(TrottoTestCase):
                      actual_attributes)
 
   def test_create_shortlink__successful_go_link_creation(self):
-    new_link = helpers.create_short_link('1.com', 'kay@1.com', 'go', 'there', 'example.com', 'simple')
+    new_link = helpers.create_short_link(_get_user('kay@1.com'), '1.com', 'kay@1.com', 'go', 'there', 'example.com', 'simple')
 
     self.assert_entity_attributes({'organization': '1.com',
                                    'owner': 'kay@1.com',
@@ -279,7 +284,7 @@ class TestOtherFunctionsEmptyDatabase(TrottoTestCase):
                                   new_link)
 
   def test_create_shortlink__successful_go_link_creation_with_same_link_at_other_company(self):
-    new_link = helpers.create_short_link('1.com', 'kay@1.com', 'go', 'paper/%s', 'paper2.com/search/%s', 'simple')
+    new_link = helpers.create_short_link(_get_user('kay@1.com'), '1.com', 'kay@1.com', 'go', 'paper/%s', 'paper2.com/search/%s', 'simple')
 
     self.assert_entity_attributes({'organization': '1.com',
                                    'owner': 'kay@1.com',
@@ -293,27 +298,27 @@ class TestOtherFunctionsEmptyDatabase(TrottoTestCase):
 
   def test_create_short_link__keyword_with_underscore__simple_validation(self):
     with self.assertRaises(helpers.LinkCreationException) as cm:
-      helpers.create_short_link('1.com', 'kay@1.com', 'go', 'home_page', 'https://www.trot.to', 'simple')
+      helpers.create_short_link(_get_user('kay@1.com'), '1.com', 'kay@1.com', 'go', 'home_page', 'https://www.trot.to', 'simple')
 
     self.assertEqual(helpers.PATH_RESTRICTIONS_ERROR_SIMPLE,
                      str(cm.exception))
 
   def test_create_short_link__non_ascii_keyword__simple_validation(self):
     with self.assertRaises(helpers.LinkCreationException) as cm:
-      helpers.create_short_link('1.com', 'kay@1.com', 'go', u'こんにちは', 'https://www.trot.to', 'simple')
+      helpers.create_short_link(_get_user('kay@1.com'), '1.com', 'kay@1.com', 'go', u'こんにちは', 'https://www.trot.to', 'simple')
 
     self.assertEqual(helpers.PATH_RESTRICTIONS_ERROR_SIMPLE,
                      str(cm.exception))
 
   def test_create_short_link__invalid_keyword__expanded_validation(self):
     with self.assertRaises(helpers.LinkCreationException) as cm:
-      helpers.create_short_link('1.com', 'kay@1.com', 'gohan', 'homepage>', 'https://www.trot.to', 'expanded')
+      helpers.create_short_link(_get_user('kay@1.com'), '1.com', 'kay@1.com', 'gohan', 'homepage>', 'https://www.trot.to', 'expanded')
 
     self.assertEqual(helpers.PATH_RESTRICTIONS_ERROR_EXPANDED,
                      str(cm.exception))
 
   def test_create_short_link__keyword_with_underscore__expanded_validation(self):
-    new_link = helpers.create_short_link('1.com', 'kay@1.com', 'go', 'home_page', 'https://www.trot.to', 'expanded')
+    new_link = helpers.create_short_link(_get_user('kay@1.com'), '1.com', 'kay@1.com', 'go', 'home_page', 'https://www.trot.to', 'expanded')
 
     self.assert_entity_attributes({'organization': '1.com',
                                    'owner': 'kay@1.com',
@@ -326,7 +331,7 @@ class TestOtherFunctionsEmptyDatabase(TrottoTestCase):
                                   new_link)
 
   def test_create_short_link__non_ascii_keyword__expanded_validation(self):
-    new_link = helpers.create_short_link('1.com', 'kay@1.com', 'go', u'こんにちは', 'https://www.trot.to', 'expanded')
+    new_link = helpers.create_short_link(_get_user('kay@1.com'), '1.com', 'kay@1.com', 'go', u'こんにちは', 'https://www.trot.to', 'expanded')
 
     self.assert_entity_attributes({'organization': '1.com',
                                    'owner': 'kay@1.com',
@@ -395,21 +400,21 @@ class TestHierarchicalLinks(TrottoTestCase):
 
   def test_create_short_link__conflicting_programmatic_link(self):
     with self.assertRaises(helpers.LinkCreationException) as cm:
-      helpers.create_short_link('1.com', 'kay@1.com', 'go', 'drive/recent', 'drive.com/recent', 'simple')
+      helpers.create_short_link(_get_user('kay@1.com'), '1.com', 'kay@1.com', 'go', 'drive/recent', 'drive.com/recent', 'simple')
 
     self.assertEqual('A conflicting go link already exists. go/drive/%s points to http://drive.com/%s',
                      str(cm.exception))
 
   def test_create_short_link__conflicting_hierarchical_link(self):
     with self.assertRaises(helpers.LinkCreationException) as cm:
-      helpers.create_short_link('1.com', 'kay@1.com', 'go', 'trotto/%s', 'https://www.trot.to/q=%s', 'simple')
+      helpers.create_short_link(_get_user('kay@1.com'), '1.com', 'kay@1.com', 'go', 'trotto/%s', 'https://www.trot.to/q=%s', 'simple')
 
     self.assertEqual('A conflicting go link already exists. go/trotto/docs points to http://www.trot.to/docs',
                      str(cm.exception))
 
   def test_create_short_link__non_placeholder_after_placeholder(self):
     with self.assertRaises(helpers.LinkCreationException) as cm:
-      helpers.create_short_link('1.com', 'kay@1.com', 'go', 'trotto/%s/q', 'https://www.trot.to/q=%s', 'simple')
+      helpers.create_short_link(_get_user('kay@1.com'), '1.com', 'kay@1.com', 'go', 'trotto/%s/q', 'https://www.trot.to/q=%s', 'simple')
 
     self.assertEqual('After the first "%s" placeholder, you can only have additional placeholders',
                      str(cm.exception))
