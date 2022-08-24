@@ -28,8 +28,8 @@ class User(db.Model, users.User):
     return User.query.get(int(id))
 
   @staticmethod
-  def get_by_email(email):
-    return User.query.filter(User.email == email).one_or_none()
+  def get_by_email_and_org(email, org):
+    return User.query.filter(User.email == email, User.organization == org).one_or_none()
 
   def put(self):
     super().put()

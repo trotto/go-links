@@ -75,8 +75,16 @@ def get_allowed_authentication_methods(organization):
   except config.ServiceNotConfiguredError:
     return None
 
+"""At least `user_id` or `user_email` must be provided.
 
-def login(authentication_method, user_id=None, user_email=None):
+If only `user_email` is provided, the `user_org` will be derived from the email. The caller MUST
+verify that the `user_email` has been validated by the identity provider, e.g., by checking the
+'email_verified' property of an identity token from Google.
+"""
+def login(authentication_method, user_id=None, user_email=None, user_org=None):
+  if not user_id and not user_email:
+    abort(400)
+
   if user_id:
     user = get_user_by_id(user_id)
 
@@ -86,7 +94,7 @@ def login(authentication_method, user_id=None, user_email=None):
       abort(400)
   else:
     user = get_or_create_user(user_email,
-                              get_organization_id_for_email(user_email))
+                              user_org if user_org else get_organization_id_for_email(user_email))
 
   allowed_authentication_methods = get_allowed_authentication_methods(user.organization)
   if allowed_authentication_methods is not None and authentication_method not in allowed_authentication_methods:
@@ -122,7 +130,12 @@ def validate_user_authentication():
 def get_user_email(oauth_credentials):
   user_info = oauth_credentials.id_token
 
-  if not user_info['email_verified']:
+  email_verified = user_info['email_verified']
+
+  if type(email_verified) is not bool:
+    raise Exception(f"'email_verified' property is wrong type ({type(email_verified).__name__}). Should be bool.")
+
+  if not email_verified:
     return None
 
   user_email = user_info['email'].lower()

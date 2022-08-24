@@ -140,15 +140,13 @@ def login_with_jwt():
   try:
     user_info = jwt.decode(token, get_config()['sessions_secret'], algorithms=['HS256'])
 
+    if 'id' not in user_info and not ('email' in user_info and 'organization' in user_info):
+      return abort(400)
+
     if 'id' in user_info:
       authentication.login(user_info['method'], user_id=user_info['id'])
     else:
-      if get_organization_id_for_email(user_info['email']) != user_info['organization']:
-        logging.warning('Attempt to use JWT with mismatched org: %s', token)
-
-        return abort(400)
-
-      authentication.login(user_info['method'], user_email=user_info['email'])
+      authentication.login(user_info['method'], user_email=user_info['email'], user_org=user_info['organization'])
   except jwt.DecodeError:
     logging.warning('Attempt to use invalid JWT: %s', token)
 
@@ -161,6 +159,7 @@ def login_with_jwt():
     redirect_to = request.args['redirect_to']
 
   return redirect(redirect_to)
+
 
 @routes.route('/_/opensearch')
 def opensearch():

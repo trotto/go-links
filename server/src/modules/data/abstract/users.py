@@ -22,20 +22,13 @@ class User(BaseModel):
                  'email', 'organization', 'enabled', 'role', 'accepted_terms_at',
                  'domain_type', 'notifications']
 
-  def __init__(self, **kwargs):
-    super().__init__(**kwargs)
-
-    self.organization = get_organization_id_for_email(kwargs['email'])
-
   def __eq__(self, other):
-    return self.id == other.id  # simple comparison for unit tests
+    # simple comparison for unit tests
+    return self.id == other.id if self.id else (self.email == other.email and self.organization == other.organization)
 
   def get_id(self):  # as required by Flask-Login
     return str(super().get_id())
 
-  def extract_organization(self):
-    return get_organization_id_for_email(self.email) if self.email else None
-
   @staticmethod
-  def get_by_email(email):
+  def get_by_email_and_org(email, org):
     raise NotImplementedError

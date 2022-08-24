@@ -134,12 +134,13 @@ def find_conflicting_link(organization, namespace, shortpath):
   return None
 
 
-def create_short_link(organization, owner, namespace, shortpath, destination, validation_mode):
-  return upsert_short_link(organization, owner, namespace, shortpath, destination, None, validation_mode)
+def create_short_link(acting_user, organization, owner, namespace, shortpath, destination, validation_mode):
+  return upsert_short_link(acting_user, organization, owner, namespace, shortpath, destination, None, validation_mode)
 
 
-def update_short_link(link_object):
-  return upsert_short_link(link_object.organization, link_object.owner, link_object.namespace, link_object.shortpath,
+def update_short_link(acting_user, link_object):
+  return upsert_short_link(acting_user,
+                           link_object.organization, link_object.owner, link_object.namespace, link_object.shortpath,
                            link_object.destination_url, link_object)
 
 
@@ -236,7 +237,7 @@ def get_canonical_keyword(punctuation_sensitive, keyword):
   return keyword if punctuation_sensitive else _remove_punctuation(keyword)
 
 
-def upsert_short_link(organization, owner, namespace, shortpath, destination, updated_link_object, validation_mode=EXPANDED_VALIDATION_MODE):
+def upsert_short_link(acting_user, organization, owner, namespace, shortpath, destination, updated_link_object, validation_mode=EXPANDED_VALIDATION_MODE):
   shortpath = shortpath.strip().lower().strip('/')
   destination = destination.strip()
 
@@ -257,7 +258,8 @@ def upsert_short_link(organization, owner, namespace, shortpath, destination, up
 
   check_namespaces(organization, namespace, shortpath)
 
-  if organization != get_organization_id_for_email(owner):
+  if (not (organization == acting_user.organization and owner == acting_user.email)
+      and organization != get_organization_id_for_email(owner)):
     raise LinkCreationException("The go link's owner must be in the go link's organization")
 
   shortpath_parts = shortpath.split('/')

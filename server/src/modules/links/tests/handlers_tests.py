@@ -1,4 +1,5 @@
 import base64
+from copy import deepcopy
 from dataclasses import dataclass
 import datetime
 import json
@@ -31,7 +32,14 @@ class TestHandlers(TrottoTestCase):
                                shortpath_prefix='there',
                                destination_url='http://example.com/there')
 
-    mock_create_short_link.return_value = mock_shortlink
+    # get a deepcopy of the args since `current_user` will be None by the time we assert
+    args_deep_copy = None
+    def side_effect(*args):
+      nonlocal args_deep_copy
+      args_deep_copy = deepcopy(args)
+      return mock_shortlink
+
+    mock_create_short_link.side_effect = side_effect
 
     response = self.testapp.post_json('/_/api/links',
                                       {'shortpath': 'there',
@@ -49,8 +57,8 @@ class TestHandlers(TrottoTestCase):
                       'visits_count': 0},
                      json.loads(response.text))
 
-    self.assertEqual(mock_create_short_link.call_args_list,
-                     [call('googs.com', 'kay@googs.com', 'go', 'there', 'http://example.com/there', 'simple')])
+    self.assertEqual(list(args_deep_copy),
+                     [User.get_by_email_and_org('kay@googs.com', 'googs.com'), 'googs.com', 'kay@googs.com', 'go', 'there', 'http://example.com/there', 'simple'])
 
   def test_create_link__no_patching__no_namespace_specified(self):
     self.testapp.post_json('/_/api/links',
@@ -576,7 +584,7 @@ class TestLinkTransferHandlers(TrottoTestCase):
                                'sub': 'link:7',
                                'tp': 'transfer',
                                'o': self.test_user.id,
-                               'by': User.get_by_email('sam@googs.com').id},
+                               'by': User.get_by_email_and_org('sam@googs.com', 'googs.com').id},
                               'the_secret',
                               algorithm='HS256')
 
@@ -751,7 +759,7 @@ class TestLinkTransferHandlers(TrottoTestCase):
     self.assertEqual('joe@googs.com', updated_link.owner)
 
   def test_use_transfer_link__success__generated_by_admin(self, _):
-    self.token_payload.update({'by': User.get_by_email('sam@googs.com').id})
+    self.token_payload.update({'by': User.get_by_email_and_org('sam@googs.com', 'googs.com').id})
 
     transfer_token = base64.urlsafe_b64encode(jwt.encode(self.token_payload,
                                                          'the_secret',

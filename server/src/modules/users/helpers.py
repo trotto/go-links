@@ -1,7 +1,4 @@
-import os
 from urllib.parse import quote
-
-import jinja2
 
 from modules.data import get_models
 from modules.organizations.utils import get_organization_id_for_email
@@ -36,22 +33,12 @@ def get_users_by_organization(org_id):
 def get_or_create_user(email, user_org):
   email = email.lower()
 
-  user = models.User.get_by_email(email)
-
-  # TODO: Remove this when all users are backfilled
-  if user and (not user.domain_type
-               or not user.organization):
-    user.domain_type = _extract_domain_type(email)
-
-    if not user.organization:
-      user.organization = user.extract_organization()
-
-    user.put()
+  user = models.User.get_by_email_and_org(email, user_org)
 
   if not user:
     user = models.User(email=email,
+                       organization=user_org,
                        domain_type=_extract_domain_type(email))
-    user.organization = user.extract_organization()
     user.put()
 
     enqueue_event(user.organization,
