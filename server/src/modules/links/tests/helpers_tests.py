@@ -345,6 +345,10 @@ class TestOtherFunctionsEmptyDatabase(TrottoTestCase):
 
 
 class TestHierarchicalLinks(TrottoTestCase):
+  def assert_entity_attributes(self, expected_attributes, entity):
+    actual_attributes = {attr_name: getattr(entity, attr_name) for attr_name in expected_attributes.keys()}
+
+    self.assertEqual(expected_attributes, actual_attributes)
 
   def setUp(self):
     super().setUp()
@@ -376,6 +380,15 @@ class TestHierarchicalLinks(TrottoTestCase):
               destination_url='http://drive.com/%s'
               ).put()
 
+    ShortLink(id=19,
+              organization='1.com',
+              owner='jay@1.com',
+              namespace='go',
+              shortpath='drive/aaa/%s',
+              shortpath_prefix='drive',
+              destination_url='http://drive.com/aaa/%s'
+              ).put()
+
   def test_get_shortlink__hierarchical_link_exists(self):
     self.assertEqual((ShortLink.get_by_id(16), 'http://www.trot.to/docs'),
                      helpers.get_shortlink('1.com', True, False, 'go', 'trotto/docs'))
@@ -405,6 +418,27 @@ class TestHierarchicalLinks(TrottoTestCase):
     self.assertEqual('A conflicting go link already exists. go/drive/%s points to http://drive.com/%s',
                      str(cm.exception))
 
+  def test_create_short_link__conflicting_hierarchical_programmatic_link(self):
+    with self.assertRaises(helpers.LinkCreationException) as cm:
+      helpers.create_short_link(_get_user('kay@1.com'), '1.com', 'kay@1.com', 'go', 'drive/aaa/test', 'drive.com/aaa/test', 'simple')
+
+    self.assertEqual('A conflicting go link already exists. go/drive/aaa/%s points to http://drive.com/aaa/%s',
+                     str(cm.exception))
+
+  def test_create_short_link__not_conflicting_hierarchical_programmatic_link(self):
+    new_link = helpers.create_short_link(_get_user('kay@1.com'), '1.com', 'kay@1.com', 'go', 'drive/bbb/%s', 'drive.com/bbb/%s', 'simple')
+
+    self.assert_entity_attributes({'organization': '1.com',
+                                   'owner': 'kay@1.com',
+                                   'namespace': 'go',
+                                   'shortpath': 'drive/bbb/%s',
+                                   'shortpath_prefix': 'drive',
+                                   'destination_url': 'http://drive.com/bbb/%s',
+                                   'visits_count': None,
+                                   'visits_count_last_updated': None},
+                                  new_link)
+
+                    
   def test_create_short_link__conflicting_hierarchical_link(self):
     with self.assertRaises(helpers.LinkCreationException) as cm:
       helpers.create_short_link(_get_user('kay@1.com'), '1.com', 'kay@1.com', 'go', 'trotto/%s', 'https://www.trot.to/q=%s', 'simple')
