@@ -11,9 +11,9 @@ import yaml
 
 import main
 
+multiprocessing.set_start_method('fork')
 
 LIVE_APP_HOST = 'http://localhost:5010'
-
 
 class TrottoTestCase(unittest.TestCase):
 

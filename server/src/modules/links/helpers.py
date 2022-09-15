@@ -121,15 +121,17 @@ def find_conflicting_link(organization, namespace, shortpath):
 
   for link in links_with_prefix:
     other_shortpath_parts = link.shortpath.split('/')
-
     if len(shortpath_parts) != len(other_shortpath_parts):
       continue
-
+    
+    found_conflicting_part = False
     for i in range(0, len(shortpath_parts)):
       if shortpath_parts[i] != '%s' and shortpath_parts[i] != other_shortpath_parts[i]:
-        continue
+        found_conflicting_part = True
+        break
 
-    return link
+    if not found_conflicting_part:
+      return link
 
   return None
 
