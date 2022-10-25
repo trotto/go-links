@@ -170,9 +170,9 @@ KEYWORDS_PUNCTUATION_SENSITIVE_DEFAULT = True
 ALTERNATIVE_KEYWORD_RESOLUTION_MODE = 'alternative'
 
 
-def validate_shortpath(shortpath, validation_mode):
+def validate_shortpath(shortpath, validation_mode, validation_regex = '[^0-9a-zA-Z\-\/%]'):
   if validation_mode == SIMPLE_VALIDATION_MODE:
-    if shortpath != re.sub('[^0-9a-zA-Z\-\/%]', '', shortpath):
+    if shortpath != re.sub(validation_regex, '', shortpath):
       raise LinkCreationException(PATH_RESTRICTIONS_ERROR_SIMPLE)
   elif validation_mode == EXPANDED_VALIDATION_MODE:
     if type(validators.url('https://trot.to/'+shortpath)) is ValidationFailure:

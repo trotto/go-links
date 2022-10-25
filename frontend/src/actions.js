@@ -3,7 +3,7 @@ import { browserHistory } from 'react-router';
 import fetch from 'isomorphic-fetch'
 import { DEFAULT_NAMESPACE } from './config';
 import {getServiceBaseUrl} from './utils';
-
+import { keywordsValidationRegex } from './getters';
 
 const enhancedFetch = function(endpoint, fetchInit, dispatch) {
 
@@ -37,19 +37,23 @@ export function setErrorBarMessage(errorMessage) {
 }
 
 
-export function updateNewLinkField(fieldName, elem) {
-  var fieldValue = elem.target.value.trim().replace(' ', '');
-  if (fieldName == 'shortpath') {
-    fieldValue = fieldValue.replace(/[^0-9a-zA-Z\-\/%]/g, '').toLowerCase();
-    while (fieldValue[0] === '/') {
-      fieldValue = fieldValue.slice(1)
+export function updateNewLinkField(fieldName, elem ) {
+  return function(dispatch, getState){
+    var fieldValue = elem.target.value.trim().replace(' ', '');
+    const validationRegex = keywordsValidationRegex(getState().core) ?? '[^0-9a-zA-Z\-\/%]';
+        
+    if (fieldName == 'shortpath') {
+      fieldValue = fieldValue.replace(new RegExp(validationRegex,'g'), '').toLowerCase();
+      while (fieldValue[0] === '/') {
+        fieldValue = fieldValue.slice(1)
+      }
     }
-  }
 
-  return {
-    type: 'UPDATE_NEW_LINK_FIELD',
-    fieldName,
-    fieldValue
+    return dispatch({
+      type: 'UPDATE_NEW_LINK_FIELD',
+      fieldName,
+      fieldValue
+    })
   }
 }
 

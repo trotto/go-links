@@ -26,7 +26,8 @@ def _user_info(user, admins_ids=None, org_edit_mode=None, org_settings=None):
   if org_settings is not None:
     user_info.update({
       'read_only_mode': org_settings.get('read_only_mode'),
-      'info_bar': org_settings.get('info_bar')
+      'info_bar': org_settings.get('info_bar'),
+      'keywords_validation_regex': org_settings.get('keywords').get('validation_regex'),
     })
 
   if org_edit_mode:
