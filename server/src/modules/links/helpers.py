@@ -11,6 +11,7 @@ from modules.organizations.utils import get_organization_id_for_email
 from shared_helpers import config
 from shared_helpers.encoding import convert_entity_to_dict
 from shared_helpers.events import enqueue_event
+from shared_helpers.utils import get_from_key_path
 
 
 models = get_models('links')
@@ -168,9 +169,12 @@ PATH_RESTRICTIONS_ERROR_SIMPLE = 'Keywords can include only letters, numbers, hy
 PATH_RESTRICTIONS_ERROR_EXPANDED = 'Provided keyword is invalid' # TODO: Include invalid char(s) in error
 KEYWORDS_PUNCTUATION_SENSITIVE_DEFAULT = True
 ALTERNATIVE_KEYWORD_RESOLUTION_MODE = 'alternative'
+DEFAULT_VALIDATION_REGEX = '[^0-9a-zA-Z\-\/%]'
 
 
-def validate_shortpath(shortpath, validation_mode, validation_regex = '[^0-9a-zA-Z\-\/%]'):
+def validate_shortpath(organization, shortpath, validation_mode):
+  validation_regex = get_from_key_path(config.get_organization_config(organization), ['keywords', 'validation_regex']) or DEFAULT_VALIDATION_REGEX
+
   if validation_mode == SIMPLE_VALIDATION_MODE:
     if shortpath != re.sub(validation_regex, '', shortpath):
       raise LinkCreationException(PATH_RESTRICTIONS_ERROR_SIMPLE)
@@ -246,7 +250,7 @@ def upsert_short_link(acting_user, organization, owner, namespace, shortpath, de
   if not shortpath:
     raise LinkCreationException('You must provide a path')
 
-  validate_shortpath(shortpath, validation_mode)
+  validate_shortpath(organization, shortpath, validation_mode)
 
   display_shortpath = shortpath
   org_config = config.get_organization_config(organization)

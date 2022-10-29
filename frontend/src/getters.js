@@ -21,11 +21,11 @@ export const readOnlyMode = createSelector(
     }
 );
 
-  export const keywordsValidationRegex = createSelector(
-    userInfo,
-    (userInfo) => {
-      return userInfo && userInfo.get('keywords_validation_regex');
-    }
+export const keywordsValidationRegex = createSelector(
+  userInfo,
+  (userInfo) => {
+    return userInfo && userInfo.get('keywords_validation_regex');
+  }
 );
 
 
