@@ -52,7 +52,8 @@ class TestUserHandlers(TrottoTestCase):
                       'notifications': {'some_announcement': 'dismissed'},
                       'org_edit_mode': 'owners_and_admins_only',
                       'read_only_mode': None,
-                      'info_bar': None})
+                      'info_bar': None,
+                      'keywords_validation_regex': '[^0-9a-zA-Z\\-\\/%]'})
 
     response = self.testapp.get('/_/api/users/me',
                                 headers={'TROTTO_USER_UNDER_TEST': 'ray@googs.com'})

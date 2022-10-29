@@ -172,8 +172,12 @@ ALTERNATIVE_KEYWORD_RESOLUTION_MODE = 'alternative'
 DEFAULT_VALIDATION_REGEX = '[^0-9a-zA-Z\-\/%]'
 
 
+def get_keyword_validation_regex(org_settings):
+  return get_from_key_path(org_settings or {}, ['keywords', 'validation_regex']) or DEFAULT_VALIDATION_REGEX
+
+
 def validate_shortpath(organization, shortpath, validation_mode):
-  validation_regex = get_from_key_path(config.get_organization_config(organization), ['keywords', 'validation_regex']) or DEFAULT_VALIDATION_REGEX
+  validation_regex = get_keyword_validation_regex(config.get_organization_config(organization))
 
   if validation_mode == SIMPLE_VALIDATION_MODE:
     if shortpath != re.sub(validation_regex, '', shortpath):

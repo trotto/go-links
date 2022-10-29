@@ -3,6 +3,7 @@ import copy
 from flask import Blueprint, request, jsonify, abort
 from flask_login import current_user, login_required
 
+from modules.links.helpers import get_keyword_validation_regex
 from modules.organizations.helpers import get_org_edit_mode
 from modules.users.helpers import get_users_by_organization, is_user_admin, get_user_by_id, get_admin_ids
 from shared_helpers.config import get_organization_config
@@ -27,7 +28,7 @@ def _user_info(user, admins_ids=None, org_edit_mode=None, org_settings=None):
     user_info.update({
       'read_only_mode': org_settings.get('read_only_mode'),
       'info_bar': org_settings.get('info_bar'),
-      'keywords_validation_regex': org_settings.get('keywords').get('validation_regex'),
+      'keywords_validation_regex': get_keyword_validation_regex(org_settings)
     })
 
   if org_edit_mode:
