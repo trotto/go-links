@@ -68,7 +68,8 @@ class TestUserHandlers(TrottoTestCase):
                       'notifications': {},
                       'org_edit_mode': 'owners_and_admins_only',
                       'read_only_mode': None,
-                      'info_bar': None})
+                      'info_bar': None,
+                      'keywords_validation_regex': '[^0-9a-zA-Z\\-\\/%]'})
 
   @patch('modules.users.handlers.is_user_admin', return_value=True)
   def test_user_info_endpoint__by_user_id__is_admin(self, mock_is_user_admin):
