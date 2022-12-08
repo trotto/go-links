@@ -251,6 +251,74 @@ class TestHandlers(TrottoTestCase):
                             'visits_count': 0}],
                           json.loads(response.text))
 
+  def test_get_links_with_similar_to_and_limit(self):
+    modified_datetime = datetime.datetime.utcnow() + datetime.timedelta(days=2)
+
+    with freeze_time(modified_datetime):
+      def _put_shortlink_into_db(pk:int, shortpath: str) -> ShortLink:
+        return ShortLink(
+          id=pk,
+          created=datetime.datetime(2018, 10, 1),
+          organization='googs.com',
+          owner='kay@googs.com',
+          namespace='go',
+          shortpath=shortpath,
+          shortpath_prefix='there',
+          destination_url='http://example.com',
+        ).put()
+
+      def _get_shortlink_by_shortpath(pk:int, shortpath: str):
+        return {
+          'id': str(pk),
+          'created': '2018-10-01 00:00:00',
+          'modified': str(modified_datetime),
+          'mine': True,
+          'owner': 'kay@googs.com',
+          'namespace': 'go',
+          'shortpath': shortpath,
+          'destination_url': 'http://example.com',
+          'type': None,
+          'visits_count': 0,
+        }
+
+      shrotpath_list: list[tuple[int, str]] = [
+        (1, 'maproad'),
+        (2, 'roadmap'),
+        (3, 'roadmap2022'),
+        (4, 'roadcrap'),
+        (5, 'noize'),
+        (6, 'noize2'),
+        *[(index, f'noize_to_check_a_big_difference_{index}') for index in range(7, 1001)], 
+      ]
+
+      # generating 1k links
+      for pk, shortpath in shrotpath_list:
+        _put_shortlink_into_db(pk, shortpath)
+
+      unexisting_shortpath = 'roadmpa'
+      limit = 5
+
+      sorted_shortpath_list: list[tuple[int, str]] = [
+        (2, 'roadmap'),
+        (4, 'roadcrap'),
+        (3, 'roadmap2022'),
+        (1, 'maproad'),
+        (5, 'noize'),
+      ]
+    
+    start_time = datetime.datetime.utcnow()
+    response = self.testapp.get(f'/_/api/links?similar_to={unexisting_shortpath}&limit={limit}',
+                                headers={'TROTTO_USER_UNDER_TEST': 'kay@googs.com'})
+    execution_time = datetime.datetime.utcnow() - start_time
+    self.assertLess(execution_time, datetime.timedelta(seconds=0.5))
+
+    actual_response = json.loads(response.text)
+    expected_response = [_get_shortlink_by_shortpath(pk, shortpath)
+                         for pk, shortpath in sorted_shortpath_list]
+
+    self.assertCountEqual(expected_response, actual_response)
+
+
   def test_update_link__go_link__successful(self):
     ShortLink(id=7,
               organization='googs.com',

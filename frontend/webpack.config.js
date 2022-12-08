@@ -78,7 +78,7 @@ if (JSON.stringify(process.env.NODE_ENV || 'development') == '"development"') {
     contentBase: __dirname + '/../server/src/static',
     proxy: {
       '/': {
-        target: 'http://localhost:9095',
+        target: 'http://127.0.0.1:9095',
         changeOrigin: true
       },
       '/_/api': {

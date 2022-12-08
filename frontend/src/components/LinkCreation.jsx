@@ -9,6 +9,7 @@ import {ReduxManagedStateComponent} from './Abstract'
 import {PrimaryButton, SecondaryButton} from './shared/Buttons';
 import {SuccessMessage, ErrorMessage} from './shared/Messages';
 import { DEFAULT_NAMESPACE } from '../config';
+import { getServiceBaseUrl } from '../utils';
 
 
 function mapStateToProps(state) {
@@ -18,6 +19,7 @@ function mapStateToProps(state) {
   return {
     newLinkData: state.get('newLinkData'),
     linkCreationMessage: state.get('linkCreationMessage'),
+    suggestedLinks: state.get('suggestedLinks'),
     termsOfServiceAcceptanceStatus: state.get('termsOfServiceAcceptanceStatus'),
     links: state.get('links'),
     chromeExtensionInstalled: state.get('chromeExtensionInstalled'),
@@ -160,6 +162,43 @@ export class LinkForm extends React.Component {
     }, 1000);
   }
 
+  renderSuggestedLinks() {
+    const { suggestedLinks, goSupportedInCurrentSession } = this.props
+    if (!suggestedLinks.length) {
+      return;
+    }
+
+    return <div style={{fontSize: '0.9em', marginTop: '20px'}}>
+      Did you mean any of this similar go links?
+      {suggestedLinks.map(({id, namespace, shortpath, destination_url}) => {
+        const host = !goSupportedInCurrentSession
+          ? getServiceBaseUrl()
+          : `http://${namespace || DEFAULT_NAMESPACE}`;
+        const linkPath = `${host}/${shortpath}`;
+
+        return (<div key={id} style={{paddingLeft: '10px'}}>
+          <a
+            href={linkPath}
+            data-test-id="suggested-shortlink-anchor-tag"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {linkPath.split('://')[1]}
+          </a>
+          <b> &#8594; </b>
+          <a
+            href={destination_url}
+            data-test-id="suggested-destination-url-anchor-tag"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {destination_url}
+          </a>
+        </div>)
+      })}
+    </div>
+  }
+
   render() {
 
     if (!this.props.linkCreationMessage) {
@@ -277,6 +316,7 @@ export class LinkForm extends React.Component {
                   </PrimaryButton>
                 </div>
               </div>
+              {this.renderSuggestedLinks()}
             </div>
           </div>
         </div>
