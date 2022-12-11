@@ -181,7 +181,7 @@ def create_transfer_link(link_id):
              'o': user_helpers.get_or_create_user(g.link.owner, g.link.organization).id,  # "o" -> link owner
              'by': current_user.id}
 
-  token = jwt.encode(payload, config.get_config()['sessions_secret'], algorithm='HS256')
+  token = jwt.encode(payload, config.get_config()['sessions_secret'], algorithm='HS256').encode('utf-8')
 
   full_url = f"{request.host_url}_transfer/{base64.urlsafe_b64encode(token).decode('utf-8').strip('=')}"
 

@@ -1,3 +1,4 @@
+from typing import Optional
 import base64
 from copy import deepcopy
 from dataclasses import dataclass
@@ -551,6 +552,11 @@ class TestLinkTransferHandlers(TrottoTestCase):
                           'o': 777,
                           'by': 777}
 
+  def _get_transfer_token(self, jwt_token: Optional[str] = None) -> str:
+    jwt_token = jwt_token or jwt.encode(self.token_payload, 'the_secret', algorithm='HS256')
+    encoded = jwt_token.encode('utf-8')
+    return base64.urlsafe_b64encode(encoded).decode('utf-8').strip('=')
+
   def test_get_transfer_link__authorized(self, _):
     next_year = datetime.datetime.utcnow().year + 1
     with freeze_time(datetime.datetime(next_year, 10, 1, 1, 0, 0)):
@@ -567,7 +573,7 @@ class TestLinkTransferHandlers(TrottoTestCase):
                               'the_secret',
                               algorithm='HS256')
 
-    expected_url = f"http://localhost/_transfer/{base64.urlsafe_b64encode(expected_jwt).decode('utf-8').strip('=')}"
+    expected_url = f"http://localhost/_transfer/{self._get_transfer_token(expected_jwt)}"
 
     self.assertEqual({'url': expected_url},
                      response.json)
@@ -588,7 +594,7 @@ class TestLinkTransferHandlers(TrottoTestCase):
                               'the_secret',
                               algorithm='HS256')
 
-    expected_url = f"http://localhost/_transfer/{base64.urlsafe_b64encode(expected_jwt).decode('utf-8').strip('=')}"
+    expected_url = f"http://localhost/_transfer/{self._get_transfer_token(expected_jwt)}"
 
     self.assertEqual({'url': expected_url},
                      response.json)
@@ -609,10 +615,7 @@ class TestLinkTransferHandlers(TrottoTestCase):
     minute_ago = datetime.datetime.utcnow() - datetime.timedelta(minutes=1)
     self.token_payload.update({'exp': minute_ago})
 
-    transfer_token = base64.urlsafe_b64encode(jwt.encode(self.token_payload,
-                                                         'the_secret',
-                                                         algorithm='HS256')
-                                              ).decode('utf-8').strip('=')
+    transfer_token = self._get_transfer_token()
 
     response = self.testapp.post(f'/_/api/transfer_link/{transfer_token}',
                                  headers={'TROTTO_USER_UNDER_TEST': 'joe@googs.com'},
@@ -623,10 +626,8 @@ class TestLinkTransferHandlers(TrottoTestCase):
                      response.json)
 
   def test_use_transfer_link__jwt_invalid_signature(self, _):
-    transfer_token = base64.urlsafe_b64encode(jwt.encode(self.token_payload,
-                                                         'no_secret',
-                                                         algorithm='HS256')
-                                              ).decode('utf-8').strip('=')
+    invalid_jwt = jwt.encode(self.token_payload, 'no_secret', algorithm='HS256')
+    transfer_token = self._get_transfer_token(invalid_jwt)
 
     response = self.testapp.post(f'/_/api/transfer_link/{transfer_token}',
                                  headers={'TROTTO_USER_UNDER_TEST': 'joe@googs.com'},
@@ -636,10 +637,7 @@ class TestLinkTransferHandlers(TrottoTestCase):
   def test_use_transfer_link__inapplicable_subject(self, _):
     self.token_payload.update({'sub': 'link_something:7'})
 
-    transfer_token = base64.urlsafe_b64encode(jwt.encode(self.token_payload,
-                                                         'the_secret',
-                                                         algorithm='HS256')
-                                              ).decode('utf-8').strip('=')
+    transfer_token = self._get_transfer_token()
 
     response = self.testapp.post(f'/_/api/transfer_link/{transfer_token}',
                                  headers={'TROTTO_USER_UNDER_TEST': 'joe@googs.com'},
@@ -649,10 +647,7 @@ class TestLinkTransferHandlers(TrottoTestCase):
   def test_use_transfer_link__jwt_missing_claims(self, _):
     del self.token_payload['tp']
 
-    transfer_token = base64.urlsafe_b64encode(jwt.encode(self.token_payload,
-                                                         'the_secret',
-                                                         algorithm='HS256')
-                                              ).decode('utf-8').strip('=')
+    transfer_token = self._get_transfer_token()
 
     response = self.testapp.post(f'/_/api/transfer_link/{transfer_token}',
                                  headers={'TROTTO_USER_UNDER_TEST': 'joe@googs.com'},
@@ -662,10 +657,7 @@ class TestLinkTransferHandlers(TrottoTestCase):
   def test_use_transfer_link__invalid_permission(self, _):
     self.token_payload.update({'tp': 'read'})
 
-    transfer_token = base64.urlsafe_b64encode(jwt.encode(self.token_payload,
-                                                         'the_secret',
-                                                         algorithm='HS256')
-                                              ).decode('utf-8').strip('=')
+    transfer_token = self._get_transfer_token()
 
     response = self.testapp.post(f'/_/api/transfer_link/{transfer_token}',
                                  headers={'TROTTO_USER_UNDER_TEST': 'joe@googs.com'},
@@ -675,10 +667,7 @@ class TestLinkTransferHandlers(TrottoTestCase):
   def test_use_transfer_link__no_such_link(self, _):
     self.token_payload.update({'sub': 'link:20'})
 
-    transfer_token = base64.urlsafe_b64encode(jwt.encode(self.token_payload,
-                                                         'the_secret',
-                                                         algorithm='HS256')
-                                              ).decode('utf-8').strip('=')
+    transfer_token = self._get_transfer_token()
 
     response = self.testapp.post(f'/_/api/transfer_link/{transfer_token}',
                                  headers={'TROTTO_USER_UNDER_TEST': 'joe@googs.com'},
@@ -694,10 +683,7 @@ class TestLinkTransferHandlers(TrottoTestCase):
 
     self.token_payload.update({'o': 20})
 
-    transfer_token = base64.urlsafe_b64encode(jwt.encode(self.token_payload,
-                                                         'the_secret',
-                                                         algorithm='HS256')
-                                              ).decode('utf-8').strip('=')
+    transfer_token = self._get_transfer_token()
 
     response = self.testapp.post(f'/_/api/transfer_link/{transfer_token}',
                                  headers={'TROTTO_USER_UNDER_TEST': 'joe@googs.com'},
@@ -716,10 +702,7 @@ class TestLinkTransferHandlers(TrottoTestCase):
 
     self.token_payload.update({'by': 20})
 
-    transfer_token = base64.urlsafe_b64encode(jwt.encode(self.token_payload,
-                                                         'the_secret',
-                                                         algorithm='HS256')
-                                              ).decode('utf-8').strip('=')
+    transfer_token = self._get_transfer_token()
 
     response = self.testapp.post(f'/_/api/transfer_link/{transfer_token}',
                                  headers={'TROTTO_USER_UNDER_TEST': 'joe@googs.com'},
@@ -730,10 +713,7 @@ class TestLinkTransferHandlers(TrottoTestCase):
                      response.json)
 
   def test_use_transfer_link__accepting_user_in_wrong_org(self, _):
-    transfer_token = base64.urlsafe_b64encode(jwt.encode(self.token_payload,
-                                                         'the_secret',
-                                                         algorithm='HS256')
-                                              ).decode('utf-8').strip('=')
+    transfer_token = self._get_transfer_token()
 
     response = self.testapp.post(f'/_/api/transfer_link/{transfer_token}',
                                  headers={'TROTTO_USER_UNDER_TEST': 'joe@other.com'},
@@ -745,10 +725,7 @@ class TestLinkTransferHandlers(TrottoTestCase):
     self.assertEqual('kay@googs.com', link.owner)
 
   def test_use_transfer_link__success(self, _):
-    transfer_token = base64.urlsafe_b64encode(jwt.encode(self.token_payload,
-                                                         'the_secret',
-                                                         algorithm='HS256')
-                                              ).decode('utf-8').strip('=')
+    transfer_token = self._get_transfer_token()
 
     response = self.testapp.post(f'/_/api/transfer_link/{transfer_token}',
                                  headers={'TROTTO_USER_UNDER_TEST': 'joe@googs.com'})
@@ -761,10 +738,7 @@ class TestLinkTransferHandlers(TrottoTestCase):
   def test_use_transfer_link__success__generated_by_admin(self, _):
     self.token_payload.update({'by': User.get_by_email_and_org('sam@googs.com', 'googs.com').id})
 
-    transfer_token = base64.urlsafe_b64encode(jwt.encode(self.token_payload,
-                                                         'the_secret',
-                                                         algorithm='HS256')
-                                              ).decode('utf-8').strip('=')
+    transfer_token = self._get_transfer_token()
 
     response = self.testapp.post(f'/_/api/transfer_link/{transfer_token}',
                                  headers={'TROTTO_USER_UNDER_TEST': 'joe@googs.com'})

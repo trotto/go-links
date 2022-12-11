@@ -13,7 +13,7 @@ Flask-Login==0.6.2
 Flask-SQLAlchemy===2.4.1
 Flask-WTF==0.14.3
 Werkzeug==2.0.3
-PyJWT==1.7.1
+PyJWT==2.4.0
 PyYAML==5.4
 sentry-sdk[flask]==0.20.3
 validate-email==1.3
