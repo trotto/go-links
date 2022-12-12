@@ -2,7 +2,7 @@ import base64
 import datetime
 from functools import wraps
 import logging
-from typing import Any
+from typing import Any, Optional
 from urllib.parse import urlencode
 
 from flask import Blueprint, request, redirect, jsonify, abort, g
@@ -94,9 +94,16 @@ def _get_link_response(link):
   return link_response
 
 
-def _order_links_by_similarity(links: list[dict[str, Any]], similar_to: str) -> list[dict[str, Any]]:
-  distances = {link['id']: levenshtein_distance(similar_to, link['shortpath'])
+def _order_links_by_similarity(
+  links: list[dict[str, Any]],
+  similar_to: str,
+  similarity_threshold: Optional[float],
+  ) -> list[dict[str, Any]]:
+  distances = {link['id']: levenshtein_distance(similar_to, link['shortpath']) / len(link['shortpath'])
                for link in links}
+  if similarity_threshold:
+    links = [link for link in links
+             if distances[link['id']] <= similarity_threshold]
   return sorted(links, key=lambda link:distances[link['id']])
 
 
@@ -105,6 +112,7 @@ def _order_links_by_similarity(links: list[dict[str, Any]], similar_to: str) -> 
 def get_links():
   similar_to = request.args.get('similar_to')
   limit = request.args.get('limit', type=int)
+  similarity_threshold = request.args.get('similarity_threshold', type=float)
 
   links = [_get_link_response(entity)
            for entity in helpers.get_all_shortlinks_for_org(current_user.organization)]
@@ -113,7 +121,7 @@ def get_links():
     link['mine'] = link['owner'] == current_user.email
 
   if similar_to:
-    links = _order_links_by_similarity(links, similar_to)
+    links = _order_links_by_similarity(links, similar_to, similarity_threshold)
 
   if limit:
     links = links[:limit]

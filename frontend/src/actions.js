@@ -274,9 +274,10 @@ export function receiveSuggestedLinks(links) {
 
 export function fetchSuggestedLinks(similar_to) {
   const quantity = 5
+  const similarity_threshold = 0.5
 
   return function (dispatch, getState) {
-    var endpoint = `/_/api/links?similar_to=${similar_to}&limit=${quantity}`;
+    var endpoint = `/_/api/links?similar_to=${similar_to}&limit=${quantity}&similarity_threshold=${similarity_threshold}`;
 
     var fetchInit = {
       credentials: 'include',

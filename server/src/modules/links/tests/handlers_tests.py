@@ -288,35 +288,75 @@ class TestHandlers(TrottoTestCase):
         (4, 'roadcrap'),
         (5, 'noize'),
         (6, 'noize2'),
-        *[(index, f'noize_to_check_a_big_difference_{index}') for index in range(7, 1001)], 
+        (7, 'roadmap-2023'),
+        (8, '1984-map'),
+        *[(index, f'noize_to_check_a_big_difference_{index}') for index in range(9, 1001)], 
       ]
 
       # generating 1k links
       for pk, shortpath in shrotpath_list:
         _put_shortlink_into_db(pk, shortpath)
 
-      unexisting_shortpath = 'roadmpa'
-      limit = 5
-
-      sorted_shortpath_list: list[tuple[int, str]] = [
+    test_params = [{
+      # checking regular option
+      'shortpath_to_test': 'roadmpa',
+      'limit': 5,
+      'similarity_threshold': 0.5,
+      'expected_list': [
+        (2, 'roadmap'),
+        (4, 'roadcrap'),
+        (3, 'roadmap2022'),
+        (7, 'roadmap-2023'),
+      ]
+    }, {
+      # do not path similarity_trheshold
+      'shortpath_to_test': 'roadmpa',
+      'limit': 6,
+      'expected_list': [
         (2, 'roadmap'),
         (4, 'roadcrap'),
         (3, 'roadmap2022'),
         (1, 'maproad'),
-        (5, 'noize'),
+        (7, 'roadmap-2023'),
+        (8, '1984-map'),
       ]
+    }, {
+      # without limit
+      'shortpath_to_test': 'roadmpa',
+      'similarity_threshold': 0.86,
+      'expected_list': [
+        (2, 'roadmap'),
+        (4, 'roadcrap'),
+        (3, 'roadmap2022'),
+        (1, 'maproad'),
+        (7, 'roadmap-2023'),
+      ]
+    }]
     
-    start_time = datetime.datetime.utcnow()
-    response = self.testapp.get(f'/_/api/links?similar_to={unexisting_shortpath}&limit={limit}',
-                                headers={'TROTTO_USER_UNDER_TEST': 'kay@googs.com'})
-    execution_time = datetime.datetime.utcnow() - start_time
-    self.assertLess(execution_time, datetime.timedelta(seconds=0.5))
+    for params in test_params:
+      unexisting_shortpath = params.get('shortpath_to_test')
+      limit = params.get('limit')
+      similarity_threshold = params.get('similarity_threshold')
+      expected_list = params.get('expected_list')
 
-    actual_response = json.loads(response.text)
-    expected_response = [_get_shortlink_by_shortpath(pk, shortpath)
-                         for pk, shortpath in sorted_shortpath_list]
+      start_time = datetime.datetime.utcnow()
+      url = f'/_/api/links?similar_to={unexisting_shortpath}'
+      if limit:
+        url += f'&limit={limit}'
+      if similarity_threshold:
+        url += f'&similarity_threshold={similarity_threshold}'
+      response = self.testapp.get(url,
+                                  headers={'TROTTO_USER_UNDER_TEST': 'kay@googs.com'})
+      execution_time = datetime.datetime.utcnow() - start_time
+      self.assertLess(execution_time, datetime.timedelta(seconds=0.5))
 
-    self.assertCountEqual(expected_response, actual_response)
+      actual_response = json.loads(response.text)
+      expected_response = [_get_shortlink_by_shortpath(pk, shortpath)
+                          for pk, shortpath in expected_list]
+
+      print([res['shortpath'] for res in actual_response])
+
+      self.assertCountEqual(expected_response, actual_response)
 
 
   def test_update_link__go_link__successful(self):
