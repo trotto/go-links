@@ -5,7 +5,7 @@ import {createStore, applyMiddleware, combineReducers} from 'redux';
 import reducer from './reducer';
 import TrottoRouter from './router';
 import {receiveSaveResult, updateNewLinkFieldWithString,
-        setLinkCreationMessage, fetchUserInfo, setLinkEditingStatus} from './actions';
+        setLinkCreationMessage, fetchUserInfo, setLinkEditingStatus, fetchSuggestedLinks} from './actions';
 import {INIT_STATE} from './init_state';
 import thunkMiddleware from 'redux-thunk';
 import createLogger from 'redux-logger';
@@ -52,6 +52,7 @@ if (queryParams.r) {
   history.replaceState({}, '', '/');
 
   store.dispatch(setLinkCreationMessage('error', `${namespace}/${shortpath} doesn't exist yet. You can create it now!`));
+  store.dispatch(fetchSuggestedLinks(shortpath));
 } else if (queryParams.transfer) {
   history.replaceState({}, '', '/');
 

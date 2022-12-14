@@ -14,6 +14,7 @@ if (window.location.search.indexOf('autoclose=true') !== -1) {
 export const INIT_STATE = {
   userInfo: undefined,
   links: undefined,
+  suggestedLinks: [],
   newLinkData: {
     namespace: DEFAULT_NAMESPACE,
     shortpath: '',

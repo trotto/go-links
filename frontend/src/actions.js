@@ -137,6 +137,8 @@ export function receiveSaveResult(responseJson) {
           'Success! New go link created:',
           host + '/' + responseJson.shortpath
       ));
+
+      dispatch(clearSuggestedLinks())
     }
   }
 }
@@ -248,6 +250,43 @@ export function fetchLinks() {
     return enhancedFetch(endpoint, fetchInit, dispatch)
       .then(json => {
         dispatch(receiveLinks(json));
+      })
+      .catch(reason => {})
+  }
+}
+
+
+export function clearSuggestedLinks() {
+  return {
+    type: 'SET_SUGGESTED_LINKS',
+    links: [],
+  }
+}
+
+
+export function receiveSuggestedLinks(links) {
+  return {
+    type: 'SET_SUGGESTED_LINKS',
+    links,
+  }
+}
+
+
+export function fetchSuggestedLinks(similar_to) {
+  const quantity = 5
+  const similarity_threshold = 0.5
+
+  return function (dispatch, getState) {
+    var endpoint = `/_/api/links?similar_to=${similar_to}&limit=${quantity}&similarity_threshold=${similarity_threshold}`;
+
+    var fetchInit = {
+      credentials: 'include',
+      method: 'GET'
+    };
+
+    return enhancedFetch(endpoint, fetchInit, dispatch)
+      .then(json => {
+        dispatch(receiveSuggestedLinks(json));
       })
       .catch(reason => {})
   }

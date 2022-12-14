@@ -48,6 +48,9 @@ export default function (state = Map(), action) {
         }, lst);
       });
 
+    case 'SET_SUGGESTED_LINKS':
+      return state.set('suggestedLinks', action.links)
+
     case 'SET_SHOWN_SUBSECTION':
       return state.set('shownSubsection', action.subsection);
 

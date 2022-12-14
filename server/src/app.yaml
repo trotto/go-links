@@ -1,4 +1,4 @@
-runtime: python37
+runtime: python39
 entrypoint: gunicorn -b :$PORT main:app
 env_variables:
   PYTHONHTTPSVERIFY: 1

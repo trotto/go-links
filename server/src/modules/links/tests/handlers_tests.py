@@ -251,6 +251,114 @@ class TestHandlers(TrottoTestCase):
                             'visits_count': 0}],
                           json.loads(response.text))
 
+  def test_get_links_with_similar_to_and_limit(self):
+    modified_datetime = datetime.datetime.utcnow() + datetime.timedelta(days=2)
+
+    with freeze_time(modified_datetime):
+      def _put_shortlink_into_db(pk:int, shortpath: str) -> ShortLink:
+        return ShortLink(
+          id=pk,
+          created=datetime.datetime(2018, 10, 1),
+          organization='googs.com',
+          owner='kay@googs.com',
+          namespace='go',
+          shortpath=shortpath,
+          shortpath_prefix='there',
+          destination_url='http://example.com',
+        ).put()
+
+      def _get_shortlink_by_shortpath(pk:int, shortpath: str):
+        return {
+          'id': str(pk),
+          'created': '2018-10-01 00:00:00',
+          'modified': str(modified_datetime),
+          'mine': True,
+          'owner': 'kay@googs.com',
+          'namespace': 'go',
+          'shortpath': shortpath,
+          'destination_url': 'http://example.com',
+          'type': None,
+          'visits_count': 0,
+        }
+
+      shrotpath_list: list[tuple[int, str]] = [
+        (1, 'maproad'),
+        (2, 'roadmap'),
+        (3, 'roadmap2022'),
+        (4, 'roadcrap'),
+        (5, 'noize'),
+        (6, 'noize2'),
+        (7, 'roadmap-2023'),
+        (8, '1984-map'),
+        *[(index, f'noize_to_check_a_big_difference_{index}') for index in range(9, 1001)], 
+      ]
+
+      # generating 1k links
+      for pk, shortpath in shrotpath_list:
+        _put_shortlink_into_db(pk, shortpath)
+
+    test_params = [{
+      # checking regular option
+      'shortpath_to_test': 'roadmpa',
+      'limit': 5,
+      'similarity_threshold': 0.5,
+      'expected_list': [
+        (2, 'roadmap'),
+        (4, 'roadcrap'),
+        (3, 'roadmap2022'),
+        (7, 'roadmap-2023'),
+      ]
+    }, {
+      # do not path similarity_trheshold
+      'shortpath_to_test': 'roadmpa',
+      'limit': 6,
+      'expected_list': [
+        (2, 'roadmap'),
+        (4, 'roadcrap'),
+        (3, 'roadmap2022'),
+        (1, 'maproad'),
+        (7, 'roadmap-2023'),
+        (8, '1984-map'),
+      ]
+    }, {
+      # without limit
+      'shortpath_to_test': 'roadmpa',
+      'similarity_threshold': 0.86,
+      'expected_list': [
+        (2, 'roadmap'),
+        (4, 'roadcrap'),
+        (3, 'roadmap2022'),
+        (1, 'maproad'),
+        (7, 'roadmap-2023'),
+      ]
+    }]
+    
+    for params in test_params:
+      unexisting_shortpath = params.get('shortpath_to_test')
+      limit = params.get('limit')
+      similarity_threshold = params.get('similarity_threshold')
+      expected_list = params.get('expected_list')
+
+      start_time = datetime.datetime.utcnow()
+      url = f'/_/api/links?similar_to={unexisting_shortpath}'
+      if limit:
+        url += f'&limit={limit}'
+      if similarity_threshold:
+        url += f'&similarity_threshold={similarity_threshold}'
+      response = self.testapp.get(url,
+                                  headers={'TROTTO_USER_UNDER_TEST': 'kay@googs.com'})
+      execution_time = datetime.datetime.utcnow() - start_time
+      self.assertLess(execution_time, datetime.timedelta(seconds=0.5))
+
+      actual_response = json.loads(response.text)
+      expected_response = [_get_shortlink_by_shortpath(pk, shortpath)
+                          for pk, shortpath in expected_list]
+
+      print([res['shortpath'] for res in actual_response])
+
+      self.assertCountEqual(expected_response, actual_response)
+
+
   def test_update_link__go_link__successful(self):
     ShortLink(id=7,
               organization='googs.com',
