@@ -52,8 +52,8 @@ jobs:
       - checkout
       - run: sh .circleci/set_env_vars.sh
       # install gcloud
-      - run: curl -o $HOME/google-cloud-sdk-303.0.0-linux-x86_64.tar.gz https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-303.0.0-linux-x86_64.tar.gz
-      - run: tar zxf $HOME/google-cloud-sdk-303.0.0-linux-x86_64.tar.gz -C $HOME
+      - run: curl -o $HOME/google-cloud-cli-412.0.0-linux-x86_64.tar.gz https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-cli-412.0.0-linux-x86_64.tar.gz
+      - run: tar zxf $HOME/google-cloud-cli-412.0.0-linux-x86_64.tar.gz -C $HOME
       - run: CLOUDSDK_CORE_DISABLE_PROMPTS=1 $HOME/google-cloud-sdk/install.sh
       - run: echo 'source ${HOME}/google-cloud-sdk/path.bash.inc' >> $BASH_ENV
       - run: gcloud components update
