@@ -132,7 +132,7 @@ class TestHandlers(AuthenticationTestCase):
   def test_login_via_test_token__invalid_token(self, _):
     token = jwt.encode({'email': 'sam@example.com'}, 'some_secret', algorithm='HS256')
 
-    response = self.testapp.get(f'/_/auth/oauth2_callback?test_token={token.decode("utf-8")}',
+    response = self.testapp.get(f'/_/auth/oauth2_callback?test_token={token}',
                                 expect_errors=True)
 
     self.assertEqual(500, response.status_int)
@@ -143,7 +143,7 @@ class TestHandlers(AuthenticationTestCase):
   def test_login_via_test_token__no_test_token_config(self, _):
     token = jwt.encode({'email': 'sam@example.com'}, 'a_test_secret', algorithm='HS256')
 
-    response = self.testapp.get(f'/_/auth/oauth2_callback?test_token={token.decode("utf-8")}',
+    response = self.testapp.get(f'/_/auth/oauth2_callback?test_token={token}',
                                 expect_errors=True)
 
     self.assertEqual(500, response.status_int)
@@ -155,7 +155,7 @@ class TestHandlers(AuthenticationTestCase):
   def test_login_via_test_token__valid_token_invalid_domain(self, _):
     token = jwt.encode({'user_email': 'sam@googs.com'}, 'a_test_secret', algorithm='HS256')
 
-    response = self.testapp.get(f'/_/auth/oauth2_callback?test_token={token.decode("utf-8")}',
+    response = self.testapp.get(f'/_/auth/oauth2_callback?test_token={token}',
                                 expect_errors=True)
 
     self.assertEqual(500, response.status_int)
@@ -167,7 +167,7 @@ class TestHandlers(AuthenticationTestCase):
   def test_login_via_test_token__success(self, _):
     token = jwt.encode({'user_email': 'sam@example.com'}, 'a_test_secret', algorithm='HS256')
 
-    response = self.testapp.get(f'/_/auth/oauth2_callback?test_token={token.decode("utf-8")}')
+    response = self.testapp.get(f'/_/auth/oauth2_callback?test_token={token}')
 
     self.assertEqual(302, response.status_int)
 
@@ -188,7 +188,7 @@ def _generate_signin_token(secret, org, expires_in_seconds, user_id=None, user_e
 
   return jwt.encode(payload,
                     secret,
-                    'HS256').decode('utf-8')
+                    'HS256')
 
 class TestAuthenticationControls(AuthenticationTestCase):
 
