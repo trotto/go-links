@@ -1,6 +1,6 @@
 declare global {
   interface Window {
-    _trotto: { [name: string]: any }
+    _trotto: { [name: string]: unknown }
   }
 }
 
