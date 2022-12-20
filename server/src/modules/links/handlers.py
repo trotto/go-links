@@ -133,7 +133,6 @@ def get_links():
 @login_required
 def post_link():
   object_data = request.json
-  print(request)
 
   if 'owner' in object_data and not user_helpers.is_user_admin(current_user):
     abort(403)
