@@ -172,26 +172,28 @@ def home():
                          namespaces=json.dumps(namespaces),
                          admin_links=json.dumps(admin_links))
 
-@app.route('/_scripts/config2.js')
-def config2():
+
+@app.route('/_csrf_token')
+def get_csrf_token():
+  """Return csrf token for API call"""
+  if not current_user.is_authenticated:
+    return redirect('https://www.trot.to'
+                    if request.host == 'trot.to'
+                    else '/_/auth/login')
+
+  return {"csrfToken": generate_csrf()}
+
+@app.route('/_admin_links')
+def admin_links():
+  """Returns admin links for API call"""
   if not current_user.is_authenticated:
     return redirect('https://www.trot.to'
                     if request.host == 'trot.to'
                     else '/_/auth/login')
 
   from modules.organizations.helpers import get_org_settings
-
-  namespaces = config.get_organization_config(current_user.organization).get('namespaces', [])
   admin_links = get_org_settings(current_user.organization).get('admin_links', [])
-
-  return f"""
-    window._trotto = window._trotto || {{}}
-    window._trotto.csrfToken = '{generate_csrf()}'
-    window._trotto.defaultNamespace = '{config.get_default_namespace(current_user.organization)}'
-    window._trotto.namespaces = {json.dumps(namespaces)}
-    window._trotto.adminLinks = {json.dumps(admin_links)}
-  """
-
+  return json.dumps(admin_links)
 
 @app.route('/_scripts/config.js')
 def layout_config():

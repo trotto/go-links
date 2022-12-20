@@ -12,8 +12,8 @@ import { Link, LinkCreate, LinkCreateResponse } from '../../types'
 import { find } from 'lodash'
 
 const StyledDiv = styled.div`
-  background-color: #f2f2f2;
-  height: calc(100vh - 64px);
+  background-color: #fff;
+  height: calc(100% - 64px);
   padding: 64px 200px 0;
 
   .scrollable {
