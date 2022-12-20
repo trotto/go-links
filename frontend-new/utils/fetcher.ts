@@ -1,13 +1,13 @@
 declare global {
   interface Window {
-    _trotto: {[name: string]: any}
+    _trotto: { [name: string]: any }
   }
 }
 
 let csrfToken: string
 
 export const fetcher = async <T>(url: string, config: RequestInit = {}): Promise<T> => {
-  if (config?.method != 'GET')  {
+  if (config?.method != 'GET') {
     if (!csrfToken) {
       const response = await (await fetch('/_csrf_token')).json()
       csrfToken = response.csrfToken
@@ -18,7 +18,7 @@ export const fetcher = async <T>(url: string, config: RequestInit = {}): Promise
         'X-CSRFToken': csrfToken,
         'Content-Type': 'application/json',
         ...config?.headers,
-      }
+      },
     }
   }
   const res = await fetch(url, config)
