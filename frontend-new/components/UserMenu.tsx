@@ -10,6 +10,7 @@ import useSWR from 'swr'
 import { fetcher } from '../utils/fetcher'
 import PersonIcon from '@mui/icons-material/Person'
 import { Vector } from '../icons'
+import { User } from '../types'
 
 const StyledDiv = styled.div`
   .vector {
@@ -20,20 +21,6 @@ const StyledDiv = styled.div`
   a {
   }
 `
-
-interface User {
-  admin: boolean
-  created: string
-  email: string
-  id: number
-  info_bar?: unknown
-  keywords_validation_regex: string
-  notifications: unknown
-  org_edit_mode: string
-  organization: string
-  read_only_mode?: unknown
-  role?: unknown
-}
 
 export const UserMenu: FC = () => {
   const { data: user } = useSWR(`/_/api/users/me`, fetcher<User>)

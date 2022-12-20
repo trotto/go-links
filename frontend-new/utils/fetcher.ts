@@ -1,9 +1,3 @@
-declare global {
-  interface Window {
-    _trotto: { [name: string]: unknown }
-  }
-}
-
 let csrfToken: string
 
 export const fetcher = async <T>(url: string, config: RequestInit = {}): Promise<T> => {
