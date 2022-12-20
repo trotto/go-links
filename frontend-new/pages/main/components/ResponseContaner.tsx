@@ -1,15 +1,8 @@
-import { useState, useCallback, ChangeEvent, FormEvent } from 'react'
 import { Link } from '../../../types'
-import TextField from '@mui/material/TextField'
-import Button from '@mui/material/Button'
-import { LinkActions } from './LinkActions'
 import styled from '@emotion/styled'
-import { LinkUpdate } from '../../../types'
-import { TransferModal } from '../modals/TransferModal'
-import { DeleteModal } from '../modals/DeleteModal'
 import { LinkItem } from './LinkItem'
 
-const StyledDiv = styled.div(({ type }: { type: ResponseType }) => ({
+const StyledDiv = styled.div(() => ({
   border: '1px solid',
   borderRadius: '4px',
   '.header': {
@@ -33,9 +26,9 @@ interface Props {
   message: string
 }
 
-export const ResponseContainer = ({ link, type, message }: Props) => {
+export const ResponseContainer = ({ link, message }: Props) => {
   return (
-    <StyledDiv type={type}>
+    <StyledDiv>
       <div className='header'>{message}</div>
       <LinkItem link={link}></LinkItem>
     </StyledDiv>

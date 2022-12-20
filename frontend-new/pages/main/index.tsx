@@ -1,7 +1,5 @@
 import { useCallback, useMemo, useState } from 'react'
 import useSWR from 'swr'
-import Head from 'next/head'
-import Image from 'next/image'
 import styled from '@emotion/styled'
 import { LinkCreationForm } from './components/LinkCreationForm'
 import { LinkList } from './components/LinkList'
@@ -30,7 +28,7 @@ interface NotificationState {
 export default function Home() {
   const [notificationState, setNotificationState] = useState<NotificationState>()
   const [searchState, setSearchState] = useState('')
-  const { data: links, error, isLoading, mutate } = useSWR('/_/api/links', fetcher<Link[]>)
+  const { data: links, mutate } = useSWR('/_/api/links', fetcher<Link[]>)
 
   const handleCreate = useCallback(
     async (link: LinkCreate) => {

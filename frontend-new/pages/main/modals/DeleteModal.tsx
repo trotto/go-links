@@ -4,10 +4,9 @@ import Button from '@mui/material/Button'
 import Modal from '@mui/material/Modal'
 import { Link } from '../../../types'
 import TextField from '@mui/material/TextField'
-import { fetcher } from '../../../utils/fetcher'
 
 const style = {
-  position: 'absolute' as 'absolute',
+  position: 'absolute' as const,
   display: 'flex',
   'flex-direction': 'column',
   top: '50%',
@@ -25,10 +24,6 @@ interface Props {
   onDelete: (id: number) => void
   onClose: () => void
   link: Link
-}
-
-interface TransferToken {
-  url: string
 }
 
 export const DeleteModal: FC<Props> = ({ open, onClose, onDelete, link }) => {
@@ -56,10 +51,10 @@ export const DeleteModal: FC<Props> = ({ open, onClose, onDelete, link }) => {
       <Box sx={style}>
         <p>
           Deleting a go link will delete the go link for everyone in your organization. No one on
-          your team will be able to use <b>fullShortPath</b> until it's re-created.
+          your team will be able to use <b>{fullShortPath}</b> until it&#39s re-created.
         </p>
         <p>
-          To confirm deletion, type <b>fullShortPath</b> and press Delete.
+          To confirm deletion, type <b>{fullShortPath}</b> and press Delete.
         </p>
         <TextField
           value={confirmationPath}

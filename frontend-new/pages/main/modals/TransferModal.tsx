@@ -1,4 +1,4 @@
-import { FC, useCallback, useState, useEffect } from 'react'
+import { FC, useCallback } from 'react'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Modal from '@mui/material/Modal'
@@ -8,7 +8,7 @@ import useSWR from 'swr'
 import { fetcher } from '../../../utils/fetcher'
 
 const style = {
-  position: 'absolute' as 'absolute',
+  position: 'absolute' as const,
   display: 'flex',
   'flex-direction': 'column',
   top: '50%',

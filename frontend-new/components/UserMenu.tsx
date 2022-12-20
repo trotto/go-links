@@ -26,13 +26,13 @@ interface User {
   created: string
   email: string
   id: number
-  info_bar?: any
+  info_bar?: unknown
   keywords_validation_regex: string
-  notifications: any
+  notifications: unknown
   org_edit_mode: string
   organization: string
-  read_only_mode?: any
-  role?: any
+  read_only_mode?: unknown
+  role?: unknown
 }
 
 export const UserMenu: FC = () => {
