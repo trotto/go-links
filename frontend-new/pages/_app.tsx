@@ -16,6 +16,33 @@ const theme = createTheme({
   typography: {
     fontFamily: ['Poppins', 'Sans-serif'].join(', '),
   },
+  components: {
+    // Name of the component
+    MuiButton: {
+      styleOverrides: {
+        // Name of the slot
+        root: {
+          // Some CSS
+          color: '#fff',
+          backgroundColor: '#646ae7',
+          height: '32px',
+          padding: '0 24px',
+          borderRadius: '32px',
+          textTransform: 'none',
+          fontSize: '16px',
+          fontWeight: 400,
+          '&:disabled': {
+            backgroundColor: '#bdbcf3',
+            color: '#fff',
+          },
+          '&:hover': {
+            backgroundColor: '#bdbcf3',
+            color: '#fff',
+          },
+        },
+      },
+    },
+  },
 })
 
 export default function App({ Component, pageProps }: AppProps) {

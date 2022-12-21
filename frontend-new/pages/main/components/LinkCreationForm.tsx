@@ -1,9 +1,10 @@
-import { useState, useCallback, ChangeEvent, FormEvent } from 'react'
+import { useState, useCallback, ChangeEvent, FormEvent, useMemo } from 'react'
 import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
 import { LinkCreate } from '../../../types'
 import InputAdornment from '@mui/material/InputAdornment'
 import styled from '@emotion/styled'
+import EastRoundedIcon from '@mui/icons-material/EastRounded'
 
 const StyledForm = styled.form`
   display: flex;
@@ -12,8 +13,25 @@ const StyledForm = styled.form`
     flex-grow: 1;
   }
 
+  .circle-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 64px;
+    height: 64px;
+    background: #646ae7;
+    border-radius: 32px;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 700;
+  }
+
   .button {
-    margin: 10px;
+    margin-left: 10px;
+    height: 64px;
+
+    font-weight: 700;
+    padding: 0 32px;
   }
 `
 
@@ -42,8 +60,14 @@ export const LinkCreationForm = ({ onCreate }: Props) => {
     [formState],
   )
 
+  const isDisabled = useMemo(
+    () => !formState.shortpath.length || !formState.destination.length,
+    [formState],
+  )
+
   return (
     <StyledForm onSubmit={handleSubmit}>
+      <div className='circle-container'>{formState.namespace}/</div>
       <TextField
         id='shortpath'
         className='input'
@@ -59,7 +83,9 @@ export const LinkCreationForm = ({ onCreate }: Props) => {
           ),
         }}
       />
-      <b> &#8594; </b>
+      <div className='circle-container'>
+        <EastRoundedIcon />
+      </div>
       <TextField
         id='destination'
         className='input'
@@ -68,7 +94,7 @@ export const LinkCreationForm = ({ onCreate }: Props) => {
         value={formState.destination}
         onChange={handleChange}
       />
-      <Button className='button' variant='contained' type='submit'>
+      <Button className='button' variant='contained' type='submit' disabled={isDisabled}>
         Create
       </Button>
     </StyledForm>
