@@ -1,25 +1,10 @@
 import { FC, useCallback } from 'react'
-import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
-import Modal from '@mui/material/Modal'
 import { Link } from '../../../types'
 import TextField from '@mui/material/TextField'
 import useSWR from 'swr'
 import { fetcher } from '../../../utils/fetcher'
-
-const style = {
-  position: 'absolute' as const,
-  display: 'flex',
-  'flex-direction': 'column',
-  top: '50%',
-  left: '50%',
-  transform: 'translate(-50%, -50%)',
-  width: 400,
-  bgcolor: 'background.paper',
-  border: '2px solid #000',
-  boxShadow: 24,
-  p: 4,
-}
+import { Modal } from './BaseModal'
 
 interface Props {
   open: boolean
@@ -43,13 +28,8 @@ export const TransferModal: FC<Props> = ({ open, onClose, link }) => {
   )
 
   return (
-    <Modal
-      open={open}
-      onClose={onClose}
-      aria-labelledby='modal-modal-title'
-      aria-describedby='modal-modal-description'
-    >
-      <Box sx={style}>
+    <Modal.Base open={open} onClose={onClose}>
+      <div>
         <p>
           To transfer ownership of{' '}
           <b>
@@ -57,16 +37,16 @@ export const TransferModal: FC<Props> = ({ open, onClose, link }) => {
           </b>
           , copy this link and send it to the new owner
         </p>
-        <TextField value={transferToken?.url} multiline></TextField>
-        <div>
-          <Button variant='contained' onClick={handleCopy}>
-            Click to copy
-          </Button>
-          <Button variant='contained' onClick={onClose}>
-            Done
-          </Button>
-        </div>
-      </Box>
-    </Modal>
+      </div>
+      <TextField value={transferToken?.url} multiline disabled></TextField>
+      <Modal.Buttons>
+        <Button variant='contained' onClick={handleCopy}>
+          Copy
+        </Button>
+        <Button variant='contained' onClick={onClose}>
+          Done
+        </Button>
+      </Modal.Buttons>
+    </Modal.Base>
   )
 }

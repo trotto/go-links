@@ -5,12 +5,22 @@ body {
   padding: 0;
   margin: 0;
   font-family: 'Poppins', sans-serif;
+  font-size: 14px;
+  line-height: 21px;
 
   color: #000000;
+}
+
+* {
+  box-sizing: border-box;
 }
 
 a {
   outline: none;
   text-decoration: none;
   color: #000000;
+}
+
+p {
+  margin: 0;
 }
