@@ -27,6 +27,12 @@ const Buttons = styled.div`
   justify-content: space-between;
 `
 
+const StyledDiv = styled.div`
+  .MuiBackdrop-root {
+    background-color: red;
+  }
+`
+
 interface Props extends PropsWithChildren {
   open: boolean
   onClose: () => void
@@ -34,14 +40,17 @@ interface Props extends PropsWithChildren {
 
 const Base: FC<Props> = ({ open, onClose, children }) => {
   return (
-    <MuiModal
-      open={open}
-      onClose={onClose}
-      aria-labelledby='modal-modal-title'
-      aria-describedby='modal-modal-description'
-    >
-      <Box sx={style}>{children}</Box>
-    </MuiModal>
+    <StyledDiv>
+      <MuiModal
+        open={open}
+        onClose={onClose}
+        aria-labelledby='modal-modal-title'
+        aria-describedby='modal-modal-description'
+        slotProps={{ backdrop: { style: { backgroundColor: '#131878', opacity: 0.6 } } }}
+      >
+        <Box sx={style}>{children}</Box>
+      </MuiModal>
+    </StyledDiv>
   )
 }
 

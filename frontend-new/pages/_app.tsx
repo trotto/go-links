@@ -18,6 +18,31 @@ const theme = createTheme({
   },
   components: {
     // Name of the component
+    MuiTextField: {
+      styleOverrides: {
+        // Name of the slot
+        root: {
+          display: 'flex',
+          justifyContent: 'center',
+          backgroundColor: '#fff',
+          borderRadius: '32px',
+          padding: '4px 16px',
+          '& fieldset': { border: 'none' },
+          '& input, & .MuiInputBase-root': {
+            padding: 0,
+          },
+          '& input:disabled': {
+            color: '#000',
+            // NOTE: MUI has this prop
+            '-webkit-text-fill-color': 'unset',
+          },
+          '& input, & input::placeholder': {
+            color: '#000',
+            opacity: 1,
+          },
+        },
+      },
+    },
     MuiButton: {
       styleOverrides: {
         // Name of the slot
