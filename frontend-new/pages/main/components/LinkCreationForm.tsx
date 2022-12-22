@@ -2,15 +2,23 @@ import { useState, useCallback, ChangeEvent, FormEvent, useMemo } from 'react'
 import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
 import { LinkCreate } from '../../../types'
-import InputAdornment from '@mui/material/InputAdornment'
 import styled from '@emotion/styled'
 import EastRoundedIcon from '@mui/icons-material/EastRounded'
 
 const StyledForm = styled.form`
-  display: flex;
+  display: grid;
+  grid-template-columns: 5fr 8fr;
+  gap: 8px;
 
   .input {
     flex-grow: 1;
+  }
+
+  .group {
+    display: flex;
+    flex-direction: row;
+    background-color: #f4f3ff;
+    border-radius: 32px;
   }
 
   .circle-container {
@@ -19,7 +27,7 @@ const StyledForm = styled.form`
     align-items: center;
     width: 64px;
     height: 64px;
-    background: #646ae7;
+    background-color: #646ae7;
     border-radius: 32px;
     color: #fff;
     font-size: 16px;
@@ -27,7 +35,6 @@ const StyledForm = styled.form`
   }
 
   .button {
-    margin-left: 10px;
     height: 64px;
 
     font-weight: 700;
@@ -67,36 +74,46 @@ export const LinkCreationForm = ({ onCreate }: Props) => {
 
   return (
     <StyledForm onSubmit={handleSubmit}>
-      <div className='circle-container'>{formState.namespace}/</div>
-      <TextField
-        id='shortpath'
-        className='input'
-        label='Keyword'
-        variant='standard'
-        value={formState.shortpath}
-        onChange={handleChange}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position='start' sx={{ marginRight: 0 }}>
-              {formState.namespace}/
-            </InputAdornment>
-          ),
-        }}
-      />
-      <div className='circle-container'>
-        <EastRoundedIcon />
+      <div className='group'>
+        <div className='circle-container'>{formState.namespace}/</div>
+        <TextField
+          id='shortpath'
+          className='input'
+          placeholder='Keyword'
+          value={formState.shortpath}
+          onChange={handleChange}
+          sx={{
+            backgroundColor: '#f4f3ff',
+            '& input, & input::placeholder': {
+              color: '#343AAA',
+              opacity: 1,
+            },
+          }}
+        />
       </div>
-      <TextField
-        id='destination'
-        className='input'
-        label='Paste the link to a resource here'
-        variant='standard'
-        value={formState.destination}
-        onChange={handleChange}
-      />
-      <Button className='button' variant='contained' type='submit' disabled={isDisabled}>
-        Create
-      </Button>
+
+      <div className='group'>
+        <div className='circle-container'>
+          <EastRoundedIcon />
+        </div>
+        <TextField
+          id='destination'
+          className='input'
+          placeholder='Paste the link to a resource here'
+          value={formState.destination}
+          onChange={handleChange}
+          sx={{
+            backgroundColor: '#f4f3ff',
+            '& input, & input::placeholder': {
+              color: '#343AAA',
+              opacity: 1,
+            },
+          }}
+        />
+        <Button className='button' variant='contained' type='submit' disabled={isDisabled}>
+          Create
+        </Button>
+      </div>
     </StyledForm>
   )
 }

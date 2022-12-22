@@ -38,7 +38,12 @@ export const TransferModal: FC<Props> = ({ open, onClose, link }) => {
           , copy this link and send it to the new owner
         </p>
       </div>
-      <TextField value={transferToken?.url} multiline disabled></TextField>
+      <TextField
+        value={transferToken?.url}
+        sx={{ borderRadius: '8px', padding: '16px' }}
+        multiline
+        disabled
+      ></TextField>
       <Modal.Buttons>
         <Button variant='contained' onClick={handleCopy}>
           Copy

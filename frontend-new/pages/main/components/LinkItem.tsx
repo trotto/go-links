@@ -1,4 +1,4 @@
-import { useState, useCallback, ChangeEvent, FormEvent } from 'react'
+import { useState, useCallback, ChangeEvent, FormEvent, PropsWithChildren, FC } from 'react'
 import { Link } from '../../../types'
 import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
@@ -9,21 +9,53 @@ import { TransferModal } from '../modals/TransferModal'
 import { DeleteModal } from '../modals/DeleteModal'
 import { useSWRConfig } from 'swr'
 import { fetcher } from '../../../utils/fetcher'
+import IconButton from '@mui/material/IconButton'
+import Box from '@mui/material/Box'
+import { BoxProps } from '@mui/system'
+import { Copy, Edit } from '../../../icons'
 
 const StyledDiv = styled.div`
-  border: 1px solid;
-  padding: 10px;
-  background-color: #d9d9d9;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  border-bottom: 1px solid #f0f0f0;
+  padding: 24px 30px;
+  background-color: #f6f8fa;
 
-  .button {
-    margin: 10px;
+  .edit-group {
+    display: flex;
+    flex-grow: 1;
+    flex-direction: row;
+    border-radius: 32px;
+    background: #fff;
+
+    .button {
+      background-color: #000;
+    }
   }
 
-  .row {
+  .row-1 {
+    display: grid;
+    grid-template-columns: max-content auto 1fr max-content 97px auto;
+  }
+
+  .grow {
+    flex-grow: 1;
+  }
+
+  .row-2 {
     display: flex;
 
-    .grow {
-      flex-grow: 1;
+    .edit-group {
+      display: flex;
+      flex-direction: row;
+      border-radius: 32px;
+      background: #fff;
+      margin-right: 16px;
+
+      .button {
+        background-color: #000;
+      }
     }
   }
 `
@@ -32,7 +64,22 @@ interface Props {
   link: Link
 }
 
-export const LinkItem = ({ link }: Props) => {
+const InfoBox: FC<PropsWithChildren & { sx?: BoxProps['sx'] }> = ({ children, sx }) => (
+  <Box
+    sx={{
+      backgroundColor: '#fff',
+      borderRadius: '32px',
+      display: 'flex',
+      alignItems: 'center',
+      px: '16px',
+      ...sx,
+    }}
+  >
+    {children}
+  </Box>
+)
+
+export const LinkItem: FC<Props> = ({ link }) => {
   const { mutate } = useSWRConfig()
   const { id, shortpath, destination_url, owner, namespace, visits_count } = link
   const [destination, setDestination] = useState(destination_url)
@@ -85,42 +132,47 @@ export const LinkItem = ({ link }: Props) => {
   )
 
   return (
-    <StyledDiv>
-      <div className='row'>
-        <TextField
-          id='shorpath'
-          className='grow'
-          label='Keyword'
-          variant='standard'
-          value={fullShortPath}
-          disabled
-        />
-        <Button className='button' variant='contained' onClick={handleCopy}>
-          Copy
-        </Button>
-        <TextField id='owner' label='Owner' variant='standard' value={owner} disabled />
-        <TextField id='visits' label='Visits' variant='standard' value={visits_count} disabled />
-        <LinkActions onTransfer={openTrasferModal} onDelete={openDeleteModal} />
-      </div>
-      <form className='row' onSubmit={handleSave}>
-        <TextField
-          id='destination'
-          className='grow'
-          label='Keyword'
-          variant='standard'
-          value={destination}
-          onChange={handleDestinationChange}
-          disabled={!editable}
-        />
-        {editable && (
-          <Button className='button' variant='contained' type='submit'>
-            Save
-          </Button>
-        )}
-        <Button className='button' variant='contained' onClick={handleEdit}>
-          Edit
-        </Button>
-      </form>
+    <>
+      <StyledDiv>
+        <div className='row-1'>
+          <InfoBox
+            sx={{
+              fontSize: '16px',
+              fontWeight: '700',
+              mr: '8px',
+            }}
+          >
+            {fullShortPath}
+          </InfoBox>
+          <IconButton onClick={handleCopy}>
+            <Copy />
+          </IconButton>
+          <div></div>
+          <InfoBox sx={{ mr: '24px' }}>{owner}</InfoBox>
+          <InfoBox sx={{ mr: '16px' }}>{`${visits_count} visits`}</InfoBox>
+          <LinkActions onTransfer={openTrasferModal} onDelete={openDeleteModal} />
+        </div>
+        <form className='row-2' onSubmit={handleSave}>
+          <div className='edit-group grow'>
+            <TextField
+              id='destination'
+              className='grow'
+              placeholder='Keyword'
+              value={destination}
+              onChange={handleDestinationChange}
+              disabled={!editable}
+            />
+            {editable && (
+              <Button className='button' variant='contained' type='submit'>
+                Save
+              </Button>
+            )}
+          </div>
+          <IconButton onClick={handleEdit}>
+            <Edit />
+          </IconButton>
+        </form>
+      </StyledDiv>
       {transferModal && (
         <TransferModal open={transferModal} onClose={closeTrasferModal} link={link} />
       )}
@@ -130,6 +182,6 @@ export const LinkItem = ({ link }: Props) => {
         onDelete={handleDelete}
         link={link}
       />
-    </StyledDiv>
+    </>
   )
 }

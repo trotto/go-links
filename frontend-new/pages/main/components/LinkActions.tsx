@@ -1,8 +1,9 @@
 import { useState, MouseEvent, FC, useCallback } from 'react'
-import Button from '@mui/material/Button'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import styled from '@emotion/styled'
+import IconButton from '@mui/material/IconButton'
+import { ThreeDots } from '../../../icons'
 
 const StyledDiv = styled.div`
   display: inline-flex;
@@ -35,15 +36,15 @@ export const LinkActions: FC<Props> = ({ onDelete, onTransfer }) => {
 
   return (
     <StyledDiv>
-      <Button
+      <IconButton
         id='basic-button'
         aria-controls={open ? 'basic-menu' : undefined}
         aria-haspopup='true'
         aria-expanded={open ? 'true' : undefined}
         onClick={handleClick}
       >
-        ...
-      </Button>
+        <ThreeDots />
+      </IconButton>
       <Menu
         id='basic-menu'
         anchorEl={anchorEl}
