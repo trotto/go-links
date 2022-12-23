@@ -1,9 +1,10 @@
 import styled from '@emotion/styled'
-import { TrottoLogo } from 'icons'
 import { FC } from 'react'
 import useSWR from 'swr'
-import { User } from 'types'
-import { fetcher } from 'utils/fetcher'
+
+import { TrottoLogo } from 'app/icons'
+import { User } from 'app/types'
+import { fetcher } from 'app/utils/fetcher'
 
 import { UserMenu } from './UserMenu'
 

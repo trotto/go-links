@@ -1,13 +1,14 @@
 import styled from '@emotion/styled'
-import { Box, Button, IconButton, TextField } from '@mui/material'
+import { Box, Button, IconButton, TextField, Tooltip } from '@mui/material'
 import { BoxProps } from '@mui/system'
-import { Copy, Edit } from 'icons'
-import { DeleteModal } from 'pages/main/modals/DeleteModal'
-import { TransferModal } from 'pages/main/modals/TransferModal'
 import { ChangeEvent, FC, FormEvent, PropsWithChildren, useCallback, useState } from 'react'
 import { useSWRConfig } from 'swr'
-import { Link, LinkUpdate } from 'types'
-import { fetcher } from 'utils/fetcher'
+
+import { Copy, Edit } from 'app/icons'
+import { DeleteModal } from 'app/pages/main/modals/DeleteModal'
+import { TransferModal } from 'app/pages/main/modals/TransferModal'
+import { Link, LinkUpdate } from 'app/types'
+import { fetcher } from 'app/utils/fetcher'
 
 import { LinkActions } from './LinkActions'
 
@@ -29,10 +30,6 @@ const LabelRow = styled.div`
 const Form = styled.form`
   display: flex;
   align-items: center;
-`
-
-const Gap = styled.div`
-  width: 24px;
 `
 
 interface Props {
@@ -137,11 +134,11 @@ export const LinkItem: FC<Props> = ({ link, canEdit = false }) => {
           <div />
           <InfoBox>{owner}</InfoBox>
           <InfoBox>{`${visits_count} visits`}</InfoBox>
-          {canEdit ? (
-            <LinkActions onTransfer={openTrasferModal} onDelete={openDeleteModal} />
-          ) : (
-            <Gap />
-          )}
+          <LinkActions
+            disabled={!canEdit}
+            onTransfer={openTrasferModal}
+            onDelete={openDeleteModal}
+          />
         </LabelRow>
         <Form onSubmit={handleSave}>
           <Box
@@ -178,18 +175,22 @@ export const LinkItem: FC<Props> = ({ link, canEdit = false }) => {
               </Button>
             )}
           </Box>
-          {canEdit ? (
-            <IconButton
-              onClick={handleEdit}
-              sx={{
-                opacity: editable ? 1 : 0.25,
-              }}
-            >
-              <Edit />
-            </IconButton>
-          ) : (
-            <Gap />
-          )}
+          <Tooltip title={!canEdit && 'You don’t have permission to modify this go link'}>
+            <span>
+              <IconButton
+                onClick={handleEdit}
+                sx={{
+                  opacity: editable ? 1 : 0.25,
+                  '&:disabled': {
+                    opacity: 0.1,
+                  },
+                }}
+                disabled={!canEdit}
+              >
+                <Edit />
+              </IconButton>
+            </span>
+          </Tooltip>
         </Form>
       </Container>
       {transferModal && (

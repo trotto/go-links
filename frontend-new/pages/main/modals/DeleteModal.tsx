@@ -1,6 +1,7 @@
 import { Button, TextField } from '@mui/material'
 import { ChangeEvent, FC, useCallback, useState } from 'react'
-import { Link } from 'types'
+
+import { Link } from 'app/types'
 
 import { Modal } from './BaseModal'
 

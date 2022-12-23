@@ -1,6 +1,7 @@
 import { Box } from '@mui/material'
-import { FailedCircle, SuccessCircle } from 'icons'
-import { Link } from 'types'
+
+import { FailedCircle, SuccessCircle } from 'app/icons'
+import { Link } from 'app/types'
 
 import { LinkItem } from './LinkItem'
 

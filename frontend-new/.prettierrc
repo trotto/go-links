@@ -6,7 +6,6 @@
   "trailingComma": "all",
   "jsxSingleQuote": true,
   "bracketSpacing": true,
-  "importOrder": ["^components/(.*)$", "^[./]" ],
-  "importOrderSeparation": true, 
-  "importOrderSortSpecifiers": true 
+  "importOrder": ["^app/(.*)$", "^[./]" ],
+  "importOrderSeparation": true 
 }

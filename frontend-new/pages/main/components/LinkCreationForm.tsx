@@ -2,7 +2,8 @@ import styled from '@emotion/styled'
 import EastRoundedIcon from '@mui/icons-material/EastRounded'
 import { Button, TextField } from '@mui/material'
 import { ChangeEvent, FormEvent, useCallback, useMemo, useState } from 'react'
-import { LinkCreate } from 'types'
+
+import { LinkCreate } from 'app/types'
 
 const StyledForm = styled.form`
   display: grid;
