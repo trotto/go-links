@@ -1,11 +1,11 @@
-import type { AppProps } from 'next/app'
-import '../styles/globals.css'
 import styled from '@emotion/styled'
-import { NavBar, Footer } from '../components'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
+import { Footer, NavBar } from 'components'
+import type { AppProps } from 'next/app'
+import 'styles/globals.css'
 import useSWR from 'swr'
-import { fetcher } from '../utils/fetcher'
-import { User } from '../types'
+import { User } from 'types'
+import { fetcher } from 'utils/fetcher'
 
 const Container = styled.div`
   height: 100vh;

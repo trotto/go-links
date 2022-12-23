@@ -1,21 +1,9 @@
-import { FC } from 'react'
-import styled from '@emotion/styled'
-import { useState, MouseEvent } from 'react'
-import Box from '@mui/material/Box'
-import Avatar from '@mui/material/Avatar'
-import Menu from '@mui/material/Menu'
-import MenuItem from '@mui/material/MenuItem'
-import IconButton from '@mui/material/IconButton'
 import PersonIcon from '@mui/icons-material/Person'
-import { Vector } from '../icons'
-import { User } from '../types'
-
-const StyledDiv = styled.div`
-  .vector {
-    padding-left: 8px;
-    cursor: pointer;
-  }
-`
+import { Avatar, Box, IconButton, Menu, MenuItem } from '@mui/material'
+import { Vector } from 'icons'
+import { FC } from 'react'
+import { MouseEvent, useState } from 'react'
+import { User } from 'types'
 
 interface Props {
   user: User
@@ -32,7 +20,7 @@ export const UserMenu: FC<Props> = ({ user }) => {
   }
 
   return (
-    <StyledDiv>
+    <>
       <Box
         sx={{ display: 'flex', alignItems: 'center', textAlign: 'center', cursor: 'pointer' }}
         onClick={handleClick}
@@ -40,6 +28,7 @@ export const UserMenu: FC<Props> = ({ user }) => {
         <IconButton
           sx={{
             padding: 0,
+            margin: 0,
           }}
           size='small'
           aria-controls={open ? 'account-menu' : undefined}
@@ -50,9 +39,9 @@ export const UserMenu: FC<Props> = ({ user }) => {
             <PersonIcon />
           </Avatar>
         </IconButton>
-        <div className='vector'>
+        <Box sx={{ pl: '8px', cursor: 'pointer' }}>
           <Vector />
-        </div>
+        </Box>
       </Box>
       <Menu
         anchorEl={anchorEl}
@@ -102,6 +91,6 @@ export const UserMenu: FC<Props> = ({ user }) => {
           </a>
         </MenuItem>
       </Menu>
-    </StyledDiv>
+    </>
   )
 }

@@ -1,7 +1,8 @@
 import { Box } from '@mui/material'
-import { Link } from '../../../types'
+import { FailedCircle, SuccessCircle } from 'icons'
+import { Link } from 'types'
+
 import { LinkItem } from './LinkItem'
-import { SuccessCircle, FailedCircle } from '../../../icons'
 
 export enum ResponseType {
   SUCCESS = 'success',

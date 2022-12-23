@@ -1,15 +1,15 @@
-import { useState, useCallback, ChangeEvent, FormEvent, PropsWithChildren, FC } from 'react'
-import { TextField, Button, IconButton, Box } from '@mui/material'
 import styled from '@emotion/styled'
+import { Box, Button, IconButton, TextField } from '@mui/material'
 import { BoxProps } from '@mui/system'
-import { Link } from '../../../types'
-import { LinkActions } from './LinkActions'
-import { LinkUpdate } from '../../../types'
-import { TransferModal } from '../modals/TransferModal'
-import { DeleteModal } from '../modals/DeleteModal'
+import { Copy, Edit } from 'icons'
+import { DeleteModal } from 'pages/main/modals/DeleteModal'
+import { TransferModal } from 'pages/main/modals/TransferModal'
+import { ChangeEvent, FC, FormEvent, PropsWithChildren, useCallback, useState } from 'react'
 import { useSWRConfig } from 'swr'
-import { fetcher } from '../../../utils/fetcher'
-import { Copy, Edit } from '../../../icons'
+import { Link, LinkUpdate } from 'types'
+import { fetcher } from 'utils/fetcher'
+
+import { LinkActions } from './LinkActions'
 
 const Container = styled.div`
   display: flex;

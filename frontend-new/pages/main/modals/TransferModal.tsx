@@ -1,9 +1,10 @@
-import { FC, useCallback } from 'react'
 import Button from '@mui/material/Button'
-import { Link } from '../../../types'
 import TextField from '@mui/material/TextField'
+import { FC, useCallback } from 'react'
 import useSWR from 'swr'
-import { fetcher } from '../../../utils/fetcher'
+import { Link } from 'types'
+import { fetcher } from 'utils/fetcher'
+
 import { Modal } from './BaseModal'
 
 interface Props {

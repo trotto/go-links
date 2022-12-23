@@ -1,10 +1,11 @@
-import { FC } from 'react'
 import styled from '@emotion/styled'
-import { TrottoLogo } from '../icons'
-import { UserMenu } from './UserMenu'
+import { TrottoLogo } from 'icons'
+import { FC } from 'react'
 import useSWR from 'swr'
-import { fetcher } from '../utils/fetcher'
-import { User } from '../types'
+import { User } from 'types'
+import { fetcher } from 'utils/fetcher'
+
+import { UserMenu } from './UserMenu'
 
 const StyledDiv = styled.div`
   display: flex;
@@ -48,8 +49,8 @@ export const NavBar: FC<Props> = ({ user }) => {
   const { data: adminLinks } = useSWR(`/_admin_links`, fetcher<AdminLink[]>)
   return (
     <StyledDiv>
-      <LeftLink className='left' href='/'>
-        <div className='logo'>
+      <LeftLink href='/'>
+        <div>
           <TrottoLogo />
         </div>
         <div>Trotto</div>
