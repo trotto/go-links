@@ -1,13 +1,15 @@
-import { Box, IconButton, Menu, MenuItem } from '@mui/material'
-import { ThreeDots } from 'icons'
+import { Box, IconButton, Menu, MenuItem, Tooltip } from '@mui/material'
 import { FC, MouseEvent, useCallback, useState } from 'react'
+
+import { ThreeDots } from 'app/icons'
 
 interface Props {
   onTransfer: () => void
   onDelete: () => void
+  disabled: boolean
 }
 
-export const LinkActions: FC<Props> = ({ onDelete, onTransfer }) => {
+export const LinkActions: FC<Props> = ({ onDelete, onTransfer, disabled }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
@@ -29,15 +31,25 @@ export const LinkActions: FC<Props> = ({ onDelete, onTransfer }) => {
 
   return (
     <Box sx={{ display: 'inline-flex' }}>
-      <IconButton
-        id='basic-button'
-        aria-controls={open ? 'basic-menu' : undefined}
-        aria-haspopup='true'
-        aria-expanded={open ? 'true' : undefined}
-        onClick={handleClick}
-      >
-        <ThreeDots />
-      </IconButton>
+      <Tooltip title={disabled && 'You don’t have permission to modify this go link'}>
+        <span>
+          <IconButton
+            id='basic-button'
+            aria-controls={open ? 'basic-menu' : undefined}
+            aria-haspopup='true'
+            aria-expanded={open ? 'true' : undefined}
+            onClick={handleClick}
+            disabled={disabled}
+            sx={{
+              '&:disabled': {
+                opacity: 0.1,
+              },
+            }}
+          >
+            <ThreeDots />
+          </IconButton>
+        </span>
+      </Tooltip>
       <Menu
         id='basic-menu'
         anchorEl={anchorEl}

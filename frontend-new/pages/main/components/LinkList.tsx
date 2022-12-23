@@ -1,4 +1,4 @@
-import { Link, User } from 'types'
+import { Link, User } from 'app/types'
 
 import { LinkItem } from './LinkItem'
 

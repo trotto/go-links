@@ -2,8 +2,9 @@ import Button from '@mui/material/Button'
 import TextField from '@mui/material/TextField'
 import { FC, useCallback } from 'react'
 import useSWR from 'swr'
-import { Link } from 'types'
-import { fetcher } from 'utils/fetcher'
+
+import { Link } from 'app/types'
+import { fetcher } from 'app/utils/fetcher'
 
 import { Modal } from './BaseModal'
 

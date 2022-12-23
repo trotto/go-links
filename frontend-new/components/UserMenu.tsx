@@ -1,9 +1,10 @@
 import PersonIcon from '@mui/icons-material/Person'
 import { Avatar, Box, IconButton, Menu, MenuItem } from '@mui/material'
-import { Vector } from 'icons'
 import { FC } from 'react'
 import { MouseEvent, useState } from 'react'
-import { User } from 'types'
+
+import { Vector } from 'app/icons'
+import { User } from 'app/types'
 
 interface Props {
   user: User

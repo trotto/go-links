@@ -3,8 +3,9 @@ import { Box } from '@mui/material'
 import { find } from 'lodash'
 import { useCallback, useMemo, useState } from 'react'
 import useSWR from 'swr'
-import { Link, LinkCreate, LinkCreateResponse, User } from 'types'
-import { fetcher } from 'utils/fetcher'
+
+import { Link, LinkCreate, LinkCreateResponse, User } from 'app/types'
+import { fetcher } from 'app/utils/fetcher'
 
 import { LinkCreationForm } from './components/LinkCreationForm'
 import { LinkList } from './components/LinkList'
