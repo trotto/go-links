@@ -1,67 +1,43 @@
 import { useState, useCallback, ChangeEvent, FormEvent, PropsWithChildren, FC } from 'react'
-import { Link } from '../../../types'
-import TextField from '@mui/material/TextField'
-import Button from '@mui/material/Button'
-import { LinkActions } from './LinkActions'
+import { TextField, Button, IconButton, Box } from '@mui/material'
 import styled from '@emotion/styled'
+import { BoxProps } from '@mui/system'
+import { Link } from '../../../types'
+import { LinkActions } from './LinkActions'
 import { LinkUpdate } from '../../../types'
 import { TransferModal } from '../modals/TransferModal'
 import { DeleteModal } from '../modals/DeleteModal'
 import { useSWRConfig } from 'swr'
 import { fetcher } from '../../../utils/fetcher'
-import IconButton from '@mui/material/IconButton'
-import Box from '@mui/material/Box'
-import { BoxProps } from '@mui/system'
 import { Copy, Edit } from '../../../icons'
 
-const StyledDiv = styled.div`
+const Container = styled.div`
   display: flex;
   flex-direction: column;
   gap: 16px;
   border-bottom: 1px solid #f0f0f0;
   padding: 24px 30px;
   background-color: #f6f8fa;
+`
 
-  .edit-group {
-    display: flex;
-    flex-grow: 1;
-    flex-direction: row;
-    border-radius: 32px;
-    background: #fff;
+const LabelRow = styled.div`
+  display: grid;
+  grid-template-columns: max-content auto 1fr max-content max-content auto;
+  align-items: center;
+`
 
-    .button {
-      background-color: #000;
-    }
-  }
+const Form = styled.form`
+  display: flex;
+  align-items: center;
+`
 
-  .row-1 {
-    display: grid;
-    grid-template-columns: max-content auto 1fr max-content 97px auto;
-  }
-
-  .grow {
-    flex-grow: 1;
-  }
-
-  .row-2 {
-    display: flex;
-
-    .edit-group {
-      display: flex;
-      flex-direction: row;
-      border-radius: 32px;
-      background: #fff;
-      margin-right: 16px;
-
-      .button {
-        background-color: #000;
-      }
-    }
-  }
+const Gap = styled.div`
+  width: 24px;
 `
 
 interface Props {
   link: Link
+  canEdit?: boolean
 }
 
 const InfoBox: FC<PropsWithChildren & { sx?: BoxProps['sx'] }> = ({ children, sx }) => (
@@ -72,6 +48,9 @@ const InfoBox: FC<PropsWithChildren & { sx?: BoxProps['sx'] }> = ({ children, sx
       display: 'flex',
       alignItems: 'center',
       px: '16px',
+      mr: '24px',
+      height: '32px',
+      cursor: 'default',
       ...sx,
     }}
   >
@@ -79,7 +58,7 @@ const InfoBox: FC<PropsWithChildren & { sx?: BoxProps['sx'] }> = ({ children, sx
   </Box>
 )
 
-export const LinkItem: FC<Props> = ({ link }) => {
+export const LinkItem: FC<Props> = ({ link, canEdit = false }) => {
   const { mutate } = useSWRConfig()
   const { id, shortpath, destination_url, owner, namespace, visits_count } = link
   const [destination, setDestination] = useState(destination_url)
@@ -133,46 +112,86 @@ export const LinkItem: FC<Props> = ({ link }) => {
 
   return (
     <>
-      <StyledDiv>
-        <div className='row-1'>
+      <Container>
+        <LabelRow>
           <InfoBox
             sx={{
               fontSize: '16px',
               fontWeight: '700',
-              mr: '8px',
+              mr: '16px',
             }}
           >
             {fullShortPath}
           </InfoBox>
-          <IconButton onClick={handleCopy}>
+          <IconButton
+            onClick={handleCopy}
+            sx={{
+              opacity: 0.25,
+              '&:focus': {
+                opacity: 1,
+              },
+            }}
+          >
             <Copy />
           </IconButton>
-          <div></div>
-          <InfoBox sx={{ mr: '24px' }}>{owner}</InfoBox>
-          <InfoBox sx={{ mr: '16px' }}>{`${visits_count} visits`}</InfoBox>
-          <LinkActions onTransfer={openTrasferModal} onDelete={openDeleteModal} />
-        </div>
-        <form className='row-2' onSubmit={handleSave}>
-          <div className='edit-group grow'>
+          <div />
+          <InfoBox>{owner}</InfoBox>
+          <InfoBox>{`${visits_count} visits`}</InfoBox>
+          {canEdit ? (
+            <LinkActions onTransfer={openTrasferModal} onDelete={openDeleteModal} />
+          ) : (
+            <Gap />
+          )}
+        </LabelRow>
+        <Form onSubmit={handleSave}>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'row',
+              borderRadius: '32px',
+              background: '#fff',
+              mr: '24px',
+              flexGrow: 1,
+            }}
+          >
             <TextField
               id='destination'
-              className='grow'
               placeholder='Keyword'
               value={destination}
               onChange={handleDestinationChange}
               disabled={!editable}
+              sx={{
+                height: '32px',
+                flexGrow: 1,
+              }}
             />
             {editable && (
-              <Button className='button' variant='contained' type='submit'>
+              <Button
+                className='button'
+                variant='contained'
+                type='submit'
+                sx={{
+                  backgroundColor: '#000',
+                }}
+              >
                 Save
               </Button>
             )}
-          </div>
-          <IconButton onClick={handleEdit}>
-            <Edit />
-          </IconButton>
-        </form>
-      </StyledDiv>
+          </Box>
+          {canEdit ? (
+            <IconButton
+              onClick={handleEdit}
+              sx={{
+                opacity: editable ? 1 : 0.25,
+              }}
+            >
+              <Edit />
+            </IconButton>
+          ) : (
+            <Gap />
+          )}
+        </Form>
+      </Container>
       {transferModal && (
         <TransferModal open={transferModal} onClose={closeTrasferModal} link={link} />
       )}

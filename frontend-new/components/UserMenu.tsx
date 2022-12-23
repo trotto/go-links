@@ -6,8 +6,6 @@ import Avatar from '@mui/material/Avatar'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import IconButton from '@mui/material/IconButton'
-import useSWR from 'swr'
-import { fetcher } from '../utils/fetcher'
 import PersonIcon from '@mui/icons-material/Person'
 import { Vector } from '../icons'
 import { User } from '../types'
@@ -17,13 +15,13 @@ const StyledDiv = styled.div`
     padding-left: 8px;
     cursor: pointer;
   }
-
-  a {
-  }
 `
 
-export const UserMenu: FC = () => {
-  const { data: user } = useSWR(`/_/api/users/me`, fetcher<User>)
+interface Props {
+  user: User
+}
+
+export const UserMenu: FC<Props> = ({ user }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
   const handleClick = (event: MouseEvent<HTMLElement>) => {

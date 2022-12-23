@@ -1,23 +1,7 @@
+import { Box } from '@mui/material'
 import { Link } from '../../../types'
-import styled from '@emotion/styled'
 import { LinkItem } from './LinkItem'
-
-const StyledDiv = styled.div`
-  margin-top: 24px;
-  .header {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-
-    height: 80px;
-    border: 1px solid #dedede;
-
-    font-weight: 700;
-    font-size: 16px;
-    line-height: 24px;
-  }
-`
+import { SuccessCircle, FailedCircle } from '../../../icons'
 
 export enum ResponseType {
   SUCCESS = 'success',
@@ -30,11 +14,29 @@ interface Props {
   message: string
 }
 
-export const ResponseContainer = ({ link, message }: Props) => {
+export const ResponseContainer = ({ link, message, type }: Props) => {
   return (
-    <StyledDiv>
-      <div className='header'>{message}</div>
+    <Box sx={{ mt: '24px' }}>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '80px',
+          border: '1px solid #dedede',
+          fontWeight: '700',
+          fontSize: '16px',
+          lineHeight: '24px',
+          backgroundColor: type === ResponseType.SUCCESS ? '#2885FF' : '#fff',
+          color: type === ResponseType.SUCCESS ? '#fff' : '#000',
+          gap: '24px',
+        }}
+      >
+        {type === ResponseType.SUCCESS ? <SuccessCircle /> : <FailedCircle />}
+        <p>{message}</p>
+      </Box>
       <LinkItem link={link}></LinkItem>
-    </StyledDiv>
+    </Box>
   )
 }

@@ -1,45 +1,33 @@
 import { useState, useCallback, ChangeEvent, FormEvent, useMemo } from 'react'
-import TextField from '@mui/material/TextField'
-import Button from '@mui/material/Button'
-import { LinkCreate } from '../../../types'
 import styled from '@emotion/styled'
+import { TextField, Button } from '@mui/material'
 import EastRoundedIcon from '@mui/icons-material/EastRounded'
+import { LinkCreate } from '../../../types'
 
 const StyledForm = styled.form`
   display: grid;
   grid-template-columns: 5fr 8fr;
   gap: 8px;
+`
 
-  .input {
-    flex-grow: 1;
-  }
+const Group = styled.div`
+  display: flex;
+  flex-direction: row;
+  background-color: #f4f3ff;
+  border-radius: 32px;
+`
 
-  .group {
-    display: flex;
-    flex-direction: row;
-    background-color: #f4f3ff;
-    border-radius: 32px;
-  }
-
-  .circle-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 64px;
-    height: 64px;
-    background-color: #646ae7;
-    border-radius: 32px;
-    color: #fff;
-    font-size: 16px;
-    font-weight: 700;
-  }
-
-  .button {
-    height: 64px;
-
-    font-weight: 700;
-    padding: 0 32px;
-  }
+const Cicle = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 64px;
+  height: 64px;
+  background-color: #646ae7;
+  border-radius: 32px;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
 `
 
 interface Props {
@@ -74,15 +62,15 @@ export const LinkCreationForm = ({ onCreate }: Props) => {
 
   return (
     <StyledForm onSubmit={handleSubmit}>
-      <div className='group'>
-        <div className='circle-container'>{formState.namespace}/</div>
+      <Group>
+        <Cicle>{formState.namespace}/</Cicle>
         <TextField
           id='shortpath'
-          className='input'
           placeholder='Keyword'
           value={formState.shortpath}
           onChange={handleChange}
           sx={{
+            flexGrow: 1,
             backgroundColor: '#f4f3ff',
             '& input, & input::placeholder': {
               color: '#343AAA',
@@ -90,19 +78,19 @@ export const LinkCreationForm = ({ onCreate }: Props) => {
             },
           }}
         />
-      </div>
+      </Group>
 
-      <div className='group'>
-        <div className='circle-container'>
+      <Group className='group'>
+        <Cicle>
           <EastRoundedIcon />
-        </div>
+        </Cicle>
         <TextField
           id='destination'
-          className='input'
           placeholder='Paste the link to a resource here'
           value={formState.destination}
           onChange={handleChange}
           sx={{
+            flexGrow: 1,
             backgroundColor: '#f4f3ff',
             '& input, & input::placeholder': {
               color: '#343AAA',
@@ -110,10 +98,19 @@ export const LinkCreationForm = ({ onCreate }: Props) => {
             },
           }}
         />
-        <Button className='button' variant='contained' type='submit' disabled={isDisabled}>
+        <Button
+          variant='contained'
+          type='submit'
+          disabled={isDisabled}
+          sx={{
+            height: '64px',
+            fontWeight: '700',
+            px: '32px',
+          }}
+        >
           Create
         </Button>
-      </div>
+      </Group>
     </StyledForm>
   )
 }

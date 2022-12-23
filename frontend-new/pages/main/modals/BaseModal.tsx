@@ -1,6 +1,5 @@
 import { FC, PropsWithChildren } from 'react'
-import Box from '@mui/material/Box'
-import MuiModal from '@mui/material/Modal'
+import { Box, Modal as MuiModal } from '@mui/material'
 import styled from '@emotion/styled'
 
 const style = {
@@ -27,7 +26,7 @@ const Buttons = styled.div`
   justify-content: space-between;
 `
 
-const StyledDiv = styled.div`
+const Container = styled.div`
   .MuiBackdrop-root {
     background-color: red;
   }
@@ -40,7 +39,7 @@ interface Props extends PropsWithChildren {
 
 const Base: FC<Props> = ({ open, onClose, children }) => {
   return (
-    <StyledDiv>
+    <Container>
       <MuiModal
         open={open}
         onClose={onClose}
@@ -50,7 +49,7 @@ const Base: FC<Props> = ({ open, onClose, children }) => {
       >
         <Box sx={style}>{children}</Box>
       </MuiModal>
-    </StyledDiv>
+    </Container>
   )
 }
 
