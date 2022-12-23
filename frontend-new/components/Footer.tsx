@@ -1,6 +1,6 @@
-import { FC } from 'react'
 import styled from '@emotion/styled'
-import { GithubLogo } from '../icons'
+import { GithubLogo } from 'icons'
+import { FC } from 'react'
 
 const StyledDiv = styled.div`
   display: flex;

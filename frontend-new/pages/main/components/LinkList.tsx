@@ -1,4 +1,5 @@
-import { Link, User } from '../../../types'
+import { Link, User } from 'types'
+
 import { LinkItem } from './LinkItem'
 
 interface Props {

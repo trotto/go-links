@@ -1,6 +1,6 @@
-import { useState, MouseEvent, FC, useCallback } from 'react'
-import { Menu, MenuItem, IconButton, Box } from '@mui/material'
-import { ThreeDots } from '../../../icons'
+import { Box, IconButton, Menu, MenuItem } from '@mui/material'
+import { ThreeDots } from 'icons'
+import { FC, MouseEvent, useCallback, useState } from 'react'
 
 interface Props {
   onTransfer: () => void

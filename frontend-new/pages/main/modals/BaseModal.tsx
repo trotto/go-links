@@ -1,6 +1,6 @@
-import { FC, PropsWithChildren } from 'react'
-import { Box, Modal as MuiModal } from '@mui/material'
 import styled from '@emotion/styled'
+import { Box, Modal as MuiModal } from '@mui/material'
+import { FC, PropsWithChildren } from 'react'
 
 const style = {
   position: 'absolute',
