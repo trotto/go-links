@@ -1,7 +1,9 @@
 import styled from '@emotion/styled'
 import EastRoundedIcon from '@mui/icons-material/EastRounded'
 import { Button, TextField } from '@mui/material'
+import { useRouter } from 'next/router'
 import { ChangeEvent, FormEvent, useCallback, useMemo, useState } from 'react'
+import { useEffect, useRef } from 'react'
 
 import { LinkCreate } from 'app/types'
 
@@ -36,11 +38,17 @@ interface Props {
 }
 
 export const LinkCreationForm = ({ onCreate }: Props) => {
+  const {
+    query: { sp },
+  } = useRouter()
   const [formState, setFormState] = useState<LinkCreate>({
     shortpath: '',
     destination: '',
     namespace: 'go',
   })
+
+  const shortInpuRef = useRef<HTMLHeadingElement>(null)
+  const destInpuRef = useRef<HTMLHeadingElement>(null)
 
   const handleChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) =>
@@ -61,6 +69,16 @@ export const LinkCreationForm = ({ onCreate }: Props) => {
     [formState],
   )
 
+  useEffect(() => {
+    if (typeof sp !== 'string') {
+      shortInpuRef?.current?.focus()
+      return
+    }
+
+    destInpuRef?.current?.focus()
+    setFormState((state) => ({ ...state, shortpath: sp }))
+  }, [sp, destInpuRef, shortInpuRef])
+
   return (
     <StyledForm onSubmit={handleSubmit}>
       <Group>
@@ -70,6 +88,7 @@ export const LinkCreationForm = ({ onCreate }: Props) => {
           placeholder='Keyword'
           value={formState.shortpath}
           onChange={handleChange}
+          inputRef={shortInpuRef}
           sx={{
             flexGrow: 1,
             backgroundColor: '#f4f3ff',
@@ -90,6 +109,7 @@ export const LinkCreationForm = ({ onCreate }: Props) => {
           placeholder='Paste the link to a resource here'
           value={formState.destination}
           onChange={handleChange}
+          inputRef={destInpuRef}
           sx={{
             flexGrow: 1,
             backgroundColor: '#f4f3ff',
