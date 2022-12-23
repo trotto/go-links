@@ -1,10 +1,9 @@
 import { FC, useCallback, ChangeEvent } from 'react'
-import TextField from '@mui/material/TextField'
-import styled from '@emotion/styled'
-import InputAdornment from '@mui/material/InputAdornment'
+import { TextField, InputAdornment } from '@mui/material'
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded'
+import styled from '@emotion/styled'
 
-const StyledDiv = styled.div`
+const Container = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
@@ -25,27 +24,25 @@ export const Search: FC<Props> = ({ value, onChange }) => {
     [onChange],
   )
   return (
-    <StyledDiv>
-      <div className='input-container'>
-        <TextField
-          className='input'
-          placeholder='Search keyword, domain or username'
-          value={value}
-          onChange={handleChange}
-          sx={{
-            backgroundColor: '#F6F8FA',
-            width: '291px',
-            padding: 0,
-          }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position='start'>
-                <SearchRoundedIcon sx={{ width: '16px', height: '16px', color: '#000' }} />
-              </InputAdornment>
-            ),
-          }}
-        ></TextField>
-      </div>
-    </StyledDiv>
+    <Container>
+      <TextField
+        className='input'
+        placeholder='Search keyword, domain or username'
+        value={value}
+        onChange={handleChange}
+        sx={{
+          backgroundColor: '#F6F8FA',
+          width: '291px',
+          padding: 0,
+        }}
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position='start'>
+              <SearchRoundedIcon sx={{ width: '16px', height: '16px', color: '#000' }} />
+            </InputAdornment>
+          ),
+        }}
+      ></TextField>
+    </Container>
   )
 }

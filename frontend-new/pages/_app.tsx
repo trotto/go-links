@@ -3,13 +3,16 @@ import '../styles/globals.css'
 import styled from '@emotion/styled'
 import { NavBar, Footer } from '../components'
 import { ThemeProvider, createTheme } from '@mui/material/styles'
+import useSWR from 'swr'
+import { fetcher } from '../utils/fetcher'
+import { User } from '../types'
 
-const StyledDiv = styled.div`
+const Container = styled.div`
   height: 100vh;
+`
 
-  .main {
-    height: calc(100% - 64px - 64px);
-  }
+const Main = styled.div`
+  height: calc(100% - 64px - 64px);
 `
 
 const theme = createTheme({
@@ -34,12 +37,20 @@ const theme = createTheme({
           '& input:disabled': {
             color: '#000',
             // NOTE: MUI has this prop
-            '-webkit-text-fill-color': 'unset',
+            WebkitTextFillColor: 'unset',
           },
           '& input, & input::placeholder': {
             color: '#000',
             opacity: 1,
           },
+        },
+      },
+    },
+    MuiIconButton: {
+      styleOverrides: {
+        // Name of the slot
+        root: {
+          margin: '-8px',
         },
       },
     },
@@ -71,16 +82,17 @@ const theme = createTheme({
 })
 
 export default function App({ Component, pageProps }: AppProps) {
+  const { data: user } = useSWR(`/_/api/users/me`, fetcher<User>)
   return (
     <ThemeProvider theme={theme}>
-      <StyledDiv>
-        <NavBar />
+      <Container>
+        <NavBar user={user} />
         <script src='/_scripts/config.js'></script>
-        <div className='main'>
-          <Component {...pageProps} />
-        </div>
+        <Main>
+          <Component {...pageProps} user={user} />
+        </Main>
         <Footer />
-      </StyledDiv>
+      </Container>
     </ThemeProvider>
   )
 }

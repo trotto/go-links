@@ -1,13 +1,6 @@
 import { useState, MouseEvent, FC, useCallback } from 'react'
-import Menu from '@mui/material/Menu'
-import MenuItem from '@mui/material/MenuItem'
-import styled from '@emotion/styled'
-import IconButton from '@mui/material/IconButton'
+import { Menu, MenuItem, IconButton, Box } from '@mui/material'
 import { ThreeDots } from '../../../icons'
-
-const StyledDiv = styled.div`
-  display: inline-flex;
-`
 
 interface Props {
   onTransfer: () => void
@@ -35,7 +28,7 @@ export const LinkActions: FC<Props> = ({ onDelete, onTransfer }) => {
   }, [onTransfer, handleClose])
 
   return (
-    <StyledDiv>
+    <Box sx={{ display: 'inline-flex' }}>
       <IconButton
         id='basic-button'
         aria-controls={open ? 'basic-menu' : undefined}
@@ -57,6 +50,6 @@ export const LinkActions: FC<Props> = ({ onDelete, onTransfer }) => {
         <MenuItem onClick={handleTransfer}>Transfer</MenuItem>
         <MenuItem onClick={handleDelete}>Delete</MenuItem>
       </Menu>
-    </StyledDiv>
+    </Box>
   )
 }

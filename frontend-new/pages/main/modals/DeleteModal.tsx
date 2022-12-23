@@ -1,7 +1,6 @@
 import { FC, useCallback, useState, ChangeEvent } from 'react'
-import Button from '@mui/material/Button'
+import { Button, TextField } from '@mui/material'
 import { Link } from '../../../types'
-import TextField from '@mui/material/TextField'
 import { Modal } from './BaseModal'
 
 interface Props {

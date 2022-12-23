@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from 'react'
 import useSWR from 'swr'
+import { Box } from '@mui/material'
 import styled from '@emotion/styled'
 import { LinkCreationForm } from './components/LinkCreationForm'
 import { LinkList } from './components/LinkList'
@@ -8,24 +9,30 @@ import { Search } from './components/Search'
 import { fetcher } from '../../utils/fetcher'
 import { Link, LinkCreate, LinkCreateResponse } from '../../types'
 import { find } from 'lodash'
+import { User } from '../../types'
 
-const StyledDiv = styled.div`
+const Container = styled.div`
   background-color: #fff;
-  height: calc(100% - 64px);
+  height: calc(100%);
   padding: 64px 200px 0;
-
-  .scrollable {
-    height: calc(100% - 176.5px);
-    overflow: scroll;
-  }
 `
+
+const ScrollableArea = styled.div<{ cut: number }>(({ cut }) => ({
+  height: `calc(100% - ${cut}px)`,
+  overflow: 'scroll',
+}))
+
 interface NotificationState {
   link: Link
   type: ResponseType
   message: string
 }
 
-export default function Home() {
+interface Props {
+  user?: User
+}
+
+export default function Home({ user }: Props) {
   const [notificationState, setNotificationState] = useState<NotificationState>()
   const [searchState, setSearchState] = useState('')
   const { data: links, mutate } = useSWR('/_/api/links', fetcher<Link[]>)
@@ -64,15 +71,15 @@ export default function Home() {
   }, [links, searchState])
 
   return (
-    <StyledDiv>
-      <div className='sticky-container'>
+    <Container>
+      <Box>
         <LinkCreationForm onCreate={handleCreate} />
         {notificationState && <ResponseContainer {...notificationState} />}
         <Search value={searchState} onChange={setSearchState} />
-      </div>
-      <div className='scrollable'>
-        <LinkList links={displayLinks} />
-      </div>
-    </StyledDiv>
+      </Box>
+      <ScrollableArea cut={notificationState ? 168 + 24 + 209 + 24 : 168 + 24}>
+        <LinkList links={displayLinks} user={user} />
+      </ScrollableArea>
+    </Container>
   )
 }
