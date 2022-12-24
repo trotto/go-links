@@ -22,10 +22,7 @@
   },
   "addons": [
     {
-      "plan": "heroku-postgresql:hobby-dev",
-      "options": {
-        "version": "12"
-      }
+      "plan": "heroku-postgresql:standard-0"
     }
   ],
   "buildpacks": [
