@@ -1,5 +1,5 @@
 import styled from '@emotion/styled'
-import { Box, Button, IconButton, TextField, Tooltip } from '@mui/material'
+import { Box, Button, IconButton, TextField, Tooltip, Typography } from '@mui/material'
 import { BoxProps } from '@mui/system'
 import { ChangeEvent, FC, FormEvent, PropsWithChildren, useCallback, useState } from 'react'
 import { useSWRConfig } from 'swr'
@@ -15,10 +15,19 @@ import { LinkActions } from './LinkActions'
 const Container = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 8px;
   border-bottom: 1px solid #f0f0f0;
-  padding: 24px 30px;
   background-color: #f6f8fa;
+  padding: 20px 8px;
+
+  @media (min-width: 839px) {
+    padding: 26px 24px;
+    gap: 16px;
+  }
+
+  @media (min-width: 1032px) {
+    padding: 30px 24px;
+  }
 `
 
 const LabelRow = styled.div`
@@ -37,21 +46,29 @@ interface Props {
   canEdit?: boolean
 }
 
-const InfoBox: FC<PropsWithChildren & { sx?: BoxProps['sx'] }> = ({ children, sx }) => (
+const InfoBox: FC<PropsWithChildren & { sx?: BoxProps['sx']; bold?: boolean }> = ({
+  children,
+  sx,
+  bold = false,
+}) => (
   <Box
     sx={{
       backgroundColor: '#fff',
       borderRadius: '32px',
       display: 'flex',
       alignItems: 'center',
-      px: '16px',
+      px: '8px',
+      height: '24px',
       mr: '24px',
-      height: '32px',
       cursor: 'default',
+      '@media (min-width: 839px)': {
+        px: '16px',
+        height: '32px',
+      },
       ...sx,
     }}
   >
-    {children}
+    <Typography variant={bold ? 'h3' : 'body1'}>{children}</Typography>
   </Box>
 )
 
@@ -113,10 +130,10 @@ export const LinkItem: FC<Props> = ({ link, canEdit = false }) => {
         <LabelRow>
           <InfoBox
             sx={{
-              fontSize: '16px',
-              fontWeight: '700',
               mr: '16px',
+              fontWeight: '700',
             }}
+            bold
           >
             {fullShortPath}
           </InfoBox>
@@ -158,8 +175,11 @@ export const LinkItem: FC<Props> = ({ link, canEdit = false }) => {
               onChange={handleDestinationChange}
               disabled={!editable}
               sx={{
-                height: '32px',
+                height: '24px',
                 flexGrow: 1,
+                '@media (min-width: 839px)': {
+                  height: '32px',
+                },
               }}
             />
             {editable && (
@@ -169,6 +189,10 @@ export const LinkItem: FC<Props> = ({ link, canEdit = false }) => {
                 type='submit'
                 sx={{
                   backgroundColor: '#000',
+                  height: '24px',
+                  '@media (min-width: 839px)': {
+                    height: '32px',
+                  },
                 }}
               >
                 Save

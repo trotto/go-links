@@ -1,17 +1,6 @@
-import styled from '@emotion/styled'
 import SearchRoundedIcon from '@mui/icons-material/SearchRounded'
-import { InputAdornment, TextField } from '@mui/material'
+import { Box, InputAdornment, TextField } from '@mui/material'
 import { ChangeEvent, FC, useCallback } from 'react'
-
-const Container = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin: 40px 0 24px;
-  background-color: #f6f8fa;
-  height: 64px;
-  border-radius: 32px;
-`
 
 interface Props {
   value: string
@@ -24,7 +13,27 @@ export const Search: FC<Props> = ({ value, onChange }) => {
     [onChange],
   )
   return (
-    <Container>
+    <Box
+      sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        mt: '24px',
+        mb: '8px',
+        backgroundColor: '#f6f8fa',
+        borderRadius: '32px',
+        height: '32px',
+        '@media (min-width: 839px)': {
+          mt: '40px',
+          mb: '16px',
+          height: '48px',
+        },
+        '@media (min-width: 1032px)': {
+          mb: '24px',
+          height: '64px',
+        },
+      }}
+    >
       <TextField
         className='input'
         placeholder='Search keyword, domain or username'
@@ -43,6 +52,6 @@ export const Search: FC<Props> = ({ value, onChange }) => {
           ),
         }}
       ></TextField>
-    </Container>
+    </Box>
   )
 }

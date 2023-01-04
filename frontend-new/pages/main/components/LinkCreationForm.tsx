@@ -1,9 +1,9 @@
 import styled from '@emotion/styled'
 import EastRoundedIcon from '@mui/icons-material/EastRounded'
-import { Button, TextField } from '@mui/material'
+import { Button, TextField, Typography } from '@mui/material'
 import { useRouter } from 'next/router'
 import { ChangeEvent, FormEvent, useCallback, useMemo, useState } from 'react'
-import { useEffect, useRef } from 'react'
+import { useLayoutEffect, useRef, FC } from 'react'
 
 import { LinkCreate } from 'app/types'
 
@@ -11,6 +11,9 @@ const StyledForm = styled.form`
   display: grid;
   grid-template-columns: 5fr 8fr;
   gap: 8px;
+  grid-template-areas:
+    'a b'
+    'c c';
 `
 
 const Group = styled.div`
@@ -24,20 +27,28 @@ const Cicle = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 64px;
-  height: 64px;
+  width: 32px;
+  height: 32px;
   background-color: #646ae7;
   border-radius: 32px;
   color: #fff;
-  font-size: 16px;
-  font-weight: 700;
+
+  @media (min-width: 839px) {
+    width: 48px;
+    height: 48px;
+  }
+
+  @media (min-width: 1032px) {
+    width: 64px;
+    height: 64px;
+  }
 `
 
 interface Props {
   onCreate: (link: LinkCreate) => void
 }
 
-export const LinkCreationForm = ({ onCreate }: Props) => {
+export const LinkCreationForm: FC<Props> = ({ onCreate }) => {
   const {
     query: { sp },
   } = useRouter()
@@ -47,8 +58,8 @@ export const LinkCreationForm = ({ onCreate }: Props) => {
     namespace: 'go',
   })
 
-  const shortInpuRef = useRef<HTMLHeadingElement>(null)
-  const destInpuRef = useRef<HTMLHeadingElement>(null)
+  const shortInpuRef = useRef<HTMLInputElement>(null)
+  const destInpuRef = useRef<HTMLInputElement>(null)
 
   const handleChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) =>
@@ -69,7 +80,7 @@ export const LinkCreationForm = ({ onCreate }: Props) => {
     [formState],
   )
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (typeof sp !== 'string') {
       shortInpuRef?.current?.focus()
       return
@@ -82,7 +93,9 @@ export const LinkCreationForm = ({ onCreate }: Props) => {
   return (
     <StyledForm onSubmit={handleSubmit}>
       <Group>
-        <Cicle>{formState.namespace}/</Cicle>
+        <Cicle>
+          <Typography variant='h3'>{formState.namespace}/</Typography>
+        </Cicle>
         <TextField
           id='shortpath'
           placeholder='Keyword'
@@ -119,19 +132,38 @@ export const LinkCreationForm = ({ onCreate }: Props) => {
             },
           }}
         />
-        <Button
-          variant='contained'
-          type='submit'
-          disabled={isDisabled}
-          sx={{
-            height: '64px',
-            fontWeight: '700',
-            px: '32px',
-          }}
-        >
-          Create
-        </Button>
       </Group>
+      <Button
+        variant='contained'
+        type='submit'
+        disabled={isDisabled}
+        sx={{
+          height: '32px',
+          gridArea: 'c',
+          backgroundColor: '#FFBBC5',
+          '&:disabled, &:hover': {
+            backgroundColor: '#FFBBC5',
+          },
+          '@media (min-width: 839px)': {
+            height: '48px',
+            position: 'absolute',
+            right: '80px',
+            backgroundColor: '#646ae7',
+
+            '&:disabled, &:hover': {
+              backgroundColor: '#bdbcf3',
+            },
+          },
+          '@media (min-width: 1032px)': {
+            height: '64px',
+            right: '200px',
+          },
+          px: '32px',
+          typography: 'h3',
+        }}
+      >
+        Create
+      </Button>
     </StyledForm>
   )
 }

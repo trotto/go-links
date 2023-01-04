@@ -1,5 +1,5 @@
 import PersonIcon from '@mui/icons-material/Person'
-import { Avatar, Box, IconButton, Menu, MenuItem } from '@mui/material'
+import { Avatar, Box, IconButton, Menu, MenuItem, Link } from '@mui/material'
 import { MouseEvent, useState, FC } from 'react'
 
 import { Vector } from 'app/icons'
@@ -82,13 +82,15 @@ export const UserMenu: FC<Props> = ({ user }) => {
         transformOrigin={{ horizontal: 'right', vertical: 'top' }}
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
       >
-        <MenuItem sx={{ fontSize: '14px', color: '#343aaa', padding: '24px 24px 8px' }}>
+        <MenuItem
+          sx={{ fontSize: '14px', color: '#343aaa', padding: '24px 24px 8px', typography: 'body1' }}
+        >
           {user?.email}
         </MenuItem>
         <MenuItem sx={{ fontSize: '14px', color: '#343aaa', padding: '8px 24px 24px' }}>
-          <a href='/_/auth/logout' style={{ color: '#343aaa' }}>
+          <Link variant='body1' href='/_/auth/logout' sx={{ color: '#343aaa' }}>
             Sign Out
-          </a>
+          </Link>
         </MenuItem>
       </Menu>
     </>

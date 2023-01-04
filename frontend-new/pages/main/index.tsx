@@ -2,21 +2,21 @@ import styled from '@emotion/styled'
 import { Box } from '@mui/material'
 import { find } from 'lodash'
 import { useCallback, useMemo, useState } from 'react'
+import { useEffect } from 'react'
 import useSWR from 'swr'
 
 import { Link, LinkCreate, LinkCreateResponse, User } from 'app/types'
 import { fetcher } from 'app/utils/fetcher'
 
-import { LinkCreationForm } from './components/LinkCreationForm'
-import { LinkList } from './components/LinkList'
-import { ResponseContainer, ResponseType } from './components/ResponseContaner'
-import { Search } from './components/Search'
-
-const Container = styled.div`
-  background-color: #fff;
-  height: calc(100%);
-  padding: 64px 200px 0;
-`
+import {
+  ExtensionNotification,
+  LinkCreationForm,
+  LinkList,
+  NoLinksNotification,
+  ResponseContainer,
+  ResponseType,
+  Search,
+} from './components'
 
 const ScrollableArea = styled.div<{ cut: number }>(({ cut }) => ({
   height: `calc(100% - ${cut}px)`,
@@ -33,10 +33,24 @@ interface Props {
   user?: User
 }
 
+interface TrottoMetaElement extends HTMLElement {
+  content: string
+}
+
 export default function Home({ user }: Props) {
   const [notificationState, setNotificationState] = useState<NotificationState>()
   const [searchState, setSearchState] = useState('')
+  const [extInstalled, setExtInstalled] = useState(false)
   const { data: links, mutate } = useSWR('/_/api/links', fetcher<Link[]>)
+
+  useEffect(() => {
+    const crxInstalledTag = document.getElementsByName(
+      'trotto:crxInstalled',
+    ) as NodeListOf<TrottoMetaElement>
+    const extensionIsInstalled = crxInstalledTag.length > 0 && crxInstalledTag[0].content === 'true'
+
+    setExtInstalled(extensionIsInstalled)
+  })
 
   const handleCreate = useCallback(
     async (link: LinkCreate) => {
@@ -71,16 +85,44 @@ export default function Home({ user }: Props) {
     return links?.filter((link) => link.shortpath.includes(searchState)) || []
   }, [links, searchState])
 
+  const scrollableAreaCut = useMemo(() => {
+    let cut = 168 + 24
+    if (notificationState) {
+      cut += 209 + 24
+    }
+    if (!extInstalled) {
+      cut += 233 + 40
+    }
+    return cut
+  }, [notificationState, extInstalled])
+
   return (
-    <Container>
+    <Box
+      sx={{
+        backgroundColor: '#fff',
+        height: '100%',
+        padding: '32px 24px 0',
+        '@media (min-width: 839px)': {
+          padding: '64px 80px 0',
+        },
+        '@media (min-width: 1032px)': {
+          padding: '64px 200px 0',
+        },
+      }}
+    >
+      {!extInstalled && <ExtensionNotification />}
       <Box>
         <LinkCreationForm onCreate={handleCreate} />
         {notificationState && <ResponseContainer {...notificationState} />}
         <Search value={searchState} onChange={setSearchState} />
       </Box>
-      <ScrollableArea cut={notificationState ? 168 + 24 + 209 + 24 : 168 + 24}>
-        <LinkList links={displayLinks} user={user} />
-      </ScrollableArea>
-    </Container>
+      {!links || !links.length ? (
+        <NoLinksNotification />
+      ) : (
+        <ScrollableArea cut={scrollableAreaCut}>
+          <LinkList links={displayLinks} user={user} />
+        </ScrollableArea>
+      )}
+    </Box>
   )
 }

@@ -1,4 +1,4 @@
-import { Button, TextField } from '@mui/material'
+import { Button, TextField, Typography } from '@mui/material'
 import { ChangeEvent, FC, useCallback, useState } from 'react'
 
 import { Link } from 'app/types'
@@ -29,13 +29,13 @@ export const DeleteModal: FC<Props> = ({ open, onClose, onDelete, link }) => {
 
   return (
     <Modal.Base open={open} onClose={onClose}>
-      <p>
+      <Typography>
         Deleting a go link will delete the go link for everyone in your organization. No one on your
-        team will be able to use <b>{fullShortPath}</b> until it&#39s re-created.
-      </p>
-      <p>
+        team will be able to use <b>{fullShortPath}</b> until it&apos;s re-created.
+      </Typography>
+      <Typography>
         To confirm deletion, type <b>{fullShortPath}</b> and press Delete.
-      </p>
+      </Typography>
       <TextField
         value={confirmationPath}
         placeholder={fullShortPath}

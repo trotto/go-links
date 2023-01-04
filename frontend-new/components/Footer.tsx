@@ -1,40 +1,30 @@
-import styled from '@emotion/styled'
+import { Box, Link } from '@mui/material'
 import { FC } from 'react'
 
 import { GithubLogo } from 'app/icons'
 
-const StyledDiv = styled.div`
-  display: flex;
-  height: 64px;
-  background-color: #f6f8fa;
-  align-items: center;
-  justify-content: center;
-
-  .item {
-    margin: 12px;
-  }
-`
-
 export const Footer: FC = () => {
   return (
-    <StyledDiv>
-      <div className='item'>
-        <a href='https://github.com/trotto/go-links'>
-          <GithubLogo />
-        </a>
-      </div>
-      <div className='item'>
-        <a href={'/pricing'}>Pricing</a>
-      </div>
-      <div className='item'>
-        <a href={'/privacy'}>Privacy</a>
-      </div>
-      <div className='item'>
-        <a href={'/terms'}>Terms</a>
-      </div>
-      <div className='item'>
-        <a href={'/contact'}>Contact us</a>
-      </div>
-    </StyledDiv>
+    <Box
+      sx={{
+        display: 'none',
+        '@media (min-width: 839px)': {
+          height: '64px',
+          display: 'flex',
+        },
+        backgroundColor: '#f6f8fa',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '24px',
+      }}
+    >
+      <Link href='https://github.com/trotto/go-links'>
+        <GithubLogo />
+      </Link>
+      <Link href={'/pricing'}>Pricing</Link>
+      <Link href={'/privacy'}>Privacy</Link>
+      <Link href={'/terms'}>Terms</Link>
+      <Link href={'/contact'}>Contact us</Link>
+    </Box>
   )
 }

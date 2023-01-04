@@ -1,3 +1,4 @@
+import { Typography } from '@mui/material'
 import Button from '@mui/material/Button'
 import TextField from '@mui/material/TextField'
 import { FC, useCallback } from 'react'
@@ -32,17 +33,23 @@ export const TransferModal: FC<Props> = ({ open, onClose, link }) => {
   return (
     <Modal.Base open={open} onClose={onClose}>
       <div>
-        <p>
+        <Typography>
           To transfer ownership of{' '}
           <b>
             {namespace}/{shortpath}
           </b>
           , copy this link and send it to the new owner
-        </p>
+        </Typography>
       </div>
       <TextField
         value={transferToken?.url}
-        sx={{ borderRadius: '8px', padding: '16px' }}
+        sx={{
+          borderRadius: '8px',
+          p: '8px',
+          '@media (min-width: 839px)': {
+            p: '16px',
+          },
+        }}
         multiline
         disabled
       ></TextField>

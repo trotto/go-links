@@ -19,6 +19,69 @@ const Main = styled.div`
 const theme = createTheme({
   typography: {
     fontFamily: ['Poppins', 'Sans-serif'].join(', '),
+    h1: {
+      fontSize: '16px',
+      fontWeight: 700,
+      lineHeight: '24px',
+      '@media (min-width:839px)': {
+        fontSize: '20px',
+        fontWeight: 700,
+        lineHeight: '30px',
+      },
+      '@media (min-width:1032px)': {
+        fontSize: '24px',
+        fontWeight: 700,
+        lineHeight: '36px',
+      },
+    },
+    h2: {
+      fontSize: '12px',
+      lineHeight: '18px',
+      '@media (min-width:839px)': {
+        fontSize: '14px',
+        lineHeight: '21px',
+      },
+      '@media (min-width:1032px)': {
+        fontSize: '16px',
+        lineHeight: '24px',
+      },
+    },
+    h3: {
+      fontSize: '10px',
+      lineHeight: '15px',
+      fontWeight: 700,
+      '@media (min-width:839px)': {
+        fontSize: '14px',
+        fontWeight: 700,
+        lineHeight: '21px',
+      },
+      '@media (min-width:1032px)': {
+        fontSize: '16px',
+        fontWeight: 700,
+        lineHeight: '24px',
+      },
+    },
+    body1: {
+      fontSize: '10px',
+      lineHeight: '15px',
+      '@media (min-width:839px)': {
+        fontSize: '12px',
+        lineHeight: '18px',
+      },
+      '@media (min-width:1032px)': {
+        fontSize: '14px',
+        lineHeight: '21px',
+      },
+    },
+    button: {
+      fontSize: '12px',
+      '@media (min-width:839px)': {
+        fontSize: '14px',
+      },
+      '@media (min-width:1032px)': {
+        fontSize: '16px',
+      },
+    },
   },
   components: {
     // Name of the component
@@ -30,7 +93,10 @@ const theme = createTheme({
           justifyContent: 'center',
           backgroundColor: '#fff',
           borderRadius: '32px',
-          padding: '4px 16px',
+          padding: '4px 8px',
+          '@media (min-width:839px)': {
+            padding: '4px 16px',
+          },
           '& fieldset': { border: 'none' },
           '& input, & .MuiInputBase-root': {
             padding: 0,
@@ -43,6 +109,13 @@ const theme = createTheme({
           '& input, & input::placeholder': {
             color: '#000',
             opacity: 1,
+            fontSize: '10px',
+            '@media (min-width:839px)': {
+              fontSize: '12px',
+            },
+            '@media (min-width:1032px)': {
+              fontSize: '14px',
+            },
           },
         },
       },
@@ -52,6 +125,15 @@ const theme = createTheme({
         // Name of the slot
         root: {
           margin: '-8px',
+        },
+      },
+    },
+    MuiLink: {
+      styleOverrides: {
+        root: {
+          outline: 'none',
+          textDecoration: 'none',
+          color: '#000000',
         },
       },
     },
@@ -66,8 +148,6 @@ const theme = createTheme({
           padding: '0 24px',
           borderRadius: '32px',
           textTransform: 'none',
-          fontSize: '16px',
-          fontWeight: 400,
           '&:disabled': {
             backgroundColor: '#bdbcf3',
             color: '#fff',

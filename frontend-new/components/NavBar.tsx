@@ -1,4 +1,4 @@
-import styled from '@emotion/styled'
+import { Link, Box, Typography } from '@mui/material'
 import { FC } from 'react'
 import useSWR from 'swr'
 
@@ -7,35 +7,6 @@ import { User } from 'app/types'
 import { fetcher } from 'app/utils/fetcher'
 
 import { UserMenu } from './UserMenu'
-
-const StyledDiv = styled.div`
-  display: flex;
-  height: 64px;
-  background-color: #f6f8fa;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 80px;
-
-  font-weight: 500;
-  font-size: 24px;
-`
-
-const LeftLink = styled.a`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-`
-
-const RightContainer = styled.div`
-  display: flex;
-  align-items: center;
-  font-weight: 400;
-  font-size: 16px;
-
-  .item {
-    margin: 0 12px;
-  }
-`
 
 interface AdminLink {
   text: string
@@ -49,24 +20,59 @@ interface Props {
 export const NavBar: FC<Props> = ({ user }) => {
   const { data: adminLinks } = useSWR(`/_admin_links`, fetcher<AdminLink[]>)
   return (
-    <StyledDiv>
-      <LeftLink href='/'>
-        <div>
-          <TrottoLogo />
-        </div>
-        <div>Trotto</div>
-      </LeftLink>
-      <RightContainer>
-        <a className='item' href='/documentation'>
+    <Box
+      sx={{
+        display: 'flex',
+        height: '64px',
+        backgroundColor: '#f6f8fa',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: '0 24px',
+        '@media (min-width: 839px)': {
+          padding: ' 0 80px',
+        },
+      }}
+    >
+      <Link
+        href='/'
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+        }}
+      >
+        <TrottoLogo />
+        <Typography
+          sx={{
+            fontWeight: 500,
+            fontSize: '20px',
+            '@media (min-width: 839px)': {
+              fontSize: '22px',
+            },
+            '@media (min-width: 1032px)': {
+              fontSize: '24px',
+            },
+          }}
+        >
+          Trotto
+        </Typography>
+      </Link>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+        }}
+      >
+        <Link className='item' href='/documentation' typography='h2'>
           Documentation
-        </a>
+        </Link>
         {adminLinks?.map(({ url, text }) => (
-          <a className='item' href={url} key={url}>
+          <Link className='item' href={url} key={url}>
             {text}
-          </a>
+          </Link>
         ))}
-        <div className='item'>{user && <UserMenu user={user} />}</div>
-      </RightContainer>
-    </StyledDiv>
+        <Box sx={{ m: '0 12px' }}>{user && <UserMenu user={user} />}</Box>
+      </Box>
+    </Box>
   )
 }

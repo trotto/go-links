@@ -1,3 +1,5 @@
+import { FC } from 'react'
+
 import { Link, User } from 'app/types'
 
 import { LinkItem } from './LinkItem'
@@ -7,7 +9,7 @@ interface Props {
   user?: User
 }
 
-export const LinkList = ({ links, user }: Props) => {
+export const LinkList: FC<Props> = ({ links, user }) => {
   return (
     <div>
       {links?.map((link) => (
