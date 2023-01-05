@@ -1,8 +1,15 @@
+import { SvgIcon } from '@mui/material'
 import { FC } from 'react'
 
 export const ThreeDots: FC = () => {
   return (
-    <svg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
+    <SvgIcon
+      width='24'
+      height='24'
+      viewBox='0 0 24 24'
+      fill='none'
+      xmlns='http://www.w3.org/2000/svg'
+    >
       <path
         d='M5 13C5.55228 13 6 12.5523 6 12C6 11.4477 5.55228 11 5 11C4.44772 11 4 11.4477 4 12C4 12.5523 4.44772 13 5 13Z'
         stroke='black'
@@ -24,6 +31,6 @@ export const ThreeDots: FC = () => {
         strokeLinecap='round'
         strokeLinejoin='round'
       />
-    </svg>
+    </SvgIcon>
   )
 }

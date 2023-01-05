@@ -1,8 +1,9 @@
+import { SvgIcon } from '@mui/material'
 import { FC } from 'react'
 
 export const Copy: FC = () => {
   return (
-    <svg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'>
+    <SvgIcon width='24' height='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'>
       <path
         d='M20 9H11C9.89543 9 9 9.89543 9 11V20C9 21.1046 9.89543 22 11 22H20C21.1046 22 22 21.1046 22 20V11C22 9.89543 21.1046 9 20 9Z'
         stroke='black'
@@ -17,6 +18,6 @@ export const Copy: FC = () => {
         strokeLinecap='round'
         strokeLinejoin='round'
       />
-    </svg>
+    </SvgIcon>
   )
 }

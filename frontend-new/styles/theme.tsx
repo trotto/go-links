@@ -7,12 +7,12 @@ export const theme = createTheme({
       fontSize: '16px',
       fontWeight: 700,
       lineHeight: '24px',
-      '@media (min-width:839px)': {
+      '@media (min-width:840px)': {
         fontSize: '20px',
         fontWeight: 700,
         lineHeight: '30px',
       },
-      '@media (min-width:1032px)': {
+      '@media (min-width:1440px)': {
         fontSize: '24px',
         fontWeight: 700,
         lineHeight: '36px',
@@ -21,11 +21,11 @@ export const theme = createTheme({
     h2: {
       fontSize: '12px',
       lineHeight: '18px',
-      '@media (min-width:839px)': {
+      '@media (min-width:840px)': {
         fontSize: '14px',
         lineHeight: '21px',
       },
-      '@media (min-width:1032px)': {
+      '@media (min-width:1440px)': {
         fontSize: '16px',
         lineHeight: '24px',
       },
@@ -34,12 +34,12 @@ export const theme = createTheme({
       fontSize: '10px',
       lineHeight: '15px',
       fontWeight: 700,
-      '@media (min-width:839px)': {
+      '@media (min-width:840px)': {
         fontSize: '14px',
         fontWeight: 700,
         lineHeight: '21px',
       },
-      '@media (min-width:1032px)': {
+      '@media (min-width:1440px)': {
         fontSize: '16px',
         fontWeight: 700,
         lineHeight: '24px',
@@ -48,21 +48,21 @@ export const theme = createTheme({
     body1: {
       fontSize: '10px',
       lineHeight: '15px',
-      '@media (min-width:839px)': {
+      '@media (min-width:840px)': {
         fontSize: '12px',
         lineHeight: '18px',
       },
-      '@media (min-width:1032px)': {
+      '@media (min-width:1440px)': {
         fontSize: '14px',
         lineHeight: '21px',
       },
     },
     button: {
       fontSize: '12px',
-      '@media (min-width:839px)': {
+      '@media (min-width:840px)': {
         fontSize: '14px',
       },
-      '@media (min-width:1032px)': {
+      '@media (min-width:1440px)': {
         fontSize: '16px',
       },
     },
@@ -78,7 +78,7 @@ export const theme = createTheme({
           backgroundColor: '#fff',
           borderRadius: '32px',
           padding: '4px 8px',
-          '@media (min-width:839px)': {
+          '@media (min-width:840px)': {
             padding: '4px 16px',
           },
           '& fieldset': { border: 'none' },
@@ -94,10 +94,10 @@ export const theme = createTheme({
             color: '#000',
             opacity: 1,
             fontSize: '10px',
-            '@media (min-width:839px)': {
+            '@media (min-width:840px)': {
               fontSize: '12px',
             },
-            '@media (min-width:1032px)': {
+            '@media (min-width:1440px)': {
               fontSize: '14px',
             },
           },
@@ -118,6 +118,19 @@ export const theme = createTheme({
           outline: 'none',
           textDecoration: 'none',
           color: '#000000',
+        },
+      },
+    },
+    MuiSvgIcon: {
+      styleOverrides: {
+        root: {
+          width: '16px',
+          height: '16px',
+          fill: 'none',
+          '@media (min-width: 840px)': {
+            width: '24px',
+            height: '24px',
+          },
         },
       },
     },

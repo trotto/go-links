@@ -51,12 +51,13 @@ export default function Home({ user }: Props) {
   }, [])
 
   const handleCreate = useCallback(
-    async (link: LinkCreate) => {
-      const createdResponse = await fetcher<LinkCreateResponse>('/_/api/links', {
-        method: 'POST',
-        body: JSON.stringify(link),
-      })
-
+    async ({
+      link,
+      createdResponse,
+    }: {
+      link: LinkCreate
+      createdResponse: LinkCreateResponse
+    }) => {
       if (createdResponse.error) {
         const conflictLink = find(links, ['shortpath', link.shortpath])
         if (!conflictLink) {
@@ -112,11 +113,10 @@ export default function Home({ user }: Props) {
       <Box>
         <LinkCreationForm onCreate={handleCreate} />
         {notificationState && <ResponseContainer {...notificationState} />}
+        {(!links || !links.length) && <NoLinksNotification />}
         <Search value={searchState} onChange={setSearchState} />
       </Box>
-      {!links || !links.length ? (
-        <NoLinksNotification />
-      ) : (
+      {links && !!links.length && (
         <ScrollableArea cut={scrollableAreaCut}>
           <LinkList links={displayLinks} user={user} />
         </ScrollableArea>

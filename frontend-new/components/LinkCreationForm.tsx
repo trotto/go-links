@@ -3,9 +3,10 @@ import EastRoundedIcon from '@mui/icons-material/EastRounded'
 import { Button, TextField, Typography } from '@mui/material'
 import { useRouter } from 'next/router'
 import { ChangeEvent, FormEvent, useCallback, useMemo, useState } from 'react'
-import { useLayoutEffect, useRef, FC } from 'react'
+import { useEffect, useRef, FC } from 'react'
 
-import { LinkCreate } from 'app/types'
+import { LinkCreate, LinkCreateResponse } from 'app/types'
+import { fetcher } from 'app/utils/fetcher'
 
 const StyledForm = styled.form`
   display: grid;
@@ -45,7 +46,13 @@ const Cicle = styled.div`
 `
 
 interface Props {
-  onCreate: (link: LinkCreate) => void
+  onCreate: ({
+    link,
+    createdResponse,
+  }: {
+    link: LinkCreate
+    createdResponse: LinkCreateResponse
+  }) => void
 }
 
 export const LinkCreationForm: FC<Props> = ({ onCreate }) => {
@@ -68,9 +75,13 @@ export const LinkCreationForm: FC<Props> = ({ onCreate }) => {
   )
 
   const handleSubmit = useCallback(
-    (e: FormEvent<HTMLFormElement>) => {
+    async (e: FormEvent<HTMLFormElement>) => {
       e.preventDefault()
-      onCreate(formState)
+      const createdResponse = await fetcher<LinkCreateResponse>('/_/api/links', {
+        method: 'POST',
+        body: JSON.stringify(formState),
+      })
+      onCreate({ link: formState, createdResponse })
     },
     [formState, onCreate],
   )
@@ -80,7 +91,7 @@ export const LinkCreationForm: FC<Props> = ({ onCreate }) => {
     [formState],
   )
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (typeof sp !== 'string') {
       shortInpuRef?.current?.focus()
       return
@@ -115,7 +126,7 @@ export const LinkCreationForm: FC<Props> = ({ onCreate }) => {
 
       <Group className='group'>
         <Cicle>
-          <EastRoundedIcon />
+          <EastRoundedIcon sx={{ fill: '#fff' }} />
         </Cicle>
         <TextField
           id='destination'

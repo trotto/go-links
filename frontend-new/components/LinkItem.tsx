@@ -146,7 +146,17 @@ export const LinkItem: FC<Props> = ({ link, canEdit = false }) => {
               },
             }}
           >
-            <Copy />
+            <Copy
+              sx={{
+                width: '16px',
+                height: '16px',
+                fill: 'none',
+                '@media (min-width: 840px)': {
+                  width: '24px',
+                  height: '24px',
+                },
+              }}
+            />
           </IconButton>
           <div />
           <InfoBox>{owner}</InfoBox>

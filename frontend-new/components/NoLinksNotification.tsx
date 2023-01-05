@@ -8,25 +8,41 @@ export const NoLinksNotification: FC = () => {
   return (
     <Box
       sx={{
-        height: '248px',
         display: 'flex',
         borderRadius: '8px',
         flexDirection: 'column',
         alignItems: 'center',
         backgroundImage: `url(${Background.src})`,
         backgroundSize: 'cover',
-        gap: '16px',
-        pb: '48px',
-        mb: '40px',
+        gap: '8px',
+        pb: '32px',
+        mt: '8px',
+        '@media (min-width: 840px)': {
+          pb: '40px',
+          gap: '16px',
+        },
+        '@media (min-width: 1440px)': {
+          pb: '48px',
+          mt: '16px',
+        },
       }}
     >
       <ArrowDown />
+      <Box
+        sx={{
+          height: '8px',
+          '@media (min-width: 840px)': {
+            height: 0,
+          },
+          '@media (min-width: 1440px)': {
+            height: '8px',
+          },
+        }}
+      ></Box>
       <NewLink />
       <Typography
         sx={{
           color: '#fff',
-          fontSize: '24px',
-          fontWeight: 700,
         }}
         variant='h1'
       >
