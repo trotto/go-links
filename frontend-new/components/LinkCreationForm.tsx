@@ -5,8 +5,8 @@ import { useRouter } from 'next/router'
 import { ChangeEvent, FormEvent, useCallback, useMemo, useState } from 'react'
 import { useEffect, useRef, FC } from 'react'
 
+import { useSaveLink } from 'app/hooks/linksApi'
 import { LinkCreate, LinkCreateResponse } from 'app/types'
-import { fetcher } from 'app/utils/fetcher'
 
 const StyledForm = styled.form`
   display: grid;
@@ -64,6 +64,7 @@ export const LinkCreationForm: FC<Props> = ({ onCreate }) => {
     destination: '',
     namespace: 'go',
   })
+  const saveLink = useSaveLink()
 
   const shortInpuRef = useRef<HTMLInputElement>(null)
   const destInpuRef = useRef<HTMLInputElement>(null)
@@ -77,13 +78,10 @@ export const LinkCreationForm: FC<Props> = ({ onCreate }) => {
   const handleSubmit = useCallback(
     async (e: FormEvent<HTMLFormElement>) => {
       e.preventDefault()
-      const createdResponse = await fetcher<LinkCreateResponse>('/_/api/links', {
-        method: 'POST',
-        body: JSON.stringify(formState),
-      })
+      const createdResponse = await saveLink(formState)
       onCreate({ link: formState, createdResponse })
     },
-    [formState, onCreate],
+    [formState, onCreate, saveLink],
   )
 
   const isDisabled = useMemo(

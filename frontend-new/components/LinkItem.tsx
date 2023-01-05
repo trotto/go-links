@@ -1,14 +1,21 @@
 import styled from '@emotion/styled'
 import { Box, Button, IconButton, TextField, Tooltip, Typography } from '@mui/material'
 import { BoxProps } from '@mui/system'
-import { ChangeEvent, FC, FormEvent, PropsWithChildren, useCallback, useState } from 'react'
-import { useSWRConfig } from 'swr'
+import {
+  ChangeEvent,
+  FC,
+  FormEvent,
+  PropsWithChildren,
+  useCallback,
+  useState,
+  useMemo,
+} from 'react'
 
 import { DeleteModal } from 'app/components/DeleteModal'
 import { TransferModal } from 'app/components/TransferModal'
+import { useUpdateLink, useDeleteLink, useModal, useClipboard } from 'app/hooks'
 import { Copy, Edit } from 'app/icons'
-import { Link, LinkUpdate } from 'app/types'
-import { fetcher } from 'app/utils/fetcher'
+import { Link } from 'app/types'
 
 import { LinkActions } from './LinkActions'
 
@@ -56,55 +63,36 @@ const InfoBox: FC<PropsWithChildren & { sx?: BoxProps['sx']; bold?: boolean }> =
 )
 
 export const LinkItem: FC<Props> = ({ link, canEdit = false }) => {
-  const { mutate } = useSWRConfig()
   const { id, shortpath, destination_url, owner, namespace, visits_count } = link
   const [destination, setDestination] = useState(destination_url)
   const [editable, setEditable] = useState(false)
-  const [transferModal, setTransferModal] = useState(false)
-  const [deleteModal, setDeleteModal] = useState(false)
-  const fullShortPath = `${namespace || window._trotto.defaultNamespace}/${shortpath}`
+
+  const [transferModal, openTransferModal, closeTransferModal] = useModal()
+  const [deleteModal, openDeleteModal, closeDeleteModal] = useModal()
+
+  const fullShortPath = useMemo(
+    () => `${namespace || window._trotto.defaultNamespace}/${shortpath}`,
+    [namespace, shortpath],
+  )
+  const updateLink = useUpdateLink()
+  const deleteLink = useDeleteLink()
 
   const handleDestinationChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => setDestination(e.target.value),
     [setDestination],
   )
 
-  const handleCopy = useCallback(
-    () => navigator.clipboard.writeText(fullShortPath),
-    [fullShortPath],
-  )
+  const handleCopy = useClipboard(fullShortPath)
 
   const handleEdit = useCallback(() => setEditable((editable) => !editable), [setEditable])
-
-  const openTrasferModal = useCallback(() => setTransferModal(true), [setTransferModal])
-  const closeTrasferModal = useCallback(() => setTransferModal(false), [setTransferModal])
-  const openDeleteModal = useCallback(() => setDeleteModal(true), [setDeleteModal])
-  const closeDeleteModal = useCallback(() => setDeleteModal(false), [setDeleteModal])
-
-  const handleDelete = useCallback(
-    (id: number) =>
-      fetcher<void>(`/_/api/links/${id}`, {
-        method: 'DELETE',
-      }).then(() => mutate('/_/api/links')),
-    [mutate],
-  )
-
-  const handleUpdate = useCallback(
-    (id: number, link: LinkUpdate) =>
-      fetcher<Link>(`/_/api/links/${id}`, {
-        method: 'PUT',
-        body: JSON.stringify(link),
-      }).then(() => mutate('/_/api/links')),
-    [mutate],
-  )
 
   const handleSave = useCallback(
     (e: FormEvent<HTMLFormElement>) => {
       e.preventDefault()
-      handleUpdate(id, { destination })
+      updateLink(id, { destination })
       handleEdit()
     },
-    [destination, id, handleEdit, handleUpdate],
+    [destination, id, handleEdit, updateLink],
   )
 
   return (
@@ -159,7 +147,7 @@ export const LinkItem: FC<Props> = ({ link, canEdit = false }) => {
           <InfoBox>{`${visits_count} visits`}</InfoBox>
           <LinkActions
             disabled={!canEdit}
-            onTransfer={openTrasferModal}
+            onTransfer={openTransferModal}
             onDelete={openDeleteModal}
           />
         </LabelRow>
@@ -227,12 +215,12 @@ export const LinkItem: FC<Props> = ({ link, canEdit = false }) => {
         </Form>
       </Box>
       {transferModal && (
-        <TransferModal open={transferModal} onClose={closeTrasferModal} link={link} />
+        <TransferModal open={transferModal} onClose={closeTransferModal} link={link} />
       )}
       <DeleteModal
         open={deleteModal}
         onClose={closeDeleteModal}
-        onDelete={handleDelete}
+        onDelete={deleteLink}
         link={link}
       />
     </>

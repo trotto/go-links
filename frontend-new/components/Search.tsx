@@ -1,4 +1,3 @@
-import SearchRoundedIcon from '@mui/icons-material/SearchRounded'
 import { Box, InputAdornment, TextField } from '@mui/material'
 import { ChangeEvent, FC, useCallback } from 'react'
 

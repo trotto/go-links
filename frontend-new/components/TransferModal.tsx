@@ -1,11 +1,10 @@
 import { Typography } from '@mui/material'
 import Button from '@mui/material/Button'
 import TextField from '@mui/material/TextField'
-import { FC, useCallback } from 'react'
-import useSWR from 'swr'
+import { FC } from 'react'
 
+import { useGetTransferToken, useClipboard } from 'app/hooks'
 import { Link } from 'app/types'
-import { fetcher } from 'app/utils/fetcher'
 
 import { Modal } from './BaseModal'
 
@@ -15,20 +14,10 @@ interface Props {
   link: Link
 }
 
-interface TransferToken {
-  url: string
-}
-
 export const TransferModal: FC<Props> = ({ open, onClose, link }) => {
   const { namespace, shortpath, id } = link
-  const { data: transferToken } = useSWR(`/_/api/links/${id}/transfer_link`, (url) =>
-    fetcher<TransferToken>(url, { method: 'POST' }),
-  )
-
-  const handleCopy = useCallback(
-    () => transferToken && navigator.clipboard.writeText(transferToken.url),
-    [transferToken],
-  )
+  const transferToken = useGetTransferToken(id)
+  const handleCopy = useClipboard(transferToken?.url || '')
 
   return (
     <Modal.Base open={open} onClose={onClose}>
