@@ -42,14 +42,14 @@ const Base: FC<Props> = ({ open, onClose, children }) => {
             right: '16px',
             padding: '24px 24px',
 
-            '@media (min-width: 839px)': {
+            '@media (min-width: 840px)': {
               left: '50%',
               transform: 'translate(-50%, -50%)',
               gap: '16px',
               padding: '32px 56px',
               width: '596px',
             },
-            '@media (min-width: 1032px)': {
+            '@media (min-width: 1440px)': {
               width: '648px',
               padding: '40px 64px',
             },

@@ -8,7 +8,7 @@ export const Footer: FC = () => {
     <Box
       sx={{
         display: 'none',
-        '@media (min-width: 839px)': {
+        '@media (min-width: 840px)': {
           height: '64px',
           display: 'flex',
         },

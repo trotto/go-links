@@ -10,7 +10,7 @@ export const ExtensionNotification: FC = () => {
         p: '40px',
         backgroundColor: '#FFBEA2',
         mb: '24px',
-        '@media (min-width: 839px)': {
+        '@media (min-width: 840px)': {
           mb: '40px',
         },
         color: '#fff',

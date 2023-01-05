@@ -168,7 +168,6 @@ export default function App({ Component, pageProps }: AppProps) {
     <ThemeProvider theme={theme}>
       <Container>
         <NavBar user={user} />
-        <script src='/_scripts/config.js'></script>
         <Main>
           <Component {...pageProps} user={user} />
         </Main>

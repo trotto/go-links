@@ -46,7 +46,7 @@ export const TransferModal: FC<Props> = ({ open, onClose, link }) => {
         sx={{
           borderRadius: '8px',
           p: '8px',
-          '@media (min-width: 839px)': {
+          '@media (min-width: 840px)': {
             p: '16px',
           },
         }}

@@ -15,9 +15,9 @@ export const LinkActions: FC<Props> = ({ onDelete, onTransfer, disabled }) => {
   const handleClick = (event: MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget)
   }
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setAnchorEl(null)
-  }
+  }, [setAnchorEl])
 
   const handleDelete = useCallback(() => {
     onDelete()

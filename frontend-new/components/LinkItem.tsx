@@ -4,9 +4,9 @@ import { BoxProps } from '@mui/system'
 import { ChangeEvent, FC, FormEvent, PropsWithChildren, useCallback, useState } from 'react'
 import { useSWRConfig } from 'swr'
 
+import { DeleteModal } from 'app/components/DeleteModal'
+import { TransferModal } from 'app/components/TransferModal'
 import { Copy, Edit } from 'app/icons'
-import { DeleteModal } from 'app/pages/main/modals/DeleteModal'
-import { TransferModal } from 'app/pages/main/modals/TransferModal'
 import { Link, LinkUpdate } from 'app/types'
 import { fetcher } from 'app/utils/fetcher'
 
@@ -20,12 +20,12 @@ const Container = styled.div`
   background-color: #f6f8fa;
   padding: 20px 8px;
 
-  @media (min-width: 839px) {
+  @media (min-width: 840px) {
     padding: 26px 24px;
     gap: 16px;
   }
 
-  @media (min-width: 1032px) {
+  @media (min-width: 1440px) {
     padding: 30px 24px;
   }
 `
@@ -61,7 +61,7 @@ const InfoBox: FC<PropsWithChildren & { sx?: BoxProps['sx']; bold?: boolean }> =
       height: '24px',
       mr: '24px',
       cursor: 'default',
-      '@media (min-width: 839px)': {
+      '@media (min-width: 840px)': {
         px: '16px',
         height: '32px',
       },
@@ -121,7 +121,7 @@ export const LinkItem: FC<Props> = ({ link, canEdit = false }) => {
       handleUpdate(id, { destination })
       handleEdit()
     },
-    [destination, id, handleEdit],
+    [destination, id, handleEdit, handleUpdate],
   )
 
   return (
@@ -177,7 +177,7 @@ export const LinkItem: FC<Props> = ({ link, canEdit = false }) => {
               sx={{
                 height: '24px',
                 flexGrow: 1,
-                '@media (min-width: 839px)': {
+                '@media (min-width: 840px)': {
                   height: '32px',
                 },
               }}
@@ -190,7 +190,7 @@ export const LinkItem: FC<Props> = ({ link, canEdit = false }) => {
                 sx={{
                   backgroundColor: '#000',
                   height: '24px',
-                  '@media (min-width: 839px)': {
+                  '@media (min-width: 840px)': {
                     height: '32px',
                   },
                 }}

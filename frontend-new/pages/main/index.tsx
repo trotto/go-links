@@ -5,9 +5,6 @@ import { useCallback, useMemo, useState } from 'react'
 import { useEffect } from 'react'
 import useSWR from 'swr'
 
-import { Link, LinkCreate, LinkCreateResponse, User } from 'app/types'
-import { fetcher } from 'app/utils/fetcher'
-
 import {
   ExtensionNotification,
   LinkCreationForm,
@@ -16,7 +13,9 @@ import {
   ResponseContainer,
   ResponseType,
   Search,
-} from './components'
+} from 'app/components'
+import { Link, LinkCreate, LinkCreateResponse, User } from 'app/types'
+import { fetcher } from 'app/utils/fetcher'
 
 const ScrollableArea = styled.div<{ cut: number }>(({ cut }) => ({
   height: `calc(100% - ${cut}px)`,
@@ -50,7 +49,7 @@ export default function Home({ user }: Props) {
     const extensionIsInstalled = crxInstalledTag.length > 0 && crxInstalledTag[0].content === 'true'
 
     setExtInstalled(extensionIsInstalled)
-  })
+  }, [])
 
   const handleCreate = useCallback(
     async (link: LinkCreate) => {
@@ -102,10 +101,10 @@ export default function Home({ user }: Props) {
         backgroundColor: '#fff',
         height: '100%',
         padding: '32px 24px 0',
-        '@media (min-width: 839px)': {
+        '@media (min-width: 840px)': {
           padding: '64px 80px 0',
         },
-        '@media (min-width: 1032px)': {
+        '@media (min-width: 1440px)': {
           padding: '64px 200px 0',
         },
       }}

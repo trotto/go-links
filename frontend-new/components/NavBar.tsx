@@ -28,7 +28,7 @@ export const NavBar: FC<Props> = ({ user }) => {
         justifyContent: 'space-between',
         alignItems: 'center',
         padding: '0 24px',
-        '@media (min-width: 839px)': {
+        '@media (min-width: 840px)': {
           padding: ' 0 80px',
         },
       }}
@@ -46,10 +46,10 @@ export const NavBar: FC<Props> = ({ user }) => {
           sx={{
             fontWeight: 500,
             fontSize: '20px',
-            '@media (min-width: 839px)': {
+            '@media (min-width: 840px)': {
               fontSize: '22px',
             },
-            '@media (min-width: 1032px)': {
+            '@media (min-width: 1440px)': {
               fontSize: '24px',
             },
           }}

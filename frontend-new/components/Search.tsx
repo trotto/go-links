@@ -23,12 +23,12 @@ export const Search: FC<Props> = ({ value, onChange }) => {
         backgroundColor: '#f6f8fa',
         borderRadius: '32px',
         height: '32px',
-        '@media (min-width: 839px)': {
+        '@media (min-width: 840px)': {
           mt: '40px',
           mb: '16px',
           height: '48px',
         },
-        '@media (min-width: 1032px)': {
+        '@media (min-width: 1440px)': {
           mb: '24px',
           height: '64px',
         },

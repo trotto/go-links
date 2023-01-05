@@ -33,12 +33,12 @@ const Cicle = styled.div`
   border-radius: 32px;
   color: #fff;
 
-  @media (min-width: 839px) {
+  @media (min-width: 840px) {
     width: 48px;
     height: 48px;
   }
 
-  @media (min-width: 1032px) {
+  @media (min-width: 1440px) {
     width: 64px;
     height: 64px;
   }
@@ -72,7 +72,7 @@ export const LinkCreationForm: FC<Props> = ({ onCreate }) => {
       e.preventDefault()
       onCreate(formState)
     },
-    [formState],
+    [formState, onCreate],
   )
 
   const isDisabled = useMemo(
@@ -144,7 +144,7 @@ export const LinkCreationForm: FC<Props> = ({ onCreate }) => {
           '&:disabled, &:hover': {
             backgroundColor: '#FFBBC5',
           },
-          '@media (min-width: 839px)': {
+          '@media (min-width: 840px)': {
             height: '48px',
             position: 'absolute',
             right: '80px',
@@ -154,7 +154,7 @@ export const LinkCreationForm: FC<Props> = ({ onCreate }) => {
               backgroundColor: '#bdbcf3',
             },
           },
-          '@media (min-width: 1032px)': {
+          '@media (min-width: 1440px)': {
             height: '64px',
             right: '200px',
           },
