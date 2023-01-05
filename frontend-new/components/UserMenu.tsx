@@ -39,7 +39,7 @@ export const UserMenu: FC<Props> = ({ user }) => {
             <PersonIcon />
           </Avatar>
         </IconButton>
-        <Box sx={{ pl: '8px', cursor: 'pointer' }}>
+        <Box sx={{ pl: 1, cursor: 'pointer' }}>
           <Vector />
         </Box>
       </Box>
@@ -83,11 +83,11 @@ export const UserMenu: FC<Props> = ({ user }) => {
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
       >
         <MenuItem
-          sx={{ fontSize: '14px', color: '#343aaa', padding: '24px 24px 8px', typography: 'body1' }}
+          sx={{ fontSize: '14px', color: '#343aaa', px: 3, pt: 3, pb: 1, typography: 'body1' }}
         >
           {user?.email}
         </MenuItem>
-        <MenuItem sx={{ fontSize: '14px', color: '#343aaa', padding: '8px 24px 24px' }}>
+        <MenuItem sx={{ fontSize: '14px', color: '#343aaa', px: 3, pt: 1, pb: 3 }}>
           <Link variant='body1' href='/_/auth/logout' sx={{ color: '#343aaa' }}>
             Sign Out
           </Link>

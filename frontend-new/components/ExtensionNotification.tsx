@@ -7,17 +7,17 @@ export const ExtensionNotification: FC = () => {
   return (
     <Box
       sx={{
-        p: '40px',
+        p: 5,
         backgroundColor: '#FFBEA2',
-        mb: '24px',
+        mb: 3,
         '@media (min-width: 840px)': {
-          mb: '40px',
+          mb: 5,
         },
         color: '#fff',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        gap: '16px',
+        gap: 2,
       }}
     >
       <Typography variant='h1'>Welcome! Let’s get started!</Typography>
@@ -30,9 +30,10 @@ export const ExtensionNotification: FC = () => {
         target='_blank'
         sx={{
           backgroundColor: '#FB815B',
-          height: '64px',
-          pl: '4px',
-          pr: '16px',
+          height: 64,
+          pl: 0.5,
+          pr: 2,
+          typography: 'h2',
           '&:hover': {
             backgroundColor: '#FFBBC5',
           },
@@ -40,14 +41,14 @@ export const ExtensionNotification: FC = () => {
       >
         <Box
           sx={{
-            width: '56px',
-            height: '56px',
+            width: 56,
+            height: 56,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             backgroundColor: '#fff',
             borderRadius: '32px',
-            mr: '16px',
+            mr: 2,
           }}
         >
           <Chrome />

@@ -9,13 +9,13 @@ export const Footer: FC = () => {
       sx={{
         display: 'none',
         '@media (min-width: 840px)': {
-          height: '64px',
+          height: 64,
           display: 'flex',
         },
         backgroundColor: '#f6f8fa',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: '24px',
+        gap: 3,
       }}
     >
       <Link href='https://github.com/trotto/go-links'>

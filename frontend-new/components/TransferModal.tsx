@@ -45,9 +45,9 @@ export const TransferModal: FC<Props> = ({ open, onClose, link }) => {
         value={transferToken?.url}
         sx={{
           borderRadius: '8px',
-          p: '8px',
+          p: 1,
           '@media (min-width: 840px)': {
-            p: '16px',
+            p: 2,
           },
         }}
         multiline

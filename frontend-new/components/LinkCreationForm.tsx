@@ -149,16 +149,16 @@ export const LinkCreationForm: FC<Props> = ({ onCreate }) => {
         type='submit'
         disabled={isDisabled}
         sx={{
-          height: '32px',
+          height: 32,
           gridArea: 'c',
           backgroundColor: '#FFBBC5',
           '&:disabled, &:hover': {
             backgroundColor: '#FFBBC5',
           },
           '@media (min-width: 840px)': {
-            height: '48px',
+            height: 48,
             position: 'absolute',
-            right: '80px',
+            right: 80,
             backgroundColor: '#646ae7',
 
             '&:disabled, &:hover': {
@@ -166,10 +166,10 @@ export const LinkCreationForm: FC<Props> = ({ onCreate }) => {
             },
           },
           '@media (min-width: 1440px)': {
-            height: '64px',
-            right: '200px',
+            height: 64,
+            right: 200,
           },
-          px: '32px',
+          px: 4,
           typography: 'h3',
         }}
       >

@@ -14,28 +14,28 @@ export const NoLinksNotification: FC = () => {
         alignItems: 'center',
         backgroundImage: `url(${Background.src})`,
         backgroundSize: 'cover',
-        gap: '8px',
-        pb: '32px',
-        mt: '8px',
+        gap: 1,
+        pb: 4,
+        mt: 1,
         '@media (min-width: 840px)': {
-          pb: '40px',
-          gap: '16px',
+          pb: 5,
+          gap: 2,
         },
         '@media (min-width: 1440px)': {
-          pb: '48px',
-          mt: '16px',
+          pb: 6,
+          mt: 2,
         },
       }}
     >
       <ArrowDown />
       <Box
         sx={{
-          height: '8px',
+          height: 8,
           '@media (min-width: 840px)': {
             height: 0,
           },
           '@media (min-width: 1440px)': {
-            height: '8px',
+            height: 8,
           },
         }}
       ></Box>

@@ -19,19 +19,19 @@ interface Props {
 
 export const ResponseContainer: FC<Props> = ({ link, message, type }) => {
   return (
-    <Box sx={{ mt: '24px' }}>
+    <Box sx={{ mt: 3 }}>
       <Box
         sx={{
           display: 'flex',
           flexDirection: 'row',
           justifyContent: 'center',
           alignItems: 'center',
-          height: '80px',
+          height: 80,
           border: '1px solid #dedede',
           lineHeight: '24px',
           backgroundColor: type === ResponseType.SUCCESS ? '#2885FF' : '#fff',
           color: type === ResponseType.SUCCESS ? '#fff' : '#000',
-          gap: '24px',
+          gap: 3,
         }}
       >
         {type === ResponseType.SUCCESS ? <SuccessCircle /> : <FailedCircle />}

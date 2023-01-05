@@ -18,19 +18,19 @@ export const Search: FC<Props> = ({ value, onChange }) => {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        mt: '24px',
-        mb: '8px',
+        mt: 3,
+        mb: 1,
         backgroundColor: '#f6f8fa',
         borderRadius: '32px',
-        height: '32px',
+        height: 32,
         '@media (min-width: 840px)': {
-          mt: '40px',
-          mb: '16px',
-          height: '48px',
+          mt: 5,
+          mb: 2,
+          height: 48,
         },
         '@media (min-width: 1440px)': {
-          mb: '24px',
-          height: '64px',
+          mb: 3,
+          height: 64,
         },
       }}
     >
@@ -41,13 +41,13 @@ export const Search: FC<Props> = ({ value, onChange }) => {
         onChange={handleChange}
         sx={{
           backgroundColor: '#F6F8FA',
-          width: '291px',
+          width: 291,
           padding: 0,
         }}
         InputProps={{
           startAdornment: (
             <InputAdornment position='start'>
-              <SearchRoundedIcon sx={{ width: '16px', height: '16px', color: '#000' }} />
+              <SearchRoundedIcon sx={{ width: 16, height: 16, color: '#000' }} />
             </InputAdornment>
           ),
         }}

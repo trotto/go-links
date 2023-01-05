@@ -12,24 +12,6 @@ import { fetcher } from 'app/utils/fetcher'
 
 import { LinkActions } from './LinkActions'
 
-const Container = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  border-bottom: 1px solid #f0f0f0;
-  background-color: #f6f8fa;
-  padding: 20px 8px;
-
-  @media (min-width: 840px) {
-    padding: 26px 24px;
-    gap: 16px;
-  }
-
-  @media (min-width: 1440px) {
-    padding: 30px 24px;
-  }
-`
-
 const LabelRow = styled.div`
   display: grid;
   grid-template-columns: max-content auto 1fr max-content max-content auto;
@@ -57,13 +39,13 @@ const InfoBox: FC<PropsWithChildren & { sx?: BoxProps['sx']; bold?: boolean }> =
       borderRadius: '32px',
       display: 'flex',
       alignItems: 'center',
-      px: '8px',
-      height: '24px',
-      mr: '24px',
+      px: 1,
+      height: 24,
+      mr: 3,
       cursor: 'default',
       '@media (min-width: 840px)': {
-        px: '16px',
-        height: '32px',
+        px: 2,
+        height: 32,
       },
       ...sx,
     }}
@@ -126,12 +108,33 @@ export const LinkItem: FC<Props> = ({ link, canEdit = false }) => {
 
   return (
     <>
-      <Container>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 1,
+          borderBottom: '1px solid #f0f0f0',
+          backgroundColor: '#f6f8fa',
+          // padding: '20px 8px',
+          px: 1,
+          py: 2.5,
+
+          '@media (min-width: 840px)': {
+            px: 3,
+            py: 3.25,
+            gap: 2,
+          },
+
+          '@media (min-width: 1440px)': {
+            py: 3.75,
+          },
+        }}
+      >
         <LabelRow>
           <InfoBox
             sx={{
-              mr: '16px',
-              fontWeight: '700',
+              mr: 2,
+              fontWeight: 700,
             }}
             bold
           >
@@ -146,17 +149,7 @@ export const LinkItem: FC<Props> = ({ link, canEdit = false }) => {
               },
             }}
           >
-            <Copy
-              sx={{
-                width: '16px',
-                height: '16px',
-                fill: 'none',
-                '@media (min-width: 840px)': {
-                  width: '24px',
-                  height: '24px',
-                },
-              }}
-            />
+            <Copy />
           </IconButton>
           <div />
           <InfoBox>{owner}</InfoBox>
@@ -174,7 +167,7 @@ export const LinkItem: FC<Props> = ({ link, canEdit = false }) => {
               flexDirection: 'row',
               borderRadius: '32px',
               background: '#fff',
-              mr: '24px',
+              mr: 3,
               flexGrow: 1,
             }}
           >
@@ -185,10 +178,10 @@ export const LinkItem: FC<Props> = ({ link, canEdit = false }) => {
               onChange={handleDestinationChange}
               disabled={!editable}
               sx={{
-                height: '24px',
+                height: 24,
                 flexGrow: 1,
                 '@media (min-width: 840px)': {
-                  height: '32px',
+                  height: 32,
                 },
               }}
             />
@@ -199,9 +192,9 @@ export const LinkItem: FC<Props> = ({ link, canEdit = false }) => {
                 type='submit'
                 sx={{
                   backgroundColor: '#000',
-                  height: '24px',
+                  height: 24,
                   '@media (min-width: 840px)': {
-                    height: '32px',
+                    height: 32,
                   },
                 }}
               >
@@ -226,7 +219,7 @@ export const LinkItem: FC<Props> = ({ link, canEdit = false }) => {
             </span>
           </Tooltip>
         </Form>
-      </Container>
+      </Box>
       {transferModal && (
         <TransferModal open={transferModal} onClose={closeTrasferModal} link={link} />
       )}

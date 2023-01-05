@@ -23,13 +23,13 @@ export const NavBar: FC<Props> = ({ user }) => {
     <Box
       sx={{
         display: 'flex',
-        height: '64px',
+        height: 64,
         backgroundColor: '#f6f8fa',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: '0 24px',
+        px: 3,
         '@media (min-width: 840px)': {
-          padding: ' 0 80px',
+          px: 10,
         },
       }}
     >
@@ -38,7 +38,7 @@ export const NavBar: FC<Props> = ({ user }) => {
         sx={{
           display: 'flex',
           alignItems: 'center',
-          gap: '8px',
+          gap: 1,
         }}
       >
         <TrottoLogo />
@@ -71,7 +71,7 @@ export const NavBar: FC<Props> = ({ user }) => {
             {text}
           </Link>
         ))}
-        <Box sx={{ m: '0 12px' }}>{user && <UserMenu user={user} />}</Box>
+        <Box sx={{ mx: 1.5 }}>{user && <UserMenu user={user} />}</Box>
       </Box>
     </Box>
   )
