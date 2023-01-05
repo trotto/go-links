@@ -36,7 +36,7 @@ export const UserMenu: FC<Props> = ({ user }) => {
           aria-expanded={open ? 'true' : undefined}
         >
           <Avatar sx={{ width: 40, height: 40, backgroundColor: '#F27E8F' }}>
-            <PersonIcon />
+            <PersonIcon sx={{ fill: '#fff' }} />
           </Avatar>
         </IconButton>
         <Box sx={{ pl: 1, cursor: 'pointer' }}>

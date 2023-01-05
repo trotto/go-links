@@ -30,7 +30,13 @@ export const ExtensionNotification: FC = () => {
         target='_blank'
         sx={{
           backgroundColor: '#FB815B',
-          height: 64,
+          height: 48,
+          '@media (min-width: 840px)': {
+            height: 56,
+          },
+          '@media (min-width: 1440px)': {
+            height: 64,
+          },
           pl: 0.5,
           pr: 2,
           typography: 'h2',
@@ -41,8 +47,16 @@ export const ExtensionNotification: FC = () => {
       >
         <Box
           sx={{
-            width: 56,
-            height: 56,
+            width: 40,
+            height: 40,
+            '@media (min-width: 840px)': {
+              width: 48,
+              height: 48,
+            },
+            '@media (min-width: 1440px)': {
+              width: 56,
+              height: 56,
+            },
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',

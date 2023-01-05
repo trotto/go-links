@@ -41,10 +41,11 @@ const InfoBox: FC<PropsWithChildren & { sx?: BoxProps['sx']; bold?: boolean }> =
       alignItems: 'center',
       px: 1,
       height: 24,
-      mr: 3,
+      mr: 1,
       cursor: 'default',
       '@media (min-width: 840px)': {
         px: 2,
+        mr: 3,
         height: 32,
       },
       ...sx,
@@ -133,7 +134,9 @@ export const LinkItem: FC<Props> = ({ link, canEdit = false }) => {
         <LabelRow>
           <InfoBox
             sx={{
-              mr: 2,
+              '@media (min-width: 840px)': {
+                mr: 2,
+              },
               fontWeight: 700,
             }}
             bold
@@ -167,7 +170,10 @@ export const LinkItem: FC<Props> = ({ link, canEdit = false }) => {
               flexDirection: 'row',
               borderRadius: '32px',
               background: '#fff',
-              mr: 3,
+              mr: 1,
+              '@media (min-width: 840px)': {
+                mr: 3,
+              },
               flexGrow: 1,
             }}
           >

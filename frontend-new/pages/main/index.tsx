@@ -100,12 +100,14 @@ export default function Home({ user }: Props) {
       sx={{
         backgroundColor: '#fff',
         height: '100%',
-        padding: '32px 24px 0',
+        pt: 4,
+        px: 3,
         '@media (min-width: 840px)': {
-          padding: '64px 80px 0',
+          pt: 8,
+          px: 10,
         },
         '@media (min-width: 1440px)': {
-          padding: '64px 200px 0',
+          px: 25,
         },
       }}
     >
