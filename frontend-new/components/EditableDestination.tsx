@@ -4,6 +4,7 @@ import { FC, useState, useCallback, FormEvent, ChangeEvent } from 'react'
 
 import { useUpdateLink } from 'app/hooks'
 import { Edit } from 'app/icons'
+import { media } from 'app/styles/theme'
 
 const Form = styled.form`
   display: flex;
@@ -45,7 +46,7 @@ export const EditableDestination: FC<Props> = ({ id, destinationUrl, disabled })
           borderRadius: '32px',
           background: '#fff',
           mr: 1,
-          '@media (min-width: 840px)': {
+          [media.TABLET]: {
             mr: 3,
           },
           flexGrow: 1,
@@ -60,7 +61,7 @@ export const EditableDestination: FC<Props> = ({ id, destinationUrl, disabled })
           sx={{
             height: 24,
             flexGrow: 1,
-            '@media (min-width: 840px)': {
+            [media.TABLET]: {
               height: 32,
             },
           }}
@@ -73,7 +74,7 @@ export const EditableDestination: FC<Props> = ({ id, destinationUrl, disabled })
             sx={{
               backgroundColor: '#000',
               height: 24,
-              '@media (min-width: 840px)': {
+              [media.TABLET]: {
                 height: 32,
               },
             }}

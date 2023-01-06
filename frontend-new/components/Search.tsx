@@ -2,6 +2,7 @@ import { Box, InputAdornment, TextField } from '@mui/material'
 import { ChangeEvent, FC, useCallback } from 'react'
 
 import { Search as SearchIcon } from 'app/icons'
+import { media } from 'app/styles/theme'
 
 interface Props {
   value: string
@@ -24,12 +25,12 @@ export const Search: FC<Props> = ({ value, onChange }) => {
         backgroundColor: '#f6f8fa',
         borderRadius: '32px',
         height: 32,
-        '@media (min-width: 840px)': {
+        [media.TABLET]: {
           mt: 5,
           mb: 2,
           height: 48,
         },
-        '@media (min-width: 1440px)': {
+        [media.DESKTOP]: {
           mb: 3,
           height: 64,
         },
@@ -44,11 +45,11 @@ export const Search: FC<Props> = ({ value, onChange }) => {
           backgroundColor: '#F6F8FA',
           p: 0,
           width: 210,
-          '@media (min-width: 840px)': {
+          [media.TABLET]: {
             p: 0,
             width: 250,
           },
-          '@media (min-width: 1440px)': {
+          [media.DESKTOP]: {
             p: 0,
             width: 290,
           },

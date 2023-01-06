@@ -6,6 +6,7 @@ import { DeleteModal } from 'app/components/DeleteModal'
 import { TransferModal } from 'app/components/TransferModal'
 import { useModal, useClipboard, useFullShortPath } from 'app/hooks'
 import { Copy, Eye } from 'app/icons'
+import { media } from 'app/styles/theme'
 import { Link } from 'app/types'
 
 import { EditableDestination } from './EditableDestination'
@@ -44,13 +45,13 @@ export const LinkItem: FC<Props> = ({ link, canEdit = false }) => {
           px: 1,
           py: 2.5,
 
-          '@media (min-width: 840px)': {
+          [media.TABLET]: {
             px: 3,
             py: 3.25,
             gap: 2,
           },
 
-          '@media (min-width: 1440px)': {
+          [media.DESKTOP]: {
             py: 3.75,
           },
         }}
@@ -58,7 +59,7 @@ export const LinkItem: FC<Props> = ({ link, canEdit = false }) => {
         <LabelRow>
           <InfoBox
             sx={{
-              '@media (min-width: 840px)': {
+              [media.TABLET]: {
                 mr: 2,
               },
               fontWeight: 700,
@@ -85,7 +86,7 @@ export const LinkItem: FC<Props> = ({ link, canEdit = false }) => {
               sx={{
                 display: 'flex',
                 alignItems: 'center',
-                '@media (min-width: 840px)': {
+                [media.TABLET]: {
                   display: 'inline',
                 },
               }}
@@ -94,7 +95,7 @@ export const LinkItem: FC<Props> = ({ link, canEdit = false }) => {
               <Box
                 sx={{
                   display: 'none',
-                  '@media (min-width: 840px)': {
+                  [media.TABLET]: {
                     display: 'inline',
                   },
                 }}
@@ -106,7 +107,7 @@ export const LinkItem: FC<Props> = ({ link, canEdit = false }) => {
                 sx={{
                   display: 'flex',
                   ml: 1,
-                  '@media (min-width: 840px)': {
+                  [media.TABLET]: {
                     display: 'none',
                   },
                 }}

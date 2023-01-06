@@ -2,6 +2,8 @@ import { Box, Typography } from '@mui/material'
 import { BoxProps } from '@mui/system'
 import { FC, PropsWithChildren } from 'react'
 
+import { media } from 'app/styles/theme'
+
 interface Props extends PropsWithChildren {
   sx?: BoxProps['sx']
   bold?: boolean
@@ -18,7 +20,7 @@ export const InfoBox: FC<Props> = ({ children, sx, bold = false }) => (
       height: 24,
       mr: 1,
       cursor: 'default',
-      '@media (min-width: 840px)': {
+      [media.TABLET]: {
         px: 2,
         mr: 3,
         height: 32,

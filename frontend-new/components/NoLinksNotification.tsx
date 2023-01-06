@@ -3,6 +3,7 @@ import { FC } from 'react'
 
 import { ArrowDown, NewLink } from 'app/icons'
 import Background from 'app/public/new-link-background.svg'
+import { media } from 'app/styles/theme'
 
 export const NoLinksNotification: FC = () => {
   return (
@@ -17,11 +18,11 @@ export const NoLinksNotification: FC = () => {
         gap: 1,
         pb: 4,
         mt: 1,
-        '@media (min-width: 840px)': {
+        [media.TABLET]: {
           pb: 5,
           gap: 2,
         },
-        '@media (min-width: 1440px)': {
+        [media.DESKTOP]: {
           pb: 6,
           mt: 2,
         },
@@ -31,10 +32,10 @@ export const NoLinksNotification: FC = () => {
       <Box
         sx={{
           height: 8,
-          '@media (min-width: 840px)': {
+          [media.TABLET]: {
             height: 0,
           },
-          '@media (min-width: 1440px)': {
+          [media.DESKTOP]: {
             height: 8,
           },
         }}

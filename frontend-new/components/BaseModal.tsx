@@ -2,6 +2,8 @@ import styled from '@emotion/styled'
 import { Box, Modal as MuiModal } from '@mui/material'
 import { FC, PropsWithChildren } from 'react'
 
+import { media } from 'app/styles/theme'
+
 const Buttons = styled.div`
   display: flex;
   flex-direction: row;
@@ -42,7 +44,7 @@ const Base: FC<Props> = ({ open, onClose, children }) => {
             right: 16,
             p: 3,
 
-            '@media (min-width: 840px)': {
+            [media.TABLET]: {
               left: '50%',
               transform: 'translate(-50%, -50%)',
               gap: 2,
@@ -50,7 +52,7 @@ const Base: FC<Props> = ({ open, onClose, children }) => {
               py: 4,
               width: 596,
             },
-            '@media (min-width: 1440px)': {
+            [media.DESKTOP]: {
               width: 648,
               py: 5,
               px: 8,

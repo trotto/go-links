@@ -11,6 +11,7 @@ import {
   Search,
 } from 'app/components'
 import { useLinkList } from 'app/hooks/links'
+import { media } from 'app/styles/theme'
 import { User } from 'app/types'
 
 const ScrollableArea = styled.div<{ cut: number }>(({ cut }) => ({
@@ -51,11 +52,11 @@ export default function Home({ user }: Props) {
         height: '100%',
         pt: 4,
         px: 3,
-        '@media (min-width: 840px)': {
+        [media.TABLET]: {
           pt: 8,
           px: 10,
         },
-        '@media (min-width: 1440px)': {
+        [media.DESKTOP]: {
           px: 25,
         },
       }}

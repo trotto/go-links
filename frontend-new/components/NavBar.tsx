@@ -3,6 +3,7 @@ import { FC } from 'react'
 
 import { useGetAdminLinks } from 'app/hooks'
 import { TrottoLogo } from 'app/icons'
+import { media } from 'app/styles/theme'
 import { User } from 'app/types'
 
 import { UserMenu } from './UserMenu'
@@ -22,7 +23,7 @@ export const NavBar: FC<Props> = ({ user }) => {
         justifyContent: 'space-between',
         alignItems: 'center',
         px: 3,
-        '@media (min-width: 840px)': {
+        [media.TABLET]: {
           px: 10,
           height: 64,
         },
@@ -41,10 +42,10 @@ export const NavBar: FC<Props> = ({ user }) => {
           sx={{
             fontWeight: 500,
             fontSize: '20px',
-            '@media (min-width: 840px)': {
+            [media.TABLET]: {
               fontSize: '22px',
             },
-            '@media (min-width: 1440px)': {
+            [media.DESKTOP]: {
               fontSize: '24px',
             },
           }}
@@ -63,7 +64,7 @@ export const NavBar: FC<Props> = ({ user }) => {
           sx={{
             display: 'none',
             gap: 3,
-            '@media (min-width: 840px)': {
+            [media.TABLET]: {
               display: 'flex',
               alignItems: 'center',
             },

@@ -4,6 +4,7 @@ import TextField from '@mui/material/TextField'
 import { FC } from 'react'
 
 import { useGetTransferToken, useClipboard } from 'app/hooks'
+import { media } from 'app/styles/theme'
 import { Link } from 'app/types'
 
 import { Modal } from './BaseModal'
@@ -35,7 +36,7 @@ export const TransferModal: FC<Props> = ({ open, onClose, link }) => {
         sx={{
           borderRadius: '8px',
           p: 1,
-          '@media (min-width: 840px)': {
+          [media.TABLET]: {
             p: 2,
           },
         }}

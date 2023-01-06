@@ -2,6 +2,7 @@ import { Box, Typography, Button } from '@mui/material'
 import { FC } from 'react'
 
 import { Chrome } from 'app/icons'
+import { media } from 'app/styles/theme'
 
 export const ExtensionNotification: FC = () => {
   return (
@@ -10,7 +11,7 @@ export const ExtensionNotification: FC = () => {
         p: 5,
         backgroundColor: '#FFBEA2',
         mb: 3,
-        '@media (min-width: 840px)': {
+        [media.TABLET]: {
           mb: 5,
         },
         color: '#fff',
@@ -31,10 +32,10 @@ export const ExtensionNotification: FC = () => {
         sx={{
           backgroundColor: '#FB815B',
           height: 48,
-          '@media (min-width: 840px)': {
+          [media.TABLET]: {
             height: 56,
           },
-          '@media (min-width: 1440px)': {
+          [media.DESKTOP]: {
             height: 64,
           },
           pl: 0.5,
@@ -49,11 +50,11 @@ export const ExtensionNotification: FC = () => {
           sx={{
             width: 40,
             height: 40,
-            '@media (min-width: 840px)': {
+            [media.TABLET]: {
               width: 48,
               height: 48,
             },
-            '@media (min-width: 1440px)': {
+            [media.DESKTOP]: {
               width: 56,
               height: 56,
             },

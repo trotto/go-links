@@ -1,23 +1,25 @@
 import { SvgIcon } from '@mui/material'
 import { FC } from 'react'
 
+import { media } from 'app/styles/theme'
+
 export const NewLink: FC = () => {
   return (
     <SvgIcon
       sx={{
-        width: '81px',
-        height: '48px',
+        width: 81,
+        height: 48,
         transform: 'translateX(-13px)',
 
-        '@media (min-width: 840px)': {
-          width: '102px',
-          height: '72px',
+        [media.TABLET]: {
+          width: 102,
+          height: 72,
           transform: 'translateX(-18px)',
         },
 
-        '@media (min-width: 1440px)': {
-          width: '136px',
-          height: '88px',
+        [media.DESKTOP]: {
+          width: 136,
+          height: 88,
           transform: 'translateX(-24px)',
         },
       }}

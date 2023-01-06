@@ -3,6 +3,7 @@ import { Avatar, Box, IconButton, Menu, MenuItem, MenuItemProps, Link } from '@m
 import { MouseEvent, useState, FC, PropsWithChildren } from 'react'
 
 import { Vector, Burger } from 'app/icons'
+import { media } from 'app/styles/theme'
 import { User, AdminLink } from 'app/types'
 
 interface Props {
@@ -38,7 +39,7 @@ export const UserMenu: FC<Props> = ({ user, adminLinks }) => {
       <Box
         sx={{
           display: 'none',
-          '@media (min-width: 840px)': {
+          [media.TABLET]: {
             display: 'flex',
             alignItems: 'center',
             textAlign: 'center',
@@ -68,7 +69,7 @@ export const UserMenu: FC<Props> = ({ user, adminLinks }) => {
       <Box
         sx={{
           display: 'flex',
-          '@media (min-width: 840px)': {
+          [media.TABLET]: {
             display: 'none',
           },
         }}
@@ -92,7 +93,7 @@ export const UserMenu: FC<Props> = ({ user, adminLinks }) => {
             mt: 2,
             ml: '14px',
             right: 0,
-            '@media (min-width: 840px)': {
+            [media.TABLET]: {
               mt: 1.5,
               right: 'auto',
             },
@@ -111,7 +112,7 @@ export const UserMenu: FC<Props> = ({ user, adminLinks }) => {
               position: 'absolute',
               right: 26,
               top: 0,
-              '@media (min-width: 840px)': {
+              [media.TABLET]: {
                 right: 14,
               },
               width: 10,
@@ -143,7 +144,7 @@ export const UserMenu: FC<Props> = ({ user, adminLinks }) => {
           sx={{
             display: 'block',
 
-            '@media (min-width: 840px)': {
+            [media.TABLET]: {
               display: 'none',
             },
           }}

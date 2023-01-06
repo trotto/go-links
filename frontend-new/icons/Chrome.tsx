@@ -1,21 +1,23 @@
 import { SvgIcon } from '@mui/material'
 import { FC } from 'react'
 
+import { media } from 'app/styles/theme'
+
 export const Chrome: FC = () => {
   return (
     <SvgIcon
       sx={{
-        width: '24px',
-        height: '24px',
+        width: 24,
+        height: 24,
 
-        '@media (min-width: 840px)': {
-          width: '28px',
-          height: '28px',
+        [media.TABLET]: {
+          width: 28,
+          height: 28,
         },
 
-        '@media (min-width: 1440px)': {
-          width: '32px',
-          height: '32px',
+        [media.DESKTOP]: {
+          width: 32,
+          height: 32,
         },
       }}
       viewBox='0 0 32 32'

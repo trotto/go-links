@@ -1,5 +1,10 @@
 import { createTheme } from '@mui/material/styles'
 
+export const media = {
+  TABLET: '@media (min-width: 840px)',
+  DESKTOP: '@media (min-width: 1440px)',
+}
+
 export const theme = createTheme({
   typography: {
     fontFamily: ['Poppins', 'Sans-serif'].join(', '),
@@ -7,12 +12,12 @@ export const theme = createTheme({
       fontSize: '16px',
       fontWeight: 700,
       lineHeight: '24px',
-      '@media (min-width:840px)': {
+      [media.TABLET]: {
         fontSize: '20px',
         fontWeight: 700,
         lineHeight: '30px',
       },
-      '@media (min-width:1440px)': {
+      [media.DESKTOP]: {
         fontSize: '24px',
         fontWeight: 700,
         lineHeight: '36px',
@@ -21,11 +26,11 @@ export const theme = createTheme({
     h2: {
       fontSize: '12px',
       lineHeight: '18px',
-      '@media (min-width:840px)': {
+      [media.TABLET]: {
         fontSize: '14px',
         lineHeight: '21px',
       },
-      '@media (min-width:1440px)': {
+      [media.DESKTOP]: {
         fontSize: '16px',
         lineHeight: '24px',
       },
@@ -34,12 +39,12 @@ export const theme = createTheme({
       fontSize: '10px',
       lineHeight: '15px',
       fontWeight: 700,
-      '@media (min-width:840px)': {
+      [media.TABLET]: {
         fontSize: '14px',
         fontWeight: 700,
         lineHeight: '21px',
       },
-      '@media (min-width:1440px)': {
+      [media.DESKTOP]: {
         fontSize: '16px',
         fontWeight: 700,
         lineHeight: '24px',
@@ -48,21 +53,21 @@ export const theme = createTheme({
     body1: {
       fontSize: '10px',
       lineHeight: '15px',
-      '@media (min-width:840px)': {
+      [media.TABLET]: {
         fontSize: '12px',
         lineHeight: '18px',
       },
-      '@media (min-width:1440px)': {
+      [media.DESKTOP]: {
         fontSize: '14px',
         lineHeight: '21px',
       },
     },
     button: {
       fontSize: '12px',
-      '@media (min-width:840px)': {
+      [media.TABLET]: {
         fontSize: '14px',
       },
-      '@media (min-width:1440px)': {
+      [media.DESKTOP]: {
         fontSize: '16px',
       },
     },
@@ -78,7 +83,7 @@ export const theme = createTheme({
           backgroundColor: '#fff',
           borderRadius: '32px',
           padding: '4px 8px',
-          '@media (min-width:840px)': {
+          [media.TABLET]: {
             padding: '4px 16px',
           },
           '& fieldset': { border: 'none' },
@@ -94,10 +99,10 @@ export const theme = createTheme({
             color: '#000',
             opacity: 1,
             fontSize: '10px',
-            '@media (min-width:840px)': {
+            [media.TABLET]: {
               fontSize: '12px',
             },
-            '@media (min-width:1440px)': {
+            [media.DESKTOP]: {
               fontSize: '14px',
             },
           },
@@ -127,7 +132,7 @@ export const theme = createTheme({
           width: '16px',
           height: '16px',
           fill: 'none',
-          '@media (min-width: 840px)': {
+          [media.TABLET]: {
             width: '24px',
             height: '24px',
           },

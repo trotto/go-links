@@ -1,6 +1,8 @@
 import { SvgIcon } from '@mui/material'
 import { FC } from 'react'
 
+import { media } from 'app/styles/theme'
+
 export const Search: FC = () => {
   return (
     <SvgIcon
@@ -9,18 +11,16 @@ export const Search: FC = () => {
         width: 10,
         height: 10,
 
-        '@media (min-width: 840px)': {
+        [media.TABLET]: {
           width: 12,
           height: 12,
         },
 
-        '@media (min-width: 1440px)': {
+        [media.DESKTOP]: {
           width: 14,
           height: 14,
         },
       }}
-      width='14'
-      height='14'
       viewBox='0 0 14 14'
       fill='none'
       xmlns='http://www.w3.org/2000/svg'

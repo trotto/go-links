@@ -2,13 +2,14 @@ import { Box, Link } from '@mui/material'
 import { FC } from 'react'
 
 import { GithubLogo } from 'app/icons'
+import { media } from 'app/styles/theme'
 
 export const Footer: FC = () => {
   return (
     <Box
       sx={{
         display: 'none',
-        '@media (min-width: 840px)': {
+        [media.TABLET]: {
           height: 64,
           display: 'flex',
         },

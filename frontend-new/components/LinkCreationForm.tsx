@@ -6,6 +6,7 @@ import { ChangeEvent, FormEvent, useCallback, useMemo, useState } from 'react'
 import { useEffect, useRef, FC } from 'react'
 
 import { useSaveLink } from 'app/hooks/linksApi'
+import { media } from 'app/styles/theme'
 import { LinkCreate, LinkCreateResponse } from 'app/types'
 
 const StyledForm = styled.form`
@@ -34,12 +35,12 @@ const Cicle = styled.div`
   border-radius: 32px;
   color: #fff;
 
-  @media (min-width: 840px) {
+  ${media.TABLET} {
     width: 48px;
     height: 48px;
   }
 
-  @media (min-width: 1440px) {
+  ${media.DESKTOP} {
     width: 64px;
     height: 64px;
   }
@@ -153,7 +154,7 @@ export const LinkCreationForm: FC<Props> = ({ onCreate }) => {
           '&:disabled, &:hover': {
             backgroundColor: '#FFBBC5',
           },
-          '@media (min-width: 840px)': {
+          [media.TABLET]: {
             height: 48,
             position: 'absolute',
             right: 80,
@@ -163,7 +164,7 @@ export const LinkCreationForm: FC<Props> = ({ onCreate }) => {
               backgroundColor: '#bdbcf3',
             },
           },
-          '@media (min-width: 1440px)': {
+          [media.DESKTOP]: {
             height: 64,
             right: 200,
           },
