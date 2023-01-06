@@ -17,13 +17,14 @@ export const NavBar: FC<Props> = ({ user }) => {
     <Box
       sx={{
         display: 'flex',
-        height: 64,
+        height: 48,
         backgroundColor: '#f6f8fa',
         justifyContent: 'space-between',
         alignItems: 'center',
         px: 3,
         '@media (min-width: 840px)': {
           px: 10,
+          height: 64,
         },
       }}
     >

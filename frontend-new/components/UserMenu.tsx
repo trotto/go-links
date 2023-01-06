@@ -2,7 +2,7 @@ import PersonIcon from '@mui/icons-material/Person'
 import { Avatar, Box, IconButton, Menu, MenuItem, MenuItemProps, Link } from '@mui/material'
 import { MouseEvent, useState, FC, PropsWithChildren } from 'react'
 
-import { Vector } from 'app/icons'
+import { Vector, Burger } from 'app/icons'
 import { User, AdminLink } from 'app/types'
 
 interface Props {
@@ -36,7 +36,15 @@ export const UserMenu: FC<Props> = ({ user, adminLinks }) => {
   return (
     <>
       <Box
-        sx={{ display: 'flex', alignItems: 'center', textAlign: 'center', cursor: 'pointer' }}
+        sx={{
+          display: 'none',
+          '@media (min-width: 840px)': {
+            display: 'flex',
+            alignItems: 'center',
+            textAlign: 'center',
+            cursor: 'pointer',
+          },
+        }}
         onClick={handleClick}
       >
         <IconButton
@@ -57,6 +65,19 @@ export const UserMenu: FC<Props> = ({ user, adminLinks }) => {
           <Vector />
         </Box>
       </Box>
+      <Box
+        sx={{
+          display: 'flex',
+          '@media (min-width: 840px)': {
+            display: 'none',
+          },
+        }}
+        onClick={handleClick}
+      >
+        <IconButton>
+          <Burger />
+        </IconButton>
+      </Box>
       <Menu
         anchorEl={anchorEl}
         id='account-menu'
@@ -68,8 +89,13 @@ export const UserMenu: FC<Props> = ({ user, adminLinks }) => {
           sx: {
             overflow: 'visible',
             filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
-            mt: 1.5,
+            mt: 2,
             ml: '14px',
+            right: 0,
+            '@media (min-width: 840px)': {
+              mt: 1.5,
+              right: 'auto',
+            },
             '& .MuiList-root': {
               padding: 0,
             },
@@ -83,8 +109,11 @@ export const UserMenu: FC<Props> = ({ user, adminLinks }) => {
               content: '""',
               display: 'block',
               position: 'absolute',
+              right: 26,
               top: 0,
-              right: 14,
+              '@media (min-width: 840px)': {
+                right: 14,
+              },
               width: 10,
               height: 10,
               bgcolor: 'background.paper',
