@@ -1,24 +1,18 @@
 import { Link, Box, Typography } from '@mui/material'
 import { FC } from 'react'
-import useSWR from 'swr'
 
+import { useGetAdminLinks } from 'app/hooks'
 import { TrottoLogo } from 'app/icons'
 import { User } from 'app/types'
-import { fetcher } from 'app/utils/fetcher'
 
 import { UserMenu } from './UserMenu'
-
-interface AdminLink {
-  text: string
-  url: string
-}
 
 interface Props {
   user?: User
 }
 
 export const NavBar: FC<Props> = ({ user }) => {
-  const { data: adminLinks } = useSWR(`/_admin_links`, fetcher<AdminLink[]>)
+  const { adminLinks } = useGetAdminLinks()
   return (
     <Box
       sx={{
@@ -61,17 +55,29 @@ export const NavBar: FC<Props> = ({ user }) => {
         sx={{
           display: 'flex',
           alignItems: 'center',
+          gap: 3,
         }}
       >
-        <Link className='item' href='/documentation' typography='h2'>
-          Documentation
-        </Link>
-        {adminLinks?.map(({ url, text }) => (
-          <Link className='item' href={url} key={url}>
-            {text}
+        <Box
+          sx={{
+            display: 'none',
+            gap: 3,
+            '@media (min-width: 840px)': {
+              display: 'flex',
+              alignItems: 'center',
+            },
+          }}
+        >
+          <Link href='/documentation' typography='h2' sx={{ fontWeight: 400 }}>
+            Documentation
           </Link>
-        ))}
-        <Box sx={{ mx: 1.5 }}>{user && <UserMenu user={user} />}</Box>
+          {adminLinks?.map(({ url, text }) => (
+            <Link href={url} key={url}>
+              {text}
+            </Link>
+          ))}
+        </Box>
+        <Box>{user && <UserMenu user={user} adminLinks={adminLinks} />}</Box>
       </Box>
     </Box>
   )

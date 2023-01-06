@@ -5,7 +5,7 @@ import { FC } from 'react'
 import { DeleteModal } from 'app/components/DeleteModal'
 import { TransferModal } from 'app/components/TransferModal'
 import { useModal, useClipboard, useFullShortPath } from 'app/hooks'
-import { Copy } from 'app/icons'
+import { Copy, Eye } from 'app/icons'
 import { Link } from 'app/types'
 
 import { EditableDestination } from './EditableDestination'
@@ -80,7 +80,41 @@ export const LinkItem: FC<Props> = ({ link, canEdit = false }) => {
           </IconButton>
           <div />
           <InfoBox>{owner}</InfoBox>
-          <InfoBox>{`${visits_count} visits`}</InfoBox>
+          <InfoBox>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                '@media (min-width: 840px)': {
+                  display: 'inline',
+                },
+              }}
+            >
+              {visits_count}{' '}
+              <Box
+                sx={{
+                  display: 'none',
+                  '@media (min-width: 840px)': {
+                    display: 'inline',
+                  },
+                }}
+              >
+                {' '}
+                visits
+              </Box>
+              <Box
+                sx={{
+                  display: 'flex',
+                  ml: 1,
+                  '@media (min-width: 840px)': {
+                    display: 'none',
+                  },
+                }}
+              >
+                <Eye />
+              </Box>
+            </Box>
+          </InfoBox>
           <LinkActions
             disabled={!canEdit}
             onTransfer={openTransferModal}

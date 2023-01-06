@@ -1,15 +1,29 @@
 import PersonIcon from '@mui/icons-material/Person'
-import { Avatar, Box, IconButton, Menu, MenuItem, Link } from '@mui/material'
-import { MouseEvent, useState, FC } from 'react'
+import { Avatar, Box, IconButton, Menu, MenuItem, MenuItemProps, Link } from '@mui/material'
+import { MouseEvent, useState, FC, PropsWithChildren } from 'react'
 
 import { Vector } from 'app/icons'
-import { User } from 'app/types'
+import { User, AdminLink } from 'app/types'
 
 interface Props {
   user: User
+  adminLinks?: AdminLink[]
 }
 
-export const UserMenu: FC<Props> = ({ user }) => {
+interface MLProps extends PropsWithChildren {
+  sx?: MenuItemProps['sx']
+  href?: string
+}
+
+const MenuLink: FC<MLProps> = ({ sx, children, href }) => (
+  <MenuItem sx={{ pt: 1, pb: 1, px: 3, typography: 'body1', ...sx }}>
+    <Link variant='body1' href={href} sx={{ color: '#343aaa' }}>
+      {children}
+    </Link>
+  </MenuItem>
+)
+
+export const UserMenu: FC<Props> = ({ user, adminLinks }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
   const handleClick = (event: MouseEvent<HTMLElement>) => {
@@ -82,16 +96,48 @@ export const UserMenu: FC<Props> = ({ user }) => {
         transformOrigin={{ horizontal: 'right', vertical: 'top' }}
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
       >
-        <MenuItem
-          sx={{ fontSize: '14px', color: '#343aaa', px: 3, pt: 3, pb: 1, typography: 'body1' }}
+        <Box
+          sx={{
+            '& .MuiMenuItem-root': {
+              px: 3,
+              color: '#343aaa',
+              typography: 'body1',
+            },
+          }}
         >
-          {user?.email}
-        </MenuItem>
-        <MenuItem sx={{ fontSize: '14px', color: '#343aaa', px: 3, pt: 1, pb: 3 }}>
-          <Link variant='body1' href='/_/auth/logout' sx={{ color: '#343aaa' }}>
+          <MenuLink sx={{ pt: 3 }}>{user?.email}</MenuLink>
+          <MenuLink href='/_/auth/logout' sx={{ pb: 3 }}>
             Sign Out
-          </Link>
-        </MenuItem>
+          </MenuLink>
+        </Box>
+        <Box
+          sx={{
+            display: 'block',
+
+            '@media (min-width: 840px)': {
+              display: 'none',
+            },
+          }}
+        >
+          <Box sx={{ mx: 3, border: '1px solid #343AAA' }}></Box>
+          <MenuLink href='/documentation' sx={{ pt: 3 }}>
+            Documentation
+          </MenuLink>
+
+          {adminLinks?.map(({ url, text }) => (
+            <MenuLink href={url} key={url}>
+              {text}
+            </MenuLink>
+          ))}
+
+          <MenuLink href='https://github.com/trotto/go-links'>Github</MenuLink>
+          <MenuLink href='/pricing'>Pricing</MenuLink>
+          <MenuLink href='/privacy'>Privacy</MenuLink>
+          <MenuLink href='/terms'>Terms</MenuLink>
+          <MenuLink href='/contact' sx={{ pb: 3 }}>
+            Contact us
+          </MenuLink>
+        </Box>
       </Menu>
     </>
   )
