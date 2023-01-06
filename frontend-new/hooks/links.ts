@@ -79,3 +79,25 @@ export const useLinkList = () => {
     onSave,
   }
 }
+
+export const useFullShortPath = ({
+  shortpath,
+  namespace = window._trotto.defaultNamespace,
+}: {
+  shortpath: string
+  namespace?: string
+}) => useMemo(() => `${namespace}/${shortpath}`, [namespace, shortpath])
+
+export const useEditableDestination = (id: number, destinationUrl: string) => {
+  const [destination, setDestination] = useState(destinationUrl)
+  const [editable, setEditable] = useState(false)
+
+  const toggleEditMode = useCallback(() => setEditable((editable) => !editable), [setEditable])
+
+  return {
+    destination,
+    setDestination,
+    editable,
+    toggleEditMode,
+  }
+}

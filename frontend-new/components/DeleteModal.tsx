@@ -1,31 +1,32 @@
 import { Button, TextField, Typography } from '@mui/material'
 import { ChangeEvent, FC, useCallback, useState } from 'react'
 
+import { useDeleteLink, useFullShortPath } from 'app/hooks'
 import { Link } from 'app/types'
 
 import { Modal } from './BaseModal'
 
 interface Props {
   open: boolean
-  onDelete: (id: number) => void
   onClose: () => void
   link: Link
 }
 
-export const DeleteModal: FC<Props> = ({ open, onClose, onDelete, link }) => {
-  const { namespace, shortpath, id } = link
+export const DeleteModal: FC<Props> = ({ open, onClose, link }) => {
+  const { id } = link
   const [confirmationPath, setConfirmationPath] = useState('')
-  const fullShortPath = `${namespace || window._trotto.defaultNamespace}/${shortpath}`
+  const fullShortPath = useFullShortPath(link)
+  const deleteLink = useDeleteLink()
 
   const handleConfirmationChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => setConfirmationPath(e.target.value),
     [setConfirmationPath],
   )
 
-  const deleteLink = useCallback(() => {
-    onDelete(id)
+  const handleDelete = useCallback(() => {
+    deleteLink(id)
     onClose()
-  }, [onDelete, onClose, id])
+  }, [deleteLink, onClose, id])
 
   return (
     <Modal.Base open={open} onClose={onClose}>
@@ -47,7 +48,7 @@ export const DeleteModal: FC<Props> = ({ open, onClose, onDelete, link }) => {
         </Button>
         <Button
           variant='contained'
-          onClick={deleteLink}
+          onClick={handleDelete}
           disabled={fullShortPath != confirmationPath}
         >
           Delete
