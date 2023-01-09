@@ -24,6 +24,9 @@ export const LinkList: FC<Props> = ({ links, user }) => {
       sx={{
         overflow: 'scroll',
         backgroundColor: '#f6f8fa',
+        '&::-webkit-scrollbar': {
+          display: 'none',
+        },
         ...(overflowed
           ? {
               boxShadow: 'inset 0px 4px 8px rgba(0, 0, 0, 0.2)',
