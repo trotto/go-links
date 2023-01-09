@@ -4,3 +4,11 @@ test_circleci.sh
 app.yml
 client_secrets.json
 .DS_Store
+
+#cypress ignore
+**/.nyc_output
+**/stats.html
+**/cypress/videos
+**/cypress/screenshots
+**/coverage
+**/reports

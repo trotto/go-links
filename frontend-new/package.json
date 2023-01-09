@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "test": "cypress run",
     "lint": "next lint"
   },
   "dependencies": {
@@ -28,5 +29,11 @@
     "react-dom": "18.2.0",
     "swr": "^2.0.0",
     "typescript": "4.9.4"
+  },
+  "devDependencies": {
+    "@cypress/code-coverage": "^3.10.0",
+    "@percy/cypress": "^3.1.2",
+    "cypress": "^12.3.0",
+    "turbo": "^1.6.3"
   }
 }
