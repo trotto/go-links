@@ -1,0 +1,82 @@
+name: Test frontend-new
+
+on:
+  push:
+    branches:
+      - "master"
+    paths:
+      - "frontend-new/**"
+  pull_request:
+    branches-ignore:
+      - "dependabot/**"
+    paths:
+      - "frontend-new/**"
+
+jobs:
+  nonce:
+    runs-on: ubuntu-latest
+    outputs:
+      result: ${{ steps.nonce.outputs.result }}
+    steps:
+      - id: nonce
+        run: echo "::set-output name=result::${{ github.run_id }}-$(date +%s)"
+
+  test:
+    if: github.actor != 'dependabot'
+    runs-on: ubuntu-latest
+    # Use default to set working-directory for whole job
+    defaults:
+      run:
+        working-directory: ./frontend-new
+    env:
+      NODE_ENV: test
+
+    steps:
+      ## SETUP
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js 16
+        uses: actions/setup-node@master
+        with:
+          node-version: 16
+
+      - name: Dependencies cache
+        uses: actions/cache@v3
+        id: yarn-cache
+        with:
+          path: |
+            **/node_modules
+            ~/.cache/Cypress
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Turbo Cache
+        id: turbo-cache
+        uses: actions/cache@v3
+        with:
+          path: ./frontend-new/node_modules/.cache/turbo
+          key: turbo-${{ github.job }}-${{ github.ref_name }}-${{ github.sha }}
+          restore-keys: |
+            turbo-${{ github.job }}-${{ github.ref_name }}-
+
+      - name: Install project dependencies
+        run: yarn --prefer-offline
+
+      - name: Run the tests
+        run: yarn turbo run build test lint
+        env:
+          SITE: ${{ secrets.SITE }}
+          CYPRESS_BASE_URL: ${{ steps.wait-for-netflify-preview.outputs.url }}
+          CYPRESS_PROJECT_ID: ${{ secrets.STARTER_CYPRESS_PROJECT_ID }}
+          CYPRESS_RECORD_KEY: ${{ secrets.STARTER_CYPRESS_RECORD_KEY }}
+          PERCY_TOKEN: ${{ secrets.STARTER_PERCY_TOKEN }}
+          PERCY_PARALLEL_NONCE: ${{ needs.nonce.outputs.result }}
+          PERCY_PARALLEL_TOTAL: 1
+
+      - name: Upload screenshots
+        uses: actions/upload-artifact@v3
+        with:
+          name: frontend-new/cypress-snapshots
+          path: ./frontend-new/cypress/snapshots

@@ -1,0 +1,18 @@
+{
+  "pipeline": {
+    "build": {
+      "outputs": [".next/**"]
+    },
+    "start": {
+      "dependsOn": ["build"],
+      "outputs": [".next/**"]
+    },
+    "test": {
+      "dependsOn": ["start"],
+      "outputs": []
+    },
+    "lint": {
+      "outputs": []
+    }
+  }
+}
