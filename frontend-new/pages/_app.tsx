@@ -13,7 +13,7 @@ export default function App({ Component, pageProps }: AppProps) {
     <ThemeProvider theme={theme}>
       <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
         <NavBar user={user} />
-        <Box sx={{ overflow: 'hidden' }}>
+        <Box sx={{ overflow: 'hidden', flexGrow: 1 }}>
           <Component {...pageProps} user={user} />
         </Box>
         <Footer />

@@ -21,7 +21,7 @@ export const NavBar: FC<Props> = ({ user }) => {
         flexShrink: 0,
         height: 48,
         backgroundColor: '#f6f8fa',
-        justifyContent: 'space-between',
+        justifyContent: user ? 'space-between' : 'center',
         alignItems: 'center',
         px: 3,
         [media.TABLET]: {
@@ -54,34 +54,36 @@ export const NavBar: FC<Props> = ({ user }) => {
           Trotto
         </Typography>
       </Link>
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 3,
-        }}
-      >
+      {!!user && (
         <Box
           sx={{
-            display: 'none',
+            display: 'flex',
+            alignItems: 'center',
             gap: 3,
-            [media.TABLET]: {
-              display: 'flex',
-              alignItems: 'center',
-            },
           }}
         >
-          <Link href='/documentation' typography='h2' sx={{ fontWeight: 400 }}>
-            Documentation
-          </Link>
-          {adminLinks?.map(({ url, text }) => (
-            <Link href={url} key={url}>
-              {text}
+          <Box
+            sx={{
+              display: 'none',
+              gap: 3,
+              [media.TABLET]: {
+                display: 'flex',
+                alignItems: 'center',
+              },
+            }}
+          >
+            <Link href='/documentation' typography='h2' sx={{ fontWeight: 400 }}>
+              Documentation
             </Link>
-          ))}
+            {adminLinks?.map(({ url, text }) => (
+              <Link href={url} key={url}>
+                {text}
+              </Link>
+            ))}
+          </Box>
+          <Box>{user && <UserMenu user={user} adminLinks={adminLinks} />}</Box>
         </Box>
-        <Box>{user && <UserMenu user={user} adminLinks={adminLinks} />}</Box>
-      </Box>
+      )}
     </Box>
   )
 }

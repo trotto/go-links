@@ -6,11 +6,12 @@ import { Link, LinkCreate, LinkUpdate, LinkCreateResponse } from 'app/types'
 import { fetcher } from 'app/utils/fetcher'
 
 export const useGetLinkList = () => {
-  const { data: links, mutate } = useSWR('/_/api/links', fetcher<Link[]>)
+  const { data: links, mutate, isLoading } = useSWR('/_/api/links', fetcher<Link[]>)
 
   return {
     links,
     mutate,
+    isLoading,
   }
 }
 

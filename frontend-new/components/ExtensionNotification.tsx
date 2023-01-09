@@ -1,6 +1,7 @@
-import { Box, Typography, Button } from '@mui/material'
+import { Box, Typography } from '@mui/material'
 import { FC } from 'react'
 
+import { LinkIconButton } from 'app/components/LinkIconButton'
 import { Chrome } from 'app/icons'
 import { media } from 'app/styles/theme'
 
@@ -26,52 +27,12 @@ export const ExtensionNotification: FC = () => {
         Installing the Chrome extension is the best and easiest way to use go links. Install the
         extension now:
       </Typography>
-      <Button
+      <LinkIconButton
         href='https://chrome.google.com/webstore/detail/trotto-go-links/nkeoojidblilnkcbbmfhaeebndapehjk'
-        target='_blank'
-        sx={{
-          backgroundColor: '#FB815B',
-          height: 48,
-          pr: 1,
-          [media.TABLET]: {
-            pr: 2,
-            height: 56,
-          },
-          [media.DESKTOP]: {
-            height: 64,
-          },
-          pl: 0.5,
-          typography: 'h2',
-          '&:hover': {
-            backgroundColor: '#C5443C;',
-          },
-        }}
+        icon={<Chrome />}
       >
-        <Box
-          sx={{
-            width: 40,
-            height: 40,
-            mr: 1,
-            [media.TABLET]: {
-              mr: 2,
-              width: 48,
-              height: 48,
-            },
-            [media.DESKTOP]: {
-              width: 56,
-              height: 56,
-            },
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: '#fff',
-            borderRadius: '32px',
-          }}
-        >
-          <Chrome />
-        </Box>
         Add the Chrome Extension
-      </Button>
+      </LinkIconButton>
     </Box>
   )
 }

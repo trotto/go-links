@@ -22,9 +22,10 @@ export default function Home({ user }: Props) {
     extensionInstalled,
     filterValue,
     setFilterValue,
-    links,
     displayLinks,
     onSave,
+    linksExists,
+    noLinks,
   } = useLinkList()
 
   return (
@@ -45,14 +46,14 @@ export default function Home({ user }: Props) {
         },
       }}
     >
-      {extensionInstalled && <ExtensionNotification />}
+      {!extensionInstalled && <ExtensionNotification />}
       <Box>
         <LinkCreationForm onCreate={onSave} />
         {notificationState && <ResponseContainer {...notificationState} />}
-        {(!links || !links.length) && <NoLinksNotification />}
+        {noLinks && <NoLinksNotification />}
         <Search value={filterValue} onChange={setFilterValue} />
       </Box>
-      {links && !!links.length && <LinkList links={displayLinks} user={user} />}
+      {linksExists && <LinkList links={displayLinks} user={user} />}
     </Box>
   )
 }

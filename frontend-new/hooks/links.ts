@@ -24,7 +24,7 @@ export const useLinkList = () => {
   const [notificationState, setNotificationState] = useState<NotificationState>()
   const [filterValue, setFilterValue] = useState('')
   const [extensionInstalled, setExtensionInstalled] = useState(false)
-  const { links, mutate } = useGetLinkList()
+  const { links, mutate, isLoading } = useGetLinkList()
 
   useEffect(() => {
     const crxInstalledTag = document.getElementsByName(
@@ -69,6 +69,9 @@ export const useLinkList = () => {
     return links?.filter((link) => link.shortpath.includes(filterValue)) || []
   }, [links, filterValue])
 
+  const linksExists = useMemo(() => !isLoading && links && !!links.length, [isLoading, links])
+  const noLinks = useMemo(() => !isLoading && !(links && links.length), [isLoading, links])
+
   return {
     notificationState,
     extensionInstalled,
@@ -77,6 +80,8 @@ export const useLinkList = () => {
     links,
     displayLinks,
     onSave,
+    linksExists,
+    noLinks,
   }
 }
 
