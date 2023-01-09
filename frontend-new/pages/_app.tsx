@@ -1,4 +1,4 @@
-import styled from '@emotion/styled'
+import { Box } from '@mui/material'
 import { ThemeProvider } from '@mui/material/styles'
 import type { AppProps } from 'next/app'
 import 'styles/globals.css'
@@ -7,25 +7,17 @@ import { Footer, NavBar } from 'app/components'
 import { useGetMe } from 'app/hooks'
 import { theme } from 'app/styles/theme'
 
-const Container = styled.div`
-  height: 100vh;
-`
-
-const Main = styled.div`
-  height: calc(100% - 64px - 64px);
-`
-
 export default function App({ Component, pageProps }: AppProps) {
   const { user } = useGetMe()
   return (
     <ThemeProvider theme={theme}>
-      <Container>
+      <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
         <NavBar user={user} />
-        <Main>
+        <Box sx={{ overflow: 'hidden' }}>
           <Component {...pageProps} user={user} />
-        </Main>
+        </Box>
         <Footer />
-      </Container>
+      </Box>
     </ThemeProvider>
   )
 }

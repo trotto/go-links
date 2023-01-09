@@ -30,30 +30,34 @@ export const DeleteModal: FC<Props> = ({ open, onClose, link }) => {
 
   return (
     <Modal.Base open={open} onClose={onClose}>
-      <Typography>
-        Deleting a go link will delete the go link for everyone in your organization. No one on your
-        team will be able to use <b>{fullShortPath}</b> until it&apos;s re-created.
-      </Typography>
-      <Typography>
-        To confirm deletion, type <b>{fullShortPath}</b> and press Delete.
-      </Typography>
-      <TextField
-        value={confirmationPath}
-        placeholder={fullShortPath}
-        onChange={handleConfirmationChange}
-      ></TextField>
-      <Modal.Buttons>
-        <Button variant='contained' onClick={onClose}>
-          Cancel
-        </Button>
-        <Button
-          variant='contained'
-          onClick={handleDelete}
-          disabled={fullShortPath != confirmationPath}
-        >
-          Delete
-        </Button>
-      </Modal.Buttons>
+      <form onSubmit={handleDelete}>
+        <Typography>
+          Deleting a go link will delete the go link for everyone in your organization. No one on
+          your team will be able to use <b>{fullShortPath}</b> until it&apos;s re-created.
+        </Typography>
+        <Typography>
+          To confirm deletion, type <b>{fullShortPath}</b> and press Delete.
+        </Typography>
+        <TextField
+          sx={{
+            '& input::placeholder': {
+              opacity: 0.38,
+            },
+          }}
+          value={confirmationPath}
+          placeholder={fullShortPath}
+          onChange={handleConfirmationChange}
+          autoFocus
+        ></TextField>
+        <Modal.Buttons>
+          <Button variant='contained' onClick={onClose}>
+            Cancel
+          </Button>
+          <Button variant='contained' type='submit' disabled={fullShortPath != confirmationPath}>
+            Delete
+          </Button>
+        </Modal.Buttons>
+      </form>
     </Modal.Base>
   )
 }

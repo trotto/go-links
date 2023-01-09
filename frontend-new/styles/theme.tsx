@@ -73,10 +73,8 @@ export const theme = createTheme({
     },
   },
   components: {
-    // Name of the component
     MuiTextField: {
       styleOverrides: {
-        // Name of the slot
         root: {
           display: 'flex',
           justifyContent: 'center',
@@ -111,7 +109,6 @@ export const theme = createTheme({
     },
     MuiIconButton: {
       styleOverrides: {
-        // Name of the slot
         root: {
           margin: '-8px',
         },
@@ -141,10 +138,9 @@ export const theme = createTheme({
     },
     MuiButton: {
       styleOverrides: {
-        // Name of the slot
         root: {
-          // Some CSS
           color: '#fff',
+          boxShadow: 'none',
           backgroundColor: '#646ae7',
           height: '32px',
           padding: '0 24px',
@@ -153,11 +149,20 @@ export const theme = createTheme({
           '&:disabled': {
             backgroundColor: '#bdbcf3',
             color: '#fff',
+            boxShadow: 'none',
           },
           '&:hover': {
-            backgroundColor: '#bdbcf3',
+            backgroundColor: '#343AAA',
             color: '#fff',
+            boxShadow: 'none',
           },
+        },
+      },
+    },
+    MuiMenuItem: {
+      styleOverrides: {
+        root: {
+          minHeight: 0,
         },
       },
     },

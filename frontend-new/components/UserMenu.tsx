@@ -128,6 +128,7 @@ export const UserMenu: FC<Props> = ({ user, adminLinks }) => {
       >
         <Box
           sx={{
+            py: 2,
             '& .MuiMenuItem-root': {
               px: 3,
               color: '#343aaa',
@@ -135,24 +136,21 @@ export const UserMenu: FC<Props> = ({ user, adminLinks }) => {
             },
           }}
         >
-          <MenuLink sx={{ pt: 3 }}>{user?.email}</MenuLink>
-          <MenuLink href='/_/auth/logout' sx={{ pb: 3 }}>
-            Sign Out
-          </MenuLink>
+          <MenuLink>{user?.email}</MenuLink>
+          <MenuLink href='/_/auth/logout'>Sign Out</MenuLink>
         </Box>
         <Box
           sx={{
             display: 'block',
+            pb: 2,
 
             [media.TABLET]: {
               display: 'none',
             },
           }}
         >
-          <Box sx={{ mx: 3, border: '1px solid #343AAA' }}></Box>
-          <MenuLink href='/documentation' sx={{ pt: 3 }}>
-            Documentation
-          </MenuLink>
+          <Box sx={{ mx: 3, border: '1px solid #343AAA', mb: 2 }}></Box>
+          <MenuLink href='/documentation'>Documentation</MenuLink>
 
           {adminLinks?.map(({ url, text }) => (
             <MenuLink href={url} key={url}>
@@ -164,9 +162,7 @@ export const UserMenu: FC<Props> = ({ user, adminLinks }) => {
           <MenuLink href='/pricing'>Pricing</MenuLink>
           <MenuLink href='/privacy'>Privacy</MenuLink>
           <MenuLink href='/terms'>Terms</MenuLink>
-          <MenuLink href='/contact' sx={{ pb: 3 }}>
-            Contact us
-          </MenuLink>
+          <MenuLink href='/contact'>Contact us</MenuLink>
         </Box>
       </Menu>
     </>

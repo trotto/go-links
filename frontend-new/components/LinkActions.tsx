@@ -1,7 +1,7 @@
 import { Box, IconButton, Menu, MenuItem, Tooltip } from '@mui/material'
 import { FC, MouseEvent, useCallback, useState } from 'react'
 
-import { ThreeDots } from 'app/icons'
+import { ThreeDots, Delete, Transfer } from 'app/icons'
 
 interface Props {
   onTransfer: () => void
@@ -59,8 +59,13 @@ export const LinkActions: FC<Props> = ({ onDelete, onTransfer, disabled }) => {
           'aria-labelledby': 'basic-button',
         }}
       >
-        <MenuItem onClick={handleTransfer}>Transfer</MenuItem>
-        <MenuItem onClick={handleDelete}>Delete</MenuItem>
+        <MenuItem onClick={handleTransfer} sx={{ gap: 1, color: '#343AAA', py: 1 }}>
+          <Transfer />
+          Transfer
+        </MenuItem>
+        <MenuItem onClick={handleDelete} sx={{ gap: 1, color: '#343AAA', py: 1 }}>
+          <Delete /> Delete
+        </MenuItem>
       </Menu>
     </Box>
   )

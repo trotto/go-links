@@ -18,6 +18,7 @@ export const NavBar: FC<Props> = ({ user }) => {
     <Box
       sx={{
         display: 'flex',
+        flexShrink: 0,
         height: 48,
         backgroundColor: '#f6f8fa',
         justifyContent: 'space-between',

@@ -13,12 +13,6 @@ import { EditableDestination } from './EditableDestination'
 import { InfoBox } from './InfoBox'
 import { LinkActions } from './LinkActions'
 
-const LabelRow = styled.div`
-  display: grid;
-  grid-template-columns: max-content auto 1fr max-content max-content auto;
-  align-items: center;
-`
-
 interface Props {
   link: Link
   canEdit?: boolean
@@ -41,7 +35,6 @@ export const LinkItem: FC<Props> = ({ link, canEdit = false }) => {
           flexDirection: 'column',
           gap: 1,
           borderBottom: '1px solid #f0f0f0',
-          backgroundColor: '#f6f8fa',
           px: 1,
           py: 2.5,
 
@@ -56,7 +49,13 @@ export const LinkItem: FC<Props> = ({ link, canEdit = false }) => {
           },
         }}
       >
-        <LabelRow>
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: 'max-content auto 1fr minmax(68px, max-content) max-content auto',
+            alignItems: 'center',
+          }}
+        >
           <InfoBox
             sx={{
               [media.TABLET]: {
@@ -80,7 +79,7 @@ export const LinkItem: FC<Props> = ({ link, canEdit = false }) => {
             <Copy />
           </IconButton>
           <div />
-          <InfoBox>{owner}</InfoBox>
+          <InfoBox sx={{ ml: 1 }}>{owner}</InfoBox>
           <InfoBox>
             <Box
               sx={{
@@ -121,7 +120,7 @@ export const LinkItem: FC<Props> = ({ link, canEdit = false }) => {
             onTransfer={openTransferModal}
             onDelete={openDeleteModal}
           />
-        </LabelRow>
+        </Box>
         <EditableDestination id={id} destinationUrl={destination_url} disabled={!canEdit} />
       </Box>
       {transferModal && (

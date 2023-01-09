@@ -32,17 +32,18 @@ export const ExtensionNotification: FC = () => {
         sx={{
           backgroundColor: '#FB815B',
           height: 48,
+          pr: 1,
           [media.TABLET]: {
+            pr: 2,
             height: 56,
           },
           [media.DESKTOP]: {
             height: 64,
           },
           pl: 0.5,
-          pr: 2,
           typography: 'h2',
           '&:hover': {
-            backgroundColor: '#FFBBC5',
+            backgroundColor: '#C5443C;',
           },
         }}
       >
@@ -50,7 +51,9 @@ export const ExtensionNotification: FC = () => {
           sx={{
             width: 40,
             height: 40,
+            mr: 1,
             [media.TABLET]: {
+              mr: 2,
               width: 48,
               height: 48,
             },
@@ -63,7 +66,6 @@ export const ExtensionNotification: FC = () => {
             justifyContent: 'center',
             backgroundColor: '#fff',
             borderRadius: '32px',
-            mr: 2,
           }}
         >
           <Chrome />

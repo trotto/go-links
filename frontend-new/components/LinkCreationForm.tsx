@@ -32,7 +32,7 @@ const Cicle = styled.div`
   width: 32px;
   height: 32px;
   background-color: #646ae7;
-  border-radius: 32px;
+  border-radius: 32px 0px 0px 32px;
   color: #fff;
 
   ${media.TABLET} {
@@ -150,19 +150,11 @@ export const LinkCreationForm: FC<Props> = ({ onCreate }) => {
         sx={{
           height: 32,
           gridArea: 'c',
-          backgroundColor: '#FFBBC5',
-          '&:disabled, &:hover': {
-            backgroundColor: '#FFBBC5',
-          },
+
           [media.TABLET]: {
             height: 48,
             position: 'absolute',
             right: 80,
-            backgroundColor: '#646ae7',
-
-            '&:disabled, &:hover': {
-              backgroundColor: '#bdbcf3',
-            },
           },
           [media.DESKTOP]: {
             height: 64,

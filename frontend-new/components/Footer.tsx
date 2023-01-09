@@ -8,7 +8,9 @@ export const Footer: FC = () => {
   return (
     <Box
       sx={{
+        boxShadow: '0px -1px 4px rgba(0, 0, 0, 0.1)',
         display: 'none',
+        flexShrink: 0,
         [media.TABLET]: {
           height: 64,
           display: 'flex',
