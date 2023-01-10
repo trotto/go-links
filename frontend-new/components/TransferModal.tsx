@@ -3,7 +3,7 @@ import Button from '@mui/material/Button'
 import TextField from '@mui/material/TextField'
 import { FC } from 'react'
 
-import { useGetTransferToken, useClipboard } from 'app/hooks'
+import { useGetTransferToken, useClipboard, useFullShortPath } from 'app/hooks'
 import { media } from 'app/styles/theme'
 import { Link } from 'app/types'
 
@@ -19,16 +19,14 @@ export const TransferModal: FC<Props> = ({ open, onClose, link }) => {
   const { namespace, shortpath, id } = link
   const transferToken = useGetTransferToken(id)
   const handleCopy = useClipboard(transferToken?.url || '')
+  const fullShotPath = useFullShortPath({ namespace, shortpath })
 
   return (
     <Modal.Base open={open} onClose={onClose}>
       <div>
         <Typography>
-          To transfer ownership of{' '}
-          <b>
-            {namespace}/{shortpath}
-          </b>
-          , copy this link and send it to the new owner
+          To transfer ownership of <b>{fullShotPath}</b>, copy this link and send it to the new
+          owner
         </Typography>
       </div>
       <TextField
