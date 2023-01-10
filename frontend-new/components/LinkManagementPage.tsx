@@ -1,4 +1,5 @@
 import { Box } from '@mui/material'
+import { FC } from 'react'
 
 import {
   ExtensionNotification,
@@ -16,7 +17,7 @@ interface Props {
   user?: User
 }
 
-export default function Home({ user }: Props) {
+export const LinkManagementPage: FC<Props> = ({ user }) => {
   const {
     notificationState,
     extensionInstalled,
