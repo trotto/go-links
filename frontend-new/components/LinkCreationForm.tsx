@@ -31,7 +31,7 @@ const Cicle = styled.div`
   align-items: center;
   width: 32px;
   height: 32px;
-  background-color: #646ae7;
+  background-color: #bdbcf3;
   border-radius: 32px 0px 0px 32px;
   color: #fff;
 

@@ -146,6 +146,7 @@ export const theme = createTheme({
           padding: '0 24px',
           borderRadius: '32px',
           textTransform: 'none',
+          fontWeight: 400,
           '&:disabled': {
             backgroundColor: '#bdbcf3',
             color: '#fff',

@@ -1,4 +1,4 @@
-import { Box, IconButton } from '@mui/material'
+import { Box, BoxProps, IconButton } from '@mui/material'
 import { FC } from 'react'
 
 import { DeleteModal } from 'app/components/DeleteModal'
@@ -15,9 +15,10 @@ import { LinkActions } from './LinkActions'
 interface Props {
   link: Link
   canEdit?: boolean
+  sx?: BoxProps['sx']
 }
 
-export const LinkItem: FC<Props> = ({ link, canEdit = false }) => {
+export const LinkItem: FC<Props> = ({ link, canEdit = false, sx }) => {
   const { id, destination_url, owner, visits_count } = link
   const fullShortPath = useFullShortPath(link)
 
@@ -46,6 +47,7 @@ export const LinkItem: FC<Props> = ({ link, canEdit = false }) => {
           [media.DESKTOP]: {
             py: 3.75,
           },
+          ...sx,
         }}
       >
         <Box

@@ -15,6 +15,7 @@ export const ExtensionNotification: FC = () => {
         [media.TABLET]: {
           mb: 5,
         },
+        borderRadius: '8px',
         color: '#fff',
         display: 'flex',
         flexDirection: 'column',

@@ -77,6 +77,10 @@ export const EditableDestination: FC<Props> = ({ id, destinationUrl, disabled })
               [media.TABLET]: {
                 height: 32,
               },
+
+              '&:hover': {
+                backgroundColor: '#5F5F5F',
+              },
             }}
           >
             Save

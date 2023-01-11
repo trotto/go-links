@@ -23,12 +23,9 @@ export const TransferModal: FC<Props> = ({ open, onClose, link }) => {
 
   return (
     <Modal.Base open={open} onClose={onClose}>
-      <div>
-        <Typography>
-          To transfer ownership of <b>{fullShotPath}</b>, copy this link and send it to the new
-          owner
-        </Typography>
-      </div>
+      <Typography>
+        To transfer ownership of <b>{fullShotPath}</b>, copy this link and send it to the new owner
+      </Typography>
       <TextField
         value={transferToken?.url}
         sx={{
