@@ -3,7 +3,6 @@ import { Box } from '@mui/material'
 import { ThemeProvider } from '@mui/material/styles'
 import type { AppProps } from 'next/app'
 
-// import 'styles/globals.css'
 import { Footer, NavBar } from 'app/components'
 import { Context } from 'app/context'
 import { useGetMe } from 'app/hooks'
