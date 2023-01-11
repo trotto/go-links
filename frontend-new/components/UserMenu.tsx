@@ -1,13 +1,13 @@
 import PersonIcon from '@mui/icons-material/Person'
 import { Avatar, Box, IconButton, Menu, MenuItem, MenuItemProps, Link } from '@mui/material'
-import { MouseEvent, useState, FC, PropsWithChildren } from 'react'
+import { MouseEvent, useState, FC, PropsWithChildren, useContext } from 'react'
 
+import { Context } from 'app/context'
 import { Vector, Burger } from 'app/icons'
 import { media } from 'app/styles/theme'
-import { User, AdminLink } from 'app/types'
+import { AdminLink } from 'app/types'
 
 interface Props {
-  user: User
   adminLinks?: AdminLink[]
 }
 
@@ -24,7 +24,8 @@ const MenuLink: FC<MLProps> = ({ sx, children, href }) => (
   </MenuItem>
 )
 
-export const UserMenu: FC<Props> = ({ user, adminLinks }) => {
+export const UserMenu: FC<Props> = ({ adminLinks }) => {
+  const { user } = useContext(Context)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
   const handleClick = (event: MouseEvent<HTMLElement>) => {

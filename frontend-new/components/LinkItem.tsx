@@ -1,8 +1,9 @@
 import { Box, BoxProps, IconButton } from '@mui/material'
-import { FC } from 'react'
+import { FC, useContext, useMemo } from 'react'
 
 import { DeleteModal } from 'app/components/DeleteModal'
 import { TransferModal } from 'app/components/TransferModal'
+import { Context } from 'app/context'
 import { useModal, useClipboard, useFullShortPath } from 'app/hooks'
 import { Copy, Eye } from 'app/icons'
 import { media } from 'app/styles/theme'
@@ -14,11 +15,11 @@ import { LinkActions } from './LinkActions'
 
 interface Props {
   link: Link
-  canEdit?: boolean
   sx?: BoxProps['sx']
 }
 
-export const LinkItem: FC<Props> = ({ link, canEdit = false, sx }) => {
+export const LinkItem: FC<Props> = ({ link, sx }) => {
+  const { user } = useContext(Context)
   const { id, destination_url, owner, visits_count } = link
   const fullShortPath = useFullShortPath(link)
 
@@ -26,6 +27,8 @@ export const LinkItem: FC<Props> = ({ link, canEdit = false, sx }) => {
   const [deleteModal, openDeleteModal, closeDeleteModal] = useModal()
 
   const handleCopy = useClipboard(fullShortPath)
+
+  const canEdit = useMemo(() => user && link.owner === user.email, [user, link])
 
   return (
     <>

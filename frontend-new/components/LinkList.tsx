@@ -1,16 +1,15 @@
 import { Box } from '@mui/material'
 import { FC, useRef, useEffect, useState } from 'react'
 
-import { Link, User } from 'app/types'
+import { Link } from 'app/types'
 
 import { LinkItem } from './LinkItem'
 
 interface Props {
   links?: Link[]
-  user?: User
 }
 
-export const LinkList: FC<Props> = ({ links, user }) => {
+export const LinkList: FC<Props> = ({ links }) => {
   const ref = useRef<HTMLDivElement>(null)
   const [overflowed, setOverflowed] = useState(false)
 
@@ -39,7 +38,7 @@ export const LinkList: FC<Props> = ({ links, user }) => {
       ref={ref}
     >
       {links?.map((link) => (
-        <LinkItem key={link.id} link={link} canEdit={user && link.owner === user.email} />
+        <LinkItem key={link.id} link={link} />
       ))}
     </Box>
   )

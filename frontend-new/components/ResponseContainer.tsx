@@ -52,7 +52,6 @@ export const ResponseContainer: FC<Props> = ({ link, message, type }) => {
       </Box>
       <LinkItem
         link={link}
-        canEdit
         sx={
           type === ResponseType.SUCCESS
             ? {

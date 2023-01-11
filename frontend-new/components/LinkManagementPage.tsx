@@ -11,13 +11,8 @@ import {
 } from 'app/components'
 import { useLinkList } from 'app/hooks/links'
 import { media } from 'app/styles/theme'
-import { User } from 'app/types'
 
-interface Props {
-  user?: User
-}
-
-export const LinkManagementPage: FC<Props> = ({ user }) => {
+export const LinkManagementPage: FC = () => {
   const {
     notificationState,
     extensionInstalled,
@@ -54,7 +49,7 @@ export const LinkManagementPage: FC<Props> = ({ user }) => {
         {noLinks && <NoLinksNotification />}
         <Search value={filterValue} onChange={setFilterValue} />
       </Box>
-      {linksExists && <LinkList links={displayLinks} user={user} />}
+      {linksExists && <LinkList links={displayLinks} />}
     </Box>
   )
 }

@@ -1,18 +1,16 @@
 import { Link, Box, Typography } from '@mui/material'
-import { FC } from 'react'
+import { FC, useContext } from 'react'
 
+import { Context } from 'app/context'
 import { useGetAdminLinks } from 'app/hooks'
 import { TrottoLogo } from 'app/icons'
 import { media } from 'app/styles/theme'
-import { User } from 'app/types'
 
 import { UserMenu } from './UserMenu'
 
-interface Props {
-  user?: User
-}
+export const NavBar: FC = () => {
+  const { user } = useContext(Context)
 
-export const NavBar: FC<Props> = ({ user }) => {
   const { adminLinks } = useGetAdminLinks()
   return (
     <Box
@@ -81,7 +79,7 @@ export const NavBar: FC<Props> = ({ user }) => {
               </Link>
             ))}
           </Box>
-          <Box>{user && <UserMenu user={user} adminLinks={adminLinks} />}</Box>
+          <Box>{user && <UserMenu adminLinks={adminLinks} />}</Box>
         </Box>
       )}
     </Box>
