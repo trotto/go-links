@@ -5,7 +5,7 @@ export interface User {
   id: number
   info_bar?: unknown
   keywords_validation_regex: string
-  notifications: unknown
+  notifications?: { install_extension?: 'dismissed' }
   org_edit_mode: string
   organization: string
   read_only_mode?: unknown

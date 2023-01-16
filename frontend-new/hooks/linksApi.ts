@@ -5,8 +5,10 @@ import useSWR from 'swr'
 import { Link, LinkCreate, LinkUpdate, LinkCreateResponse } from 'app/types'
 import { fetcher } from 'app/utils/fetcher'
 
+const LINKS_API = '/_/api/links'
+
 export const useGetLinkList = () => {
-  const { data: links, mutate, isLoading } = useSWR('/_/api/links', fetcher<Link[]>)
+  const { data: links, mutate, isLoading } = useSWR(LINKS_API, fetcher<Link[]>)
 
   return {
     links,
@@ -18,7 +20,7 @@ export const useGetLinkList = () => {
 export const useSaveLink = () => {
   return useCallback(
     (link: LinkCreate) =>
-      fetcher<LinkCreateResponse>('/_/api/links', {
+      fetcher<LinkCreateResponse>(LINKS_API, {
         method: 'POST',
         body: JSON.stringify(link),
       }),
@@ -31,10 +33,10 @@ export const useUpdateLink = () => {
 
   return useCallback(
     (id: number, link: LinkUpdate) =>
-      fetcher<Link>(`/_/api/links/${id}`, {
+      fetcher<Link>(`${LINKS_API}/${id}`, {
         method: 'PUT',
         body: JSON.stringify(link),
-      }).then(() => mutate('/_/api/links')),
+      }).then(() => mutate(LINKS_API)),
     [mutate],
   )
 }
@@ -44,9 +46,9 @@ export const useDeleteLink = () => {
 
   return useCallback(
     (id: number) =>
-      fetcher<void>(`/_/api/links/${id}`, {
+      fetcher<void>(`${LINKS_API}/${id}`, {
         method: 'DELETE',
-      }).then(() => mutate('/_/api/links')),
+      }).then(() => mutate(LINKS_API)),
     [mutate],
   )
 }
@@ -56,7 +58,7 @@ interface TransferToken {
 }
 
 export const useGetTransferToken = (id: number) => {
-  const { data: transferToken } = useSWR(`/_/api/links/${id}/transfer_link`, (url) =>
+  const { data: transferToken } = useSWR(`${LINKS_API}/${id}/transfer_link`, (url) =>
     fetcher<TransferToken>(url, { method: 'POST' }),
   )
 

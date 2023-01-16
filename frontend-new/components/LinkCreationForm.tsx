@@ -5,7 +5,7 @@ import { useRouter } from 'next/router'
 import { ChangeEvent, FormEvent, useCallback, useMemo, useState } from 'react'
 import { useEffect, useRef, FC } from 'react'
 
-import { useSaveLink } from 'app/hooks/linksApi'
+import { ScreenType, useSaveLink, useWindowWidth } from 'app/hooks'
 import { media } from 'app/styles/theme'
 import { LinkCreate, LinkCreateResponse } from 'app/types'
 
@@ -69,6 +69,7 @@ export const LinkCreationForm: FC<Props> = ({ onCreate }) => {
 
   const shortInpuRef = useRef<HTMLInputElement>(null)
   const destInpuRef = useRef<HTMLInputElement>(null)
+  const { isMobile } = useWindowWidth()
 
   const handleChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) =>
@@ -129,7 +130,7 @@ export const LinkCreationForm: FC<Props> = ({ onCreate }) => {
         </Cicle>
         <TextField
           id='destination'
-          placeholder='Paste the link to a resource here'
+          placeholder={isMobile ? 'Paste the link here' : 'Paste the link to a resource here'}
           value={formState.destination}
           onChange={handleChange}
           inputRef={destInpuRef}

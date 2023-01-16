@@ -1,23 +1,33 @@
-import { Box, Typography } from '@mui/material'
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded'
+import { Box, Typography, IconButton } from '@mui/material'
 import { FC } from 'react'
 
 import { LinkIconButton } from 'app/components/LinkIconButton'
+import { useDismissExtensionNotification, useGetMe } from 'app/hooks'
 import { Chrome } from 'app/icons'
 import { media } from 'app/styles/theme'
 
 export const ExtensionNotification: FC = () => {
+  const handleClose = useDismissExtensionNotification()
+  const { user, isLoading } = useGetMe()
+
+  if (isLoading || user?.notifications?.install_extension === 'dismissed') {
+    return <></>
+  }
   return (
     <Box
       sx={{
+        display: 'none',
+        position: 'relative',
         p: 5,
         backgroundColor: '#FFBEA2',
         mb: 3,
         [media.TABLET]: {
+          display: 'flex',
           mb: 5,
         },
         borderRadius: '8px',
         color: '#fff',
-        display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         gap: 2,
@@ -34,6 +44,17 @@ export const ExtensionNotification: FC = () => {
       >
         Add the Chrome Extension
       </LinkIconButton>
+      <IconButton
+        sx={{
+          position: 'absolute',
+          m: 2,
+          right: 0,
+          top: 0,
+        }}
+        onClick={handleClose}
+      >
+        <CloseRoundedIcon sx={{ fill: '#fff' }} />
+      </IconButton>
     </Box>
   )
 }
