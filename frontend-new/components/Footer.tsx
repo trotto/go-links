@@ -11,14 +11,15 @@ export const Footer: FC = () => {
         boxShadow: '0px -1px 4px rgba(0, 0, 0, 0.1)',
         display: 'none',
         flexShrink: 0,
-        [media.TABLET]: {
-          height: 64,
-          display: 'flex',
-        },
         backgroundColor: '#f6f8fa',
         alignItems: 'center',
         justifyContent: 'center',
         gap: 3,
+
+        [media.TABLET]: {
+          height: 64,
+          display: 'flex',
+        },
       }}
     >
       <Link href='https://github.com/trotto/go-links'>

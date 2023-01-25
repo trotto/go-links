@@ -20,6 +20,7 @@ export const InfoBox: FC<Props> = ({ children, sx, bold = false }) => (
       height: 24,
       mr: 1,
       cursor: 'default',
+
       [media.TABLET]: {
         px: 2,
         mr: 3,

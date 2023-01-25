@@ -79,7 +79,9 @@ export const NavBar: FC = () => {
               </Link>
             ))}
           </Box>
-          <Box>{user && <UserMenu adminLinks={adminLinks} />}</Box>
+          <Box>
+            <UserMenu adminLinks={adminLinks} />
+          </Box>
         </Box>
       )}
     </Box>

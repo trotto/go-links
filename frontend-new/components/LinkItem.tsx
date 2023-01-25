@@ -62,10 +62,10 @@ export const LinkItem: FC<Props> = ({ link, sx }) => {
         >
           <InfoBox
             sx={{
+              fontWeight: 700,
               [media.TABLET]: {
                 mr: 2,
               },
-              fontWeight: 700,
             }}
             bold
           >

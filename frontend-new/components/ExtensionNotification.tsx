@@ -21,16 +21,16 @@ export const ExtensionNotification: FC = () => {
         position: 'relative',
         p: 5,
         backgroundColor: '#FFBEA2',
-        mb: 3,
-        [media.TABLET]: {
-          display: 'flex',
-          mb: 5,
-        },
+        mb: 5,
         borderRadius: '8px',
         color: '#fff',
         flexDirection: 'column',
         alignItems: 'center',
         gap: 2,
+
+        [media.TABLET]: {
+          display: 'flex',
+        },
       }}
     >
       <Typography variant='h1'>Welcome! Let’s get started!</Typography>

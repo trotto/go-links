@@ -43,6 +43,11 @@ const Base: FC<Props> = ({ open, onClose, children }) => {
             left: 16,
             right: 16,
             p: 3,
+            bgcolor: 'background.paper',
+            boxShadow: 24,
+            color: '#343aaa',
+            background: '#F4F3FF',
+            borderRadius: '8px',
 
             [media.TABLET]: {
               left: '50%',
@@ -57,11 +62,6 @@ const Base: FC<Props> = ({ open, onClose, children }) => {
               py: 5,
               px: 8,
             },
-            bgcolor: 'background.paper',
-            boxShadow: 24,
-            color: '#343aaa',
-            background: '#F4F3FF',
-            borderRadius: '8px',
           }}
         >
           {children}

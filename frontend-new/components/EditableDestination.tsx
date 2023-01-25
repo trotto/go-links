@@ -6,11 +6,6 @@ import { useUpdateLink } from 'app/hooks'
 import { Edit } from 'app/icons'
 import { media } from 'app/styles/theme'
 
-const Form = styled.form`
-  display: flex;
-  align-items: center;
-`
-
 interface Props {
   id: number
   destinationUrl: string
@@ -38,71 +33,79 @@ export const EditableDestination: FC<Props> = ({ id, destinationUrl, disabled })
     [destination, id, handleEdit, updateLink],
   )
   return (
-    <Form onSubmit={handleSave}>
+    <form onSubmit={handleSave}>
       <Box
         sx={{
           display: 'flex',
-          flexDirection: 'row',
-          borderRadius: '32px',
-          background: '#fff',
-          mr: 1,
-          [media.TABLET]: {
-            mr: 3,
-          },
-          flexGrow: 1,
+          alignItems: 'center,',
         }}
       >
-        <TextField
-          id='destination'
-          placeholder='Keyword'
-          value={destination}
-          onChange={handleDestinationChange}
-          disabled={!editable}
+        <Box
           sx={{
-            height: 24,
+            display: 'flex',
+            flexDirection: 'row',
+            borderRadius: '32px',
+            background: '#fff',
+            mr: 1,
             flexGrow: 1,
+
             [media.TABLET]: {
-              height: 32,
+              mr: 3,
             },
           }}
-        />
-        {editable && (
-          <Button
-            className='button'
-            variant='contained'
-            type='submit'
+        >
+          <TextField
+            id='destination'
+            placeholder='Keyword'
+            value={destination}
+            onChange={handleDestinationChange}
+            disabled={!editable}
             sx={{
-              backgroundColor: '#000',
               height: 24,
+              flexGrow: 1,
               [media.TABLET]: {
                 height: 32,
               },
+            }}
+          />
+          {editable && (
+            <Button
+              className='button'
+              variant='contained'
+              type='submit'
+              sx={{
+                backgroundColor: '#000',
+                height: 24,
+                [media.TABLET]: {
+                  height: 32,
+                },
 
-              '&:hover': {
-                backgroundColor: '#5F5F5F',
-              },
-            }}
-          >
-            Save
-          </Button>
-        )}
+                '&:hover': {
+                  backgroundColor: '#5F5F5F',
+                },
+              }}
+            >
+              Save
+            </Button>
+          )}
+        </Box>
+        <Tooltip title={disabled && 'You don’t have permission to modify this go link'}>
+          <span>
+            <IconButton
+              onClick={handleEdit}
+              sx={{
+                opacity: editable ? 1 : 0.25,
+                '&:disabled': {
+                  opacity: 0.1,
+                },
+              }}
+              disabled={disabled}
+            >
+              <Edit />
+            </IconButton>
+          </span>
+        </Tooltip>
       </Box>
-      <Tooltip title={disabled && 'You don’t have permission to modify this go link'}>
-        <span>
-          <IconButton
-            onClick={handleEdit}
-            sx={{
-              opacity: editable ? 1 : 0.25,
-              '&:disabled': {
-                opacity: 0.1,
-              },
-            }}
-            disabled={disabled}
-          >
-            <Edit />
-          </IconButton>
-        </span>
-      </Tooltip>
-    </Form>
+    </form>
   )
 }

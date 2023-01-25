@@ -1,22 +1,13 @@
 import styled from '@emotion/styled'
 import EastRoundedIcon from '@mui/icons-material/EastRounded'
-import { Button, TextField, Typography } from '@mui/material'
+import { Button, TextField, Typography, Box, useMediaQuery } from '@mui/material'
 import { useRouter } from 'next/router'
 import { ChangeEvent, FormEvent, useCallback, useMemo, useState } from 'react'
 import { useEffect, useRef, FC } from 'react'
 
-import { ScreenType, useSaveLink, useWindowWidth } from 'app/hooks'
+import { useSaveLink } from 'app/hooks'
 import { media } from 'app/styles/theme'
 import { LinkCreate, LinkCreateResponse } from 'app/types'
-
-const StyledForm = styled.form`
-  display: grid;
-  grid-template-columns: 5fr 8fr;
-  gap: 8px;
-  grid-template-areas:
-    'a b'
-    'c c';
-`
 
 const Group = styled.div`
   display: flex;
@@ -25,7 +16,7 @@ const Group = styled.div`
   border-radius: 32px;
 `
 
-const Cicle = styled.div`
+const Circle = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
@@ -69,7 +60,7 @@ export const LinkCreationForm: FC<Props> = ({ onCreate }) => {
 
   const shortInpuRef = useRef<HTMLInputElement>(null)
   const destInpuRef = useRef<HTMLInputElement>(null)
-  const { isMobile } = useWindowWidth()
+  const isTablet = useMediaQuery(media.TABLET)
 
   const handleChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) =>
@@ -102,71 +93,83 @@ export const LinkCreationForm: FC<Props> = ({ onCreate }) => {
   }, [sp, destInpuRef, shortInpuRef])
 
   return (
-    <StyledForm onSubmit={handleSubmit}>
-      <Group>
-        <Cicle>
-          <Typography variant='h3'>{formState.namespace}/</Typography>
-        </Cicle>
-        <TextField
-          id='shortpath'
-          placeholder='Keyword'
-          value={formState.shortpath}
-          onChange={handleChange}
-          inputRef={shortInpuRef}
-          sx={{
-            flexGrow: 1,
-            backgroundColor: '#f4f3ff',
-            '& input, & input::placeholder': {
-              color: '#343AAA',
-              opacity: 1,
-            },
-          }}
-        />
-      </Group>
-
-      <Group className='group'>
-        <Cicle>
-          <EastRoundedIcon sx={{ fill: '#fff' }} />
-        </Cicle>
-        <TextField
-          id='destination'
-          placeholder={isMobile ? 'Paste the link here' : 'Paste the link to a resource here'}
-          value={formState.destination}
-          onChange={handleChange}
-          inputRef={destInpuRef}
-          sx={{
-            flexGrow: 1,
-            backgroundColor: '#f4f3ff',
-            '& input, & input::placeholder': {
-              color: '#343AAA',
-              opacity: 1,
-            },
-          }}
-        />
-      </Group>
-      <Button
-        variant='contained'
-        type='submit'
-        disabled={isDisabled}
+    <form onSubmit={handleSubmit}>
+      <Box
         sx={{
-          height: 32,
-          gridArea: 'c',
-
-          [media.TABLET]: {
-            height: 48,
-            position: 'absolute',
-            right: 80,
-          },
-          [media.DESKTOP]: {
-            height: 64,
-            right: 200,
-          },
-          px: 4,
-          typography: 'h3',
+          display: 'grid',
+          gridTemplateColumns: '5fr 8fr',
+          gap: '8px',
+          gridTemplateAreas: `
+            'a b'
+            'c c'
+          `,
         }}
       >
-        Create
-      </Button>
-    </StyledForm>
+        <Group>
+          <Circle>
+            <Typography variant='h3'>{formState.namespace}/</Typography>
+          </Circle>
+          <TextField
+            id='shortpath'
+            placeholder='Keyword'
+            value={formState.shortpath}
+            onChange={handleChange}
+            inputRef={shortInpuRef}
+            sx={{
+              flexGrow: 1,
+              backgroundColor: '#f4f3ff',
+              '& input, & input::placeholder': {
+                color: '#343AAA',
+                opacity: 1,
+              },
+            }}
+          />
+        </Group>
+
+        <Group>
+          <Circle>
+            <EastRoundedIcon sx={{ fill: '#fff' }} />
+          </Circle>
+          <TextField
+            id='destination'
+            placeholder={isTablet ? 'Paste the link to a resource here' : 'Paste the link here'}
+            value={formState.destination}
+            onChange={handleChange}
+            inputRef={destInpuRef}
+            sx={{
+              flexGrow: 1,
+              backgroundColor: '#f4f3ff',
+              '& input, & input::placeholder': {
+                color: '#343AAA',
+                opacity: 1,
+              },
+            }}
+          />
+        </Group>
+        <Button
+          variant='contained'
+          type='submit'
+          disabled={isDisabled}
+          sx={{
+            height: 32,
+            gridArea: 'c',
+            px: 4,
+            typography: 'h3',
+
+            [media.TABLET]: {
+              height: 48,
+              position: 'absolute',
+              right: 80,
+            },
+            [media.DESKTOP]: {
+              height: 64,
+              right: 200,
+            },
+          }}
+        >
+          Create
+        </Button>
+      </Box>
+    </form>
   )
 }

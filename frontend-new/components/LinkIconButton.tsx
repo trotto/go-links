@@ -18,17 +18,19 @@ export const LinkIconButton: FC<Props> = ({ href = '#', icon, children, sx }) =>
         backgroundColor: '#FB815B',
         height: 48,
         pr: 1,
+        pl: 0.5,
+        typography: 'h2',
+
+        '&:hover': {
+          backgroundColor: '#C5443C;',
+        },
+
         [media.TABLET]: {
           pr: 2,
           height: 56,
         },
         [media.DESKTOP]: {
           height: 64,
-        },
-        pl: 0.5,
-        typography: 'h2',
-        '&:hover': {
-          backgroundColor: '#C5443C;',
         },
         ...sx,
       }}
