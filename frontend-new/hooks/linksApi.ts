@@ -1,3 +1,4 @@
+import { useSnackbar } from 'notistack'
 import { useCallback } from 'react'
 import { useSWRConfig } from 'swr'
 import useSWR from 'swr'
@@ -18,13 +19,16 @@ export const useGetLinkList = () => {
 }
 
 export const useSaveLink = () => {
+  const { enqueueSnackbar } = useSnackbar()
   return useCallback(
     (link: LinkCreate) =>
       fetcher<LinkCreateResponse>(LINKS_API, {
         method: 'POST',
         body: JSON.stringify(link),
+      }).catch(() => {
+        enqueueSnackbar('Something went wrong. Link was not created.', { variant: 'error' })
       }),
-    [],
+    [enqueueSnackbar],
   )
 }
 
@@ -43,13 +47,18 @@ export const useUpdateLink = () => {
 
 export const useDeleteLink = () => {
   const { mutate } = useSWRConfig()
+  const { enqueueSnackbar } = useSnackbar()
 
   return useCallback(
     (id: number) =>
       fetcher<void>(`${LINKS_API}/${id}`, {
         method: 'DELETE',
-      }).then(() => mutate(LINKS_API)),
-    [mutate],
+      })
+        .then(() => mutate(LINKS_API))
+        .catch(() => {
+          enqueueSnackbar('Something went wrong. Link was not deleted.', { variant: 'error' })
+        }),
+    [mutate, enqueueSnackbar],
   )
 }
 

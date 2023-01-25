@@ -72,7 +72,9 @@ export const LinkCreationForm: FC<Props> = ({ onCreate }) => {
     async (e: FormEvent<HTMLFormElement>) => {
       e.preventDefault()
       const createdResponse = await saveLink(formState)
-      onCreate({ link: formState, createdResponse })
+      if (createdResponse) {
+        onCreate({ link: formState, createdResponse })
+      }
     },
     [formState, onCreate, saveLink],
   )
