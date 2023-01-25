@@ -3,6 +3,7 @@ import { FC } from 'react'
 
 import { GithubLogo } from 'app/icons'
 import { media } from 'app/styles/theme'
+import { navigationLinks } from 'app/config'
 
 export const Footer: FC = () => {
   return (
@@ -22,13 +23,13 @@ export const Footer: FC = () => {
         },
       }}
     >
-      <Link href='https://github.com/trotto/go-links'>
+      <Link href={navigationLinks.GITHUB}>
         <GithubLogo />
       </Link>
-      <Link href='/pricing'>Pricing</Link>
-      <Link href='/privacy'>Privacy</Link>
-      <Link href='/terms'>Terms</Link>
-      <Link href='/contact'>Contact us</Link>
+      <Link href={navigationLinks.PRICING}>Pricing</Link>
+      <Link href={navigationLinks.PRIVACY}>Privacy</Link>
+      <Link href={navigationLinks.TERMS}>Terms</Link>
+      <Link href={navigationLinks.CONTACT}>Contact us</Link>
     </Box>
   )
 }

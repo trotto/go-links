@@ -2,6 +2,7 @@ import PersonIcon from '@mui/icons-material/Person'
 import { Avatar, Box, IconButton, Menu, MenuItem, MenuItemProps, Link } from '@mui/material'
 import { MouseEvent, useState, FC, PropsWithChildren, useContext } from 'react'
 
+import { navigationLinks } from 'app/config'
 import { Context } from 'app/context'
 import { Vector, Burger } from 'app/icons'
 import { media } from 'app/styles/theme'
@@ -138,7 +139,7 @@ export const UserMenu: FC<Props> = ({ adminLinks }) => {
           }}
         >
           <MenuLink>{user?.email}</MenuLink>
-          <MenuLink href='/_/auth/logout'>Sign Out</MenuLink>
+          <MenuLink href={navigationLinks.LOGOUT}>Sign Out</MenuLink>
         </Box>
         <Box
           sx={{
@@ -151,7 +152,7 @@ export const UserMenu: FC<Props> = ({ adminLinks }) => {
           }}
         >
           <Box sx={{ mx: 3, border: '1px solid #343AAA', mb: 2 }}></Box>
-          <MenuLink href='/documentation'>Documentation</MenuLink>
+          <MenuLink href={navigationLinks.DOCUMENTATION}>Documentation</MenuLink>
 
           {adminLinks?.map(({ url, text }) => (
             <MenuLink href={url} key={url}>
@@ -159,11 +160,11 @@ export const UserMenu: FC<Props> = ({ adminLinks }) => {
             </MenuLink>
           ))}
 
-          <MenuLink href='https://github.com/trotto/go-links'>Github</MenuLink>
-          <MenuLink href='/pricing'>Pricing</MenuLink>
-          <MenuLink href='/privacy'>Privacy</MenuLink>
-          <MenuLink href='/terms'>Terms</MenuLink>
-          <MenuLink href='/contact'>Contact us</MenuLink>
+          <MenuLink href={navigationLinks.GITHUB}>Github</MenuLink>
+          <MenuLink href={navigationLinks.PRICING}>Pricing</MenuLink>
+          <MenuLink href={navigationLinks.PRIVACY}>Privacy</MenuLink>
+          <MenuLink href={navigationLinks.TERMS}>Terms</MenuLink>
+          <MenuLink href={navigationLinks.CONTACT}>Contact us</MenuLink>
         </Box>
       </Menu>
     </>

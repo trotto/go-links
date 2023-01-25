@@ -7,6 +7,7 @@ import { TrottoLogo } from 'app/icons'
 import { media } from 'app/styles/theme'
 
 import { UserMenu } from './UserMenu'
+import { navigationLinks } from 'app/config'
 
 export const NavBar: FC = () => {
   const { user } = useContext(Context)
@@ -29,7 +30,7 @@ export const NavBar: FC = () => {
       }}
     >
       <Link
-        href='/'
+        href={navigationLinks.ROOT}
         sx={{
           display: 'flex',
           alignItems: 'center',
@@ -70,7 +71,7 @@ export const NavBar: FC = () => {
               },
             }}
           >
-            <Link href='/documentation' typography='h2' sx={{ fontWeight: 400 }}>
+            <Link href={navigationLinks.DOCUMENTATION} typography='h2' sx={{ fontWeight: 400 }}>
               Documentation
             </Link>
             {adminLinks?.map(({ url, text }) => (

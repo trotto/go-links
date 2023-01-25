@@ -4,6 +4,7 @@ import { FC } from 'react'
 import { LinkIconButton } from 'app/components'
 import { Google, Microsoft } from 'app/icons'
 import { media } from 'app/styles/theme'
+import { navigationLinks } from 'app/config'
 
 export const LoginPage: FC = () => {
   return (
@@ -46,7 +47,7 @@ export const LoginPage: FC = () => {
         <Typography variant='h1'>Sign In</Typography>
         <LinkIconButton
           icon={<Google />}
-          href='/_/auth/login/google?redirect_to=https%3A%2F%2Ftrot.to'
+          href={navigationLinks.LOGIN_GOOGLE}
           sx={{
             backgroundColor: '#646AE7',
             '&:hover': {
@@ -58,7 +59,7 @@ export const LoginPage: FC = () => {
         </LinkIconButton>
         <LinkIconButton
           icon={<Microsoft />}
-          href='https://id.trot.to/sso/o365?redirect_to=https%3A%2F%2Ftrot.to'
+          href={navigationLinks.LOGIN_MICROSOFT}
           sx={{
             backgroundColor: '#646AE7',
             '&:hover': {
@@ -70,11 +71,11 @@ export const LoginPage: FC = () => {
         </LinkIconButton>
         <Typography>
           By signing in, you agree to Trotto&apos;s{' '}
-          <Link href='/terms' sx={{ fontWeight: 600, color: '#343AAA' }}>
+          <Link href={navigationLinks.TERMS} sx={{ fontWeight: 600, color: '#343AAA' }}>
             Terms of Service
           </Link>{' '}
           and{' '}
-          <Link href='/privacy' sx={{ fontWeight: 600, color: '#343AAA' }}>
+          <Link href={navigationLinks.PRIVACY} sx={{ fontWeight: 600, color: '#343AAA' }}>
             Privacy Policy.
           </Link>
         </Typography>
