@@ -65,6 +65,7 @@ export const LinkItem: FC<Props> = ({ link, sx }) => {
               fontWeight: 700,
               [media.TABLET]: {
                 mr: 2,
+                height: 32,
               },
             }}
             bold

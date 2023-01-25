@@ -29,11 +29,8 @@ export const InfoBox: FC<Props> = ({ children, sx, bold = false }) => (
       ...sx,
     }}
   >
-    <Typography
-      variant={bold ? 'h3' : 'body1'}
-      sx={{ textOverflow: 'ellipsis', overflow: 'hidden' }}
-    >
+    <Box sx={{ textOverflow: 'ellipsis', overflow: 'hidden', typography: bold ? 'h3' : 'body1' }}>
       {children}
-    </Typography>
+    </Box>
   </Box>
 )
