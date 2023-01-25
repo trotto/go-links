@@ -18,7 +18,7 @@ interface Props {
 export const TransferModal: FC<Props> = ({ open, onClose, link }) => {
   const { namespace, shortpath, id } = link
   const transferToken = useGetTransferToken(id)
-  const handleCopy = useClipboard(transferToken?.url || '')
+  const handleCopy = useClipboard(transferToken?.url)
   const fullShotPath = useFullShortPath({ namespace, shortpath })
 
   return (
@@ -39,7 +39,7 @@ export const TransferModal: FC<Props> = ({ open, onClose, link }) => {
         disabled
       ></TextField>
       <Modal.Buttons>
-        <Button variant='contained' onClick={handleCopy}>
+        <Button variant='contained' onClick={handleCopy} disabled={!transferToken}>
           Copy
         </Button>
         <Button variant='contained' onClick={onClose}>
