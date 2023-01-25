@@ -19,7 +19,7 @@ export const EditableDestination: FC<Props> = ({ id, destinationUrl, disabled })
 
   const handleDestinationChange = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => setDestination(e.target.value),
-    [setDestination],
+    [],
   )
   const handleEdit = useCallback(() => setEditable((editable) => !editable), [setEditable])
 
