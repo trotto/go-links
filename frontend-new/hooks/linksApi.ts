@@ -34,14 +34,19 @@ export const useSaveLink = () => {
 
 export const useUpdateLink = () => {
   const { mutate } = useSWRConfig()
+  const { enqueueSnackbar } = useSnackbar()
 
   return useCallback(
     (id: number, link: LinkUpdate) =>
       fetcher<Link>(`${LINKS_API}/${id}`, {
         method: 'PUT',
         body: JSON.stringify(link),
-      }).then(() => mutate(LINKS_API)),
-    [mutate],
+      })
+        .then(() => mutate(LINKS_API))
+        .catch(() => {
+          enqueueSnackbar('Something went wrong. Link was not updated.', { variant: 'error' })
+        }),
+    [mutate, enqueueSnackbar],
   )
 }
 
