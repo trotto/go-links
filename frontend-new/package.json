@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "NODE_ENV=production next build && next export && cp -r ./out/ ../server/src/static/templates/_next_static",
     "start": "next start",
     "test": "cypress run",
     "lint": "next lint"

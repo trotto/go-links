@@ -2,6 +2,7 @@ import { Global } from '@emotion/react'
 import { Box } from '@mui/material'
 import { ThemeProvider } from '@mui/material/styles'
 import type { AppProps } from 'next/app'
+import Head from 'next/head'
 import { SnackbarProvider } from 'notistack'
 
 import { Footer, NavBar } from 'app/components'
@@ -15,6 +16,9 @@ export default function App({ Component, pageProps }: AppProps) {
     <Context.Provider value={{ user }}>
       <ThemeProvider theme={theme}>
         <SnackbarProvider>
+          <Head>
+            <link rel='shortcut icon' href='/_next_static/favicon.ico' />
+          </Head>
           <Global styles={globalStyles} />
           <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
             <NavBar />

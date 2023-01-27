@@ -166,7 +166,7 @@ def home():
   namespaces = config.get_organization_config(current_user.organization).get('namespaces', [])
   admin_links = get_org_settings(current_user.organization).get('admin_links', [])
 
-  return render_template('index.html',
+  return render_template('_next_static/index.html',
                          csrf_token=generate_csrf(),
                          default_namespace=config.get_default_namespace(current_user.organization),
                          namespaces=json.dumps(namespaces),
@@ -209,3 +209,12 @@ def layout_config():
 @app.route('/_images/<path:path>')
 def static_files(path):
   return send_from_directory('static/%s' % (request.path.split('/')[1]), path)
+
+@app.route('/_next_static/<path:path>')
+def static_next_files(path: str):
+  """Handle next.js assets separately"""
+
+  sub_dir = '/'.join(path.split('/')[:-1])
+  file = path.split('/')[-1]
+
+  return send_from_directory(f'static/templates/_next_static/{sub_dir}', file)
