@@ -1,37 +1,61 @@
 import ldclient
-from ldclient import Context
+from ldclient import Context, LDClient
 from ldclient.config import Config
+from werkzeug.local import LocalProxy
 
 from shared_helpers import config
 
 class Provider:
-  default_feature_flag: dict[str, bool] = {
+  """
+  Launch Darkly client wrapper
+
+  Provides Launch Darkly feature flags if key was provided in app.yml
+  Fallbacks to default_feature_flags if Launch Darkly was not set up
+  """
+  default_feature_flags: dict[str, bool] = {
     'new_frontend': False,
   }
-  launchdarky_initialized = False
+  launchdarkly_initialized = False
+  sdk_key: str
+  ldclient: LDClient
 
-  def __init__(self, config_: dict):
+  def __init__(self, config_: dict) -> None:
+    """
+    Creates LDClient instanse
 
-    self.sdk_key = config_.get('launchdarky', {}).get('key', None)
-  
+    Args:
+      config_: config parsed from app.yml
+    """
+    self.sdk_key = config_.get('launchdarkly', {}).get('key', None)
+
     if not self.sdk_key:
       return
 
-    self.ldclient = ldclient.set_config(Config(self.sdk_key))
+    ldclient.set_config(Config(self.sdk_key))
+    self.ldclient = ldclient.get()
 
-    if not ldclient.get().is_initialized():
-      return
+    if self.ldclient.is_initialized():
+      self.launchdarkly_initialized = True
 
-    self.launchdarky_initialized = True
-    self.context = Context.builder('example-user-key').set('email', 'test@gmail.com').set('organisation', 'test_org').build()
+  def get(self, feature_flag_key: str, user: LocalProxy = None) -> bool:
+    """
+    Gets value of specified feature flag
 
+    Args:
+      feature_flag_key: Key of feature flag
+      user: Flask's user obj
 
-  def get(self, feature_flag_key: str) -> bool:
-    if self.launchdarky_initialized:
-      return ldclient.get().variation(feature_flag_key, self.context, False)
+    Returns:
+      bool value of the feature flag
+    """
+    if not self.launchdarkly_initialized:
+      return self.default_feature_flags.get(feature_flag_key, False)
+
+    context = Context.builder(user.email) \
+      .set('email', user.email) \
+      .set('organization', user.organization) \
+      .build() if user else Context.builder('any-user-key').build()
+    return ldclient.get().variation(feature_flag_key, context, False)
       
-    return self.default_feature_flag.get(feature_flag_key, False)
 
-# config_ = config.get_config()
-config_ = {}
-provider = Provider(config_)
+provider = Provider(config.get_config())

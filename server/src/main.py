@@ -166,7 +166,7 @@ def home():
   namespaces = config.get_organization_config(current_user.organization).get('namespaces', [])
   admin_links = get_org_settings(current_user.organization).get('admin_links', [])
 
-  new_frontend = feature_flags.provider.get('new_frontend')
+  new_frontend = feature_flags.provider.get('new_frontend', current_user)
   template = '_next_static/index.html' if new_frontend else 'index.html'
 
   return render_template(template,
