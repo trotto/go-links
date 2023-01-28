@@ -10,7 +10,7 @@ from oauth2client.client import FlowExchangeError
 from modules.base import authentication, errors
 from modules.organizations.utils import get_organization_id_for_email
 from shared_helpers.config import get_config, get_path_to_oauth_secrets, get_config_by_key_path
-from shared_helpers import utils
+from shared_helpers import utils, feature_flags
 
 
 LOGIN_METHODS = [{'label': 'Sign in with Google',
@@ -57,8 +57,7 @@ def login():
     error_message = errors.get_error_message_from_code(request.args.get('e', None))
 
   if error_message or len(LOGIN_METHODS) > 1:
-    # TODO: get it as launchdarky_flag
-    new_frontend = True
+    new_frontend = feature_flags.provider.get('new_frontend')
     template = '_next_static/login.html' if new_frontend else 'auth/login_selector.html'
     return render_template(template,
                            login_methods=LOGIN_METHODS,

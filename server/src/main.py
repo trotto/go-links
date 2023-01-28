@@ -13,7 +13,7 @@ from flask_wtf.csrf import generate_csrf
 import sentry_sdk
 from werkzeug.routing import BaseConverter
 
-from shared_helpers import config
+from shared_helpers import config, feature_flags
 
 
 sentry_config = config.get_config_by_key_path(['monitoring', 'sentry'])
@@ -166,8 +166,7 @@ def home():
   namespaces = config.get_organization_config(current_user.organization).get('namespaces', [])
   admin_links = get_org_settings(current_user.organization).get('admin_links', [])
 
-  # TODO: get it as launchdarky_flag
-  new_frontend = True
+  new_frontend = feature_flags.provider.get('new_frontend')
   template = '_next_static/index.html' if new_frontend else 'index.html'
 
   return render_template(template,
