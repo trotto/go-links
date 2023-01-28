@@ -166,7 +166,11 @@ def home():
   namespaces = config.get_organization_config(current_user.organization).get('namespaces', [])
   admin_links = get_org_settings(current_user.organization).get('admin_links', [])
 
-  return render_template('_next_static/index.html',
+  # TODO: get it as launchdarky_flag
+  new_frontend = True
+  template = '_next_static/index.html' if new_frontend else 'index.html'
+
+  return render_template(template,
                          csrf_token=generate_csrf(),
                          default_namespace=config.get_default_namespace(current_user.organization),
                          namespaces=json.dumps(namespaces),

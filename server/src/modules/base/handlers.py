@@ -57,7 +57,10 @@ def login():
     error_message = errors.get_error_message_from_code(request.args.get('e', None))
 
   if error_message or len(LOGIN_METHODS) > 1:
-    return render_template('auth/login_selector.html',
+    # TODO: get it as launchdarky_flag
+    new_frontend = True
+    template = '_next_static/login.html' if new_frontend else 'auth/login_selector.html'
+    return render_template(template,
                            login_methods=LOGIN_METHODS,
                            redirect_to=urlencode({'redirect_to': redirect_to}),
                            error_message=error_message)
