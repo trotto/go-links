@@ -1,3 +1,3 @@
-import MainPage from './main'
+import { LinkManagementPage } from 'app/components'
 
-export default MainPage
+export default LinkManagementPage

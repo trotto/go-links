@@ -1,5 +1,9 @@
 {
   "compilerOptions": {
+    "baseUrl": "..",
+    "paths": {
+      "app/*": ["frontend-new/*"]
+    },
     "target": "es5",
     "lib": [
       "dom",

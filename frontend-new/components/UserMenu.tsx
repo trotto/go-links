@@ -1,29 +1,32 @@
-import { FC } from 'react'
-import styled from '@emotion/styled'
-import { useState, MouseEvent } from 'react'
-import Box from '@mui/material/Box'
-import Avatar from '@mui/material/Avatar'
-import Menu from '@mui/material/Menu'
-import MenuItem from '@mui/material/MenuItem'
-import IconButton from '@mui/material/IconButton'
-import useSWR from 'swr'
-import { fetcher } from '../utils/fetcher'
 import PersonIcon from '@mui/icons-material/Person'
-import { Vector } from '../icons'
-import { User } from '../types'
+import { Avatar, Box, IconButton, Menu, MenuItem, MenuItemProps, Link } from '@mui/material'
+import { MouseEvent, useState, FC, PropsWithChildren, useContext } from 'react'
 
-const StyledDiv = styled.div`
-  .vector {
-    padding-left: 8px;
-    cursor: pointer;
-  }
+import { navigationLinks } from 'app/config'
+import { Context } from 'app/context'
+import { Vector, Burger } from 'app/icons'
+import { media } from 'app/styles/theme'
+import { AdminLink } from 'app/types'
 
-  a {
-  }
-`
+interface Props {
+  adminLinks?: AdminLink[]
+}
 
-export const UserMenu: FC = () => {
-  const { data: user } = useSWR(`/_/api/users/me`, fetcher<User>)
+interface MLProps extends PropsWithChildren {
+  sx?: MenuItemProps['sx']
+  href?: string
+}
+
+const MenuLink: FC<MLProps> = ({ sx, children, href }) => (
+  <MenuItem sx={{ pt: 1, pb: 1, px: 3, typography: 'body1', ...sx }}>
+    <Link variant='body1' href={href} sx={{ color: '#343aaa' }}>
+      {children}
+    </Link>
+  </MenuItem>
+)
+
+export const UserMenu: FC<Props> = ({ adminLinks }) => {
+  const { user } = useContext(Context)
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
   const handleClick = (event: MouseEvent<HTMLElement>) => {
@@ -34,14 +37,23 @@ export const UserMenu: FC = () => {
   }
 
   return (
-    <StyledDiv>
+    <>
       <Box
-        sx={{ display: 'flex', alignItems: 'center', textAlign: 'center', cursor: 'pointer' }}
+        sx={{
+          display: 'none',
+          [media.TABLET]: {
+            display: 'flex',
+            alignItems: 'center',
+            textAlign: 'center',
+            cursor: 'pointer',
+          },
+        }}
         onClick={handleClick}
       >
         <IconButton
           sx={{
             padding: 0,
+            margin: 0,
           }}
           size='small'
           aria-controls={open ? 'account-menu' : undefined}
@@ -49,12 +61,25 @@ export const UserMenu: FC = () => {
           aria-expanded={open ? 'true' : undefined}
         >
           <Avatar sx={{ width: 40, height: 40, backgroundColor: '#F27E8F' }}>
-            <PersonIcon />
+            <PersonIcon sx={{ fill: '#fff' }} />
           </Avatar>
         </IconButton>
-        <div className='vector'>
+        <Box sx={{ pl: 1, cursor: 'pointer' }}>
           <Vector />
-        </div>
+        </Box>
+      </Box>
+      <Box
+        sx={{
+          display: 'flex',
+          [media.TABLET]: {
+            display: 'none',
+          },
+        }}
+        onClick={handleClick}
+      >
+        <IconButton>
+          <Burger />
+        </IconButton>
       </Box>
       <Menu
         anchorEl={anchorEl}
@@ -67,8 +92,13 @@ export const UserMenu: FC = () => {
           sx: {
             overflow: 'visible',
             filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
-            mt: 1.5,
+            mt: 2,
             ml: '14px',
+            right: 0,
+            [media.TABLET]: {
+              mt: 1.5,
+              right: 'auto',
+            },
             '& .MuiList-root': {
               padding: 0,
             },
@@ -82,8 +112,11 @@ export const UserMenu: FC = () => {
               content: '""',
               display: 'block',
               position: 'absolute',
+              right: 26,
               top: 0,
-              right: 14,
+              [media.TABLET]: {
+                right: 14,
+              },
               width: 10,
               height: 10,
               bgcolor: 'background.paper',
@@ -95,15 +128,45 @@ export const UserMenu: FC = () => {
         transformOrigin={{ horizontal: 'right', vertical: 'top' }}
         anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
       >
-        <MenuItem sx={{ fontSize: '14px', color: '#343aaa', padding: '24px 24px 8px' }}>
-          {user?.email}
-        </MenuItem>
-        <MenuItem sx={{ fontSize: '14px', color: '#343aaa', padding: '8px 24px 24px' }}>
-          <a href='/_/auth/logout' style={{ color: '#343aaa' }}>
-            Sign Out
-          </a>
-        </MenuItem>
+        <Box
+          sx={{
+            py: 2,
+            '& .MuiMenuItem-root': {
+              px: 3,
+              color: '#343aaa',
+              typography: 'body1',
+            },
+          }}
+        >
+          <MenuLink>{user?.email}</MenuLink>
+          <MenuLink href={navigationLinks.LOGOUT}>Sign Out</MenuLink>
+        </Box>
+        <Box
+          sx={{
+            display: 'block',
+            pb: 2,
+
+            [media.TABLET]: {
+              display: 'none',
+            },
+          }}
+        >
+          <Box sx={{ mx: 3, border: '1px solid #343AAA', mb: 2 }}></Box>
+          <MenuLink href={navigationLinks.DOCUMENTATION}>Documentation</MenuLink>
+
+          {adminLinks?.map(({ url, text }) => (
+            <MenuLink href={url} key={url}>
+              {text}
+            </MenuLink>
+          ))}
+
+          <MenuLink href={navigationLinks.GITHUB}>Github</MenuLink>
+          <MenuLink href={navigationLinks.PRICING}>Pricing</MenuLink>
+          <MenuLink href={navigationLinks.PRIVACY}>Privacy</MenuLink>
+          <MenuLink href={navigationLinks.TERMS}>Terms</MenuLink>
+          <MenuLink href={navigationLinks.CONTACT}>Contact us</MenuLink>
+        </Box>
       </Menu>
-    </StyledDiv>
+    </>
   )
 }

@@ -1,34 +1,30 @@
+import { Global } from '@emotion/react'
+import { Box } from '@mui/material'
+import { ThemeProvider } from '@mui/material/styles'
 import type { AppProps } from 'next/app'
-import '../styles/globals.css'
-import styled from '@emotion/styled'
-import { NavBar, Footer } from '../components'
-import { ThemeProvider, createTheme } from '@mui/material/styles'
+import { SnackbarProvider } from 'notistack'
 
-const StyledDiv = styled.div`
-  height: 100vh;
-
-  .main {
-    height: calc(100% - 64px - 64px);
-  }
-`
-
-const theme = createTheme({
-  typography: {
-    fontFamily: ['Poppins', 'Sans-serif'].join(', '),
-  },
-})
+import { Footer, NavBar } from 'app/components'
+import { Context } from 'app/context'
+import { useGetMe } from 'app/hooks'
+import { theme, globalStyles } from 'app/styles'
 
 export default function App({ Component, pageProps }: AppProps) {
+  const { user } = useGetMe()
   return (
-    <ThemeProvider theme={theme}>
-      <StyledDiv>
-        <NavBar />
-        <script src='/_scripts/config.js'></script>
-        <div className='main'>
-          <Component {...pageProps} />
-        </div>
-        <Footer />
-      </StyledDiv>
-    </ThemeProvider>
+    <Context.Provider value={{ user }}>
+      <ThemeProvider theme={theme}>
+        <SnackbarProvider>
+          <Global styles={globalStyles} />
+          <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
+            <NavBar />
+            <Box sx={{ overflow: 'hidden', flexGrow: 1 }}>
+              <Component {...pageProps} />
+            </Box>
+            <Footer />
+          </Box>
+        </SnackbarProvider>
+      </ThemeProvider>
+    </Context.Provider>
   )
 }
