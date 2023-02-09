@@ -32,9 +32,8 @@ class Provider:
       return
 
     ldclient.set_config(Config(self.sdk_key))
-    self.ldclient = ldclient.get()
 
-    if self.ldclient.is_initialized():
+    if ldclient.get().is_initialized():
       self.launchdarkly_initialized = True
 
   def get(self, feature_flag_key: str, user: LocalProxy = None) -> bool:

@@ -56,8 +56,7 @@ def login():
   if request.args.get('e', None):
     error_message = errors.get_error_message_from_code(request.args.get('e', None))
 
-  # if error_message or len(LOGIN_METHODS) > 1:
-  if True:
+  if error_message or len(LOGIN_METHODS) > 1:
     new_frontend = feature_flags.provider.get('new_frontend')
     template = '_next_static/login.html' if new_frontend else 'auth/login_selector.html'
     return render_template(template,
