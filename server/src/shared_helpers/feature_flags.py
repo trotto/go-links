@@ -51,7 +51,7 @@ class Provider:
 
     has_organization = user and user.organization and '@' not in user.organization
 
-    context = Context.builder(user.id) \
+    context = Context.builder(str(user.id)) \
       .set('organization', user.organization) \
       .build() if has_organization else Context.builder('any-user-key').build()
     return ldclient.get().variation(feature_flag_key, context, False)
