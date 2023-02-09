@@ -16,16 +16,13 @@ class LDCMock:
     return self._flag_value
 
 
-
-
-
 class TestFunctions(unittest.TestCase):
 
   @patch('ldclient.Context.builder')
   @patch('ldclient.get', return_value=LDCMock())
   def test_get_via_ld(self, ldc_mock, context_builder):
     class UserMock:
-      email = 'email@e.mail'
+      id = 'user_id'
       organization = 'organization'
 
     config = {
@@ -39,7 +36,7 @@ class TestFunctions(unittest.TestCase):
 
     user = UserMock()
     self.assertEqual(provider.get('new_frontend', user), True)
-    context_builder.assert_called_once_with(user.email)
+    context_builder.assert_called_once_with(user.id)
 
   @patch('ldclient.Context.builder')
   @patch('ldclient.get', return_value=LDCMock(flag_value=False))
@@ -83,3 +80,22 @@ class TestFunctions(unittest.TestCase):
     """will fallback to default values"""
     self.assertEqual(provider.get('new_frontend'), False)
     self.assertEqual(provider.get('unknown_flag'), False)
+
+
+  @patch('ldclient.Context.builder')
+  @patch('ldclient.get', return_value=LDCMock())
+  def test_get_global_ld_flag_for_personal_user(self, ldc_mock, context_builder):
+    class UserMock:
+      id = 'user_id'
+      organization = 'personal@ema.il'
+
+    config = {
+      'launchdarkly': {
+        'key': 'key'
+      }
+    }
+    provider = feature_flags.Provider(config)
+
+    user = UserMock()
+    self.assertEqual(provider.get('new_frontend', user), True)
+    context_builder.assert_called_once_with('any-user-key')

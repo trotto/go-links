@@ -17,7 +17,6 @@ class Provider:
   }
   launchdarkly_initialized = False
   sdk_key: str
-  ldclient: LDClient
 
   def __init__(self, config_: dict) -> None:
     """
@@ -50,10 +49,12 @@ class Provider:
     if not self.launchdarkly_initialized:
       return self.default_feature_flags.get(feature_flag_key, False)
 
-    context = Context.builder(user.email) \
-      .set('email', user.email) \
+    is_personal = user and user.organization and '@' not in user.organization
+
+    context = Context.builder(user.id) \
+      .set('id', user.id) \
       .set('organization', user.organization) \
-      .build() if user else Context.builder('any-user-key').build()
+      .build() if is_personal else Context.builder('any-user-key').build()
     return ldclient.get().variation(feature_flag_key, context, False)
       
 
