@@ -961,6 +961,23 @@ class TestHandlersPublicAPI(TrottoTestCase):
         )
         self.assertEqual(401, response.status_int)
 
+  def test_invalid_token(self, _):
+    """Tests all API endpoint with non-admin user"""
+    for url, method in (
+      (BASE_URL, 'POST'),
+      (f'{BASE_URL}/1', 'PUT'),
+      (f'{BASE_URL}/1', 'DELETE'),
+      (BASE_URL, 'GET'),
+    ):
+      with self.subTest():
+        response = self.testapp.request(
+          url,
+          method=method,
+          headers={'Authorization': 'invalid'},
+          expect_errors=True,
+        )
+        self.assertEqual(401, response.status_int)
+
   def test_create_link(self, _):
     response = self.testapp.post_json(
       BASE_URL,
