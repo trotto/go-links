@@ -206,7 +206,7 @@ class TestIntegration(TrottoTestCase):
   start_live_app = True
   live_app_config = {'sessions_secret': 'a_sessions_secret',
                      'signing_secret': 'so_secret',
-                     'postgres': {'url': 'postgresql://admin:testing@/testing_trotto_core'}}
+                     'postgres': {'url': 'postgresql://bombamini@localhost:5432/testing_trotto_core'}}
 
   @patch('shared_helpers.config.get_config', return_value={'services': {'my_service': {'signing_secret': 'so_secret',
                                                                                        'base_url': LIVE_APP_HOST}}})

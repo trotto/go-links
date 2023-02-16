@@ -9,7 +9,7 @@ psql -f "$dir_path/db_create.sql" postgres
 cd "$dir_path/../../src"
 
 export FLASK_SECRET=testing
-export DATABASE_URL="postgresql://admin:testing@/testing_trotto_core"
+export DATABASE_URL="postgresql://bombamini@localhost:5432/testing_trotto_core"
 export FLASK_APP=main.py
 
 flask db upgrade
