@@ -28,6 +28,10 @@ class ApiToken(db.Model, api_tokens.ApiToken):
     return ApiToken.query.get(int(id))
 
   @staticmethod
+  def get_by_key(key: str) -> Optional[ApiToken]:
+    return ApiToken.query.filter(ApiToken.key == key).one_or_none()
+
+  @staticmethod
   def get_list() -> list[ApiToken]:
     return ApiToken.query.all()
 

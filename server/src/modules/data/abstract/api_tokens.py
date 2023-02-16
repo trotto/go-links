@@ -26,5 +26,9 @@ class ApiToken(BaseModel):
     raise NotImplementedError
 
   @staticmethod
+  def get_by_key(id: str) -> Optional[ApiToken]:
+    raise NotImplementedError
+
+  @staticmethod
   def get_list() -> list[ApiToken]:
     raise NotImplementedError

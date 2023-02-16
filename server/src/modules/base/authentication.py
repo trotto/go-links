@@ -12,6 +12,7 @@ from modules.organizations.utils import get_organization_id_for_email
 from modules.users.helpers import get_or_create_user, get_user_by_id
 from shared_helpers import config
 from shared_helpers.services import validate_internal_request, get as service_get, InvalidInternalToken
+from shared_helpers.public_api import get_api_key
 
 try:
   from commercial.auth import handle_unsupported_signin
@@ -39,6 +40,9 @@ def check_csrf():
   b) the origin is explicitly allowed
   c) the request includes a valid internal token
   """
+  if get_api_key():
+    return
+
   if request.method in ['OPTIONS', 'GET']:
     return
 
