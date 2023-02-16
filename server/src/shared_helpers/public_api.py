@@ -18,7 +18,7 @@ def _get_token_by_key(key: str) -> ApiTokenABC:
 
 
 def get_api_key():
-  return request.headers.get('X-api-token')
+  return request.headers.get('Authorization')
 
 
 def public_auth() -> Optional[ApiTokenABC]:
@@ -26,17 +26,19 @@ def public_auth() -> Optional[ApiTokenABC]:
 
 
 def login_or_api_token_required(func: Callable) -> Callable:
+    """
+    Checks user authorization
+    The same code as @login_required but with public API check
+    """
     @wraps(func)
     def decorated_view(*args, **kwargs):
         # Checking for api key
         if key := get_api_key():
           g.api_token = _get_token_by_key(key)
-          return func(*args, **kwargs)
 
-        # flask_login code for @login_required
         if request.method in {'OPTIONS'} or current_app.config.get('LOGIN_DISABLED'):
             pass
-        elif not current_user.is_authenticated:
+        elif not current_user.is_authenticated and not public_auth():
             return current_app.login_manager.unauthorized()
 
         # flask 1.x compatibility

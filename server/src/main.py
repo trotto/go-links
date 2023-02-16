@@ -73,23 +73,6 @@ def init_app_without_routes(disable_csrf=False):
   if not disable_csrf:
     app.before_request(authentication.check_csrf)
 
-  # @login_manager.request_loader
-  # def load_request(request):
-  #   from modules.users.helpers import get_user_by_id
-  #   print('here')
-
-  #   if request.headers.get('X-api-token'):
-  #     print('here')
-  #     return get_user_by_id(3886)
-  #   user_id = session.get('_user_id')
-
-  #   if not user_id:
-  #     return
-
-  #   sentry_sdk.set_user({'id': user_id})
-
-  #   return get_user_by_id(user_id)
-
 
   @login_manager.user_loader
   def load_user(user_id):
