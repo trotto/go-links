@@ -68,6 +68,8 @@ def init_app_without_routes(disable_csrf=False):
   login_manager = LoginManager()
   login_manager.init_app(app)
 
+  app.before_request(authentication.check_api_token)
+
   global csrf_protect
 
   if not disable_csrf:

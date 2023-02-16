@@ -10,6 +10,7 @@ from flask_login import current_user, login_required
 from jellyfish import levenshtein_distance
 import jwt
 
+from modules.base.authentication import login_or_api_token_required, public_auth
 from modules.links import helpers
 from modules.data import get_models
 from modules.organizations.helpers import get_org_edit_mode
@@ -18,7 +19,6 @@ from shared_helpers import config
 from shared_helpers.config import get_default_namespace
 from shared_helpers.encoding import convert_entity_to_dict
 from shared_helpers.events import enqueue_event
-from shared_helpers.public_api import login_or_api_token_required, public_auth
 
 
 routes = Blueprint('links', __name__,

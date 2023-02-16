@@ -1,18 +1,24 @@
 import datetime
+from functools import wraps
 import logging
 import os
+from typing import Callable, Optional
 from urllib.parse import quote
 
-from flask import abort, request, redirect, session
+from flask import abort, current_app, request, redirect, session, g
 from flask_login import login_user, current_user
 from flask_wtf.csrf import validate_csrf
 from wtforms.validators import ValidationError
 
+from modules.api_tokens.helpers import get_token_by_key
 from modules.organizations.utils import get_organization_id_for_email
 from modules.users.helpers import get_or_create_user, get_user_by_id
 from shared_helpers import config
 from shared_helpers.services import validate_internal_request, get as service_get, InvalidInternalToken
-from shared_helpers.public_api import get_api_key
+
+
+
+from modules.data.abstract.api_tokens import ApiToken as ApiTokenABC
 
 try:
   from commercial.auth import handle_unsupported_signin
@@ -33,6 +39,36 @@ def login_test_user():
     session['last_signin'] = datetime.datetime.utcnow()
 
 
+def check_api_token():
+  if key := request.headers.get('Authorization'):
+    g.api_token = get_token_by_key(key)
+
+
+def public_auth() -> Optional[ApiTokenABC]:
+  return getattr(g, 'api_token', None)
+
+
+def login_or_api_token_required(func: Callable) -> Callable:
+    """
+    Checks user authorization
+    The same code as @login_required but with public API check
+    """
+    @wraps(func)
+    def decorated_view(*args, **kwargs):
+        if request.method in {'OPTIONS'} or current_app.config.get('LOGIN_DISABLED'):
+            pass
+        elif not current_user.is_authenticated and not public_auth():
+            return current_app.login_manager.unauthorized()
+
+        # flask 1.x compatibility
+        # current_app.ensure_sync is only available in Flask >= 2.0
+        if callable(getattr(current_app, 'ensure_sync', None)):
+            return current_app.ensure_sync(func)(*args, **kwargs)
+        return func(*args, **kwargs)
+
+    return decorated_view
+
+
 def check_csrf():
   """Verifies one of the following is true, or aborts with 400.
 
@@ -40,7 +76,7 @@ def check_csrf():
   b) the origin is explicitly allowed
   c) the request includes a valid internal token
   """
-  if get_api_key():
+  if public_auth():
     return
 
   if request.method in ['OPTIONS', 'GET']:
