@@ -10,6 +10,14 @@ from shared_helpers import config
 
 secret = config.get_config().get('encryption_key') or config.get_config().get('sessions_secret')
 
+class EncryptedCachedType(EncryptedType):
+  """
+  EncryptedType but with cache.
+
+  SQLAlchemy warns about performance implication without it
+  """
+  cache_ok = True
+
 class ApiToken(db.Model, api_tokens.ApiToken):
 
   # Base fields
@@ -18,7 +26,7 @@ class ApiToken(db.Model, api_tokens.ApiToken):
   modified = db.Column(db.DateTime, default=datetime.datetime.utcnow)
 
   # API token specific
-  key = db.Column(EncryptedType(db.String(86), secret), nullable=False) 
+  key = db.Column(EncryptedCachedType(db.String(86), secret), nullable=False) 
   organization = db.Column(db.String(80), nullable=False)
   revoked = db.Column(db.DateTime, nullable=True)
 
