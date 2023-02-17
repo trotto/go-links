@@ -11,14 +11,11 @@ from flask_wtf.csrf import validate_csrf
 from wtforms.validators import ValidationError
 
 from modules.api_tokens.helpers import get_token_by_key
+from modules.data.abstract.api_tokens import ApiToken as ApiTokenABC
 from modules.organizations.utils import get_organization_id_for_email
 from modules.users.helpers import get_or_create_user, get_user_by_id
 from shared_helpers import config
 from shared_helpers.services import validate_internal_request, get as service_get, InvalidInternalToken
-
-
-
-from modules.data.abstract.api_tokens import ApiToken as ApiTokenABC
 
 try:
   from commercial.auth import handle_unsupported_signin

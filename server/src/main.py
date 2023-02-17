@@ -6,7 +6,7 @@ import traceback
 import jwt
 
 import jinja2
-from flask import Flask, session, send_from_directory, redirect, render_template, request, jsonify, session
+from flask import Flask, send_from_directory, redirect, render_template, request, jsonify, session
 from flask_login import LoginManager, current_user, logout_user
 from flask_sqlalchemy import SQLAlchemy as _BaseSQLAlchemy
 from flask_migrate import Migrate, upgrade as upgrade_db
@@ -74,7 +74,6 @@ def init_app_without_routes(disable_csrf=False):
 
   if not disable_csrf:
     app.before_request(authentication.check_csrf)
-
 
   @login_manager.user_loader
   def load_user(user_id):
