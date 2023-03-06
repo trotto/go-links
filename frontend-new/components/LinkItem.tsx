@@ -4,7 +4,7 @@ import { FC, useContext, useMemo } from 'react'
 import { DeleteModal } from 'app/components/DeleteModal'
 import { TransferModal } from 'app/components/TransferModal'
 import { Context } from 'app/context'
-import { useModal, useClipboard, useFullShortPath } from 'app/hooks'
+import { useModal, useClipboard, useFullShortPath, useTrotto } from 'app/hooks'
 import { Copy, Eye } from 'app/icons'
 import { media } from 'app/styles/theme'
 import { Link } from 'app/types'
@@ -22,6 +22,7 @@ export const LinkItem: FC<Props> = ({ link, sx }) => {
   const { user } = useContext(Context)
   const { id, destination_url, owner, visits_count } = link
   const fullShortPath = useFullShortPath(link)
+  const { isManaged } = useTrotto()
 
   const [transferModal, openTransferModal, closeTransferModal] = useModal()
   const [deleteModal, openDeleteModal, closeDeleteModal] = useModal()
@@ -85,41 +86,43 @@ export const LinkItem: FC<Props> = ({ link, sx }) => {
           </IconButton>
           <div />
           <InfoBox sx={{ ml: 1 }}>{owner}</InfoBox>
-          <InfoBox>
-            <Box
-              sx={{
-                display: 'flex',
-                alignItems: 'center',
-                [media.TABLET]: {
-                  display: 'inline',
-                },
-              }}
-            >
-              {visits_count}{' '}
+          {isManaged && (
+            <InfoBox>
               <Box
                 sx={{
-                  display: 'none',
+                  display: 'flex',
+                  alignItems: 'center',
                   [media.TABLET]: {
                     display: 'inline',
                   },
                 }}
               >
-                {' '}
-                visits
-              </Box>
-              <Box
-                sx={{
-                  display: 'flex',
-                  ml: 1,
-                  [media.TABLET]: {
+                {visits_count}{' '}
+                <Box
+                  sx={{
                     display: 'none',
-                  },
-                }}
-              >
-                <Eye />
+                    [media.TABLET]: {
+                      display: 'inline',
+                    },
+                  }}
+                >
+                  {' '}
+                  visits
+                </Box>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    ml: 1,
+                    [media.TABLET]: {
+                      display: 'none',
+                    },
+                  }}
+                >
+                  <Eye />
+                </Box>
               </Box>
-            </Box>
-          </InfoBox>
+            </InfoBox>
+          )}
           <LinkActions
             disabled={!canEdit}
             onTransfer={openTransferModal}

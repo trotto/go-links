@@ -1,5 +1,5 @@
 import { Box } from '@mui/material'
-import { FC, useRef, useEffect, useState } from 'react'
+import { FC, useRef, useEffect, useState, useMemo } from 'react'
 
 import { Link } from 'app/types'
 
@@ -16,6 +16,11 @@ export const LinkList: FC<Props> = ({ links }) => {
   useEffect(
     () => setOverflowed((ref.current?.clientHeight || 0) - (ref.current?.scrollHeight || 0) < 0),
     [ref, links],
+  )
+
+  const displayLinks = useMemo(
+    () => links?.sort((a, b) => b.visits_count - a.visits_count),
+    [links],
   )
 
   return (
@@ -37,7 +42,7 @@ export const LinkList: FC<Props> = ({ links }) => {
       }}
       ref={ref}
     >
-      {links?.map((link) => (
+      {displayLinks?.map((link) => (
         <LinkItem key={link.id} link={link} />
       ))}
     </Box>
