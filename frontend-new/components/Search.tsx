@@ -44,18 +44,24 @@ export const Search: FC<Props> = ({ value, onChange }) => {
         sx={{
           backgroundColor: '#F6F8FA',
           p: 0,
-          width: 210,
+          minWidth: 210,
+          flexGrow: value ? 1 : 0,
+          px: 2,
+          '& input': {
+            textAlign: 'center',
+          },
+
           [media.TABLET]: {
             p: 0,
-            width: 250,
+            minWidth: 250,
           },
           [media.DESKTOP]: {
             p: 0,
-            width: 290,
+            minWidth: 290,
           },
         }}
         InputProps={{
-          startAdornment: (
+          startAdornment: !value && (
             <InputAdornment position='start'>
               <SearchIcon />
             </InputAdornment>
