@@ -29,7 +29,7 @@ export const LinkItem: FC<Props> = ({ link, sx }) => {
 
   const handleCopy = useClipboard(fullShortPath)
 
-  const canEdit = useMemo(() => user && link.owner === user.email, [user, link])
+  const canEdit = useMemo(() => user && (user.admin || link.owner === user.email), [user, link])
 
   return (
     <>
