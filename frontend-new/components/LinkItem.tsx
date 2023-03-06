@@ -1,4 +1,4 @@
-import { Box, BoxProps, IconButton } from '@mui/material'
+import { Box, BoxProps, IconButton, Link } from '@mui/material'
 import { FC, useContext, useMemo } from 'react'
 
 import { DeleteModal } from 'app/components/DeleteModal'
@@ -7,27 +7,30 @@ import { Context } from 'app/context'
 import { useModal, useClipboard, useFullShortPath, useTrotto } from 'app/hooks'
 import { Copy, Eye } from 'app/icons'
 import { media } from 'app/styles/theme'
-import { Link } from 'app/types'
+import { Link as ILink } from 'app/types'
 
 import { EditableDestination } from './EditableDestination'
 import { InfoBox } from './InfoBox'
 import { LinkActions } from './LinkActions'
 
 interface Props {
-  link: Link
+  link: ILink
   sx?: BoxProps['sx']
 }
 
 export const LinkItem: FC<Props> = ({ link, sx }) => {
   const { user } = useContext(Context)
-  const { id, destination_url, owner, visits_count } = link
+  const { id, destination_url, owner, visits_count, shortpath } = link
   const fullShortPath = useFullShortPath(link)
-  const { isManaged } = useTrotto()
+  const { isManaged, baseUrl, isExtensionInstalled } = useTrotto()
 
   const [transferModal, openTransferModal, closeTransferModal] = useModal()
   const [deleteModal, openDeleteModal, closeDeleteModal] = useModal()
 
-  const handleCopy = useClipboard(fullShortPath)
+  const navigationPath = useMemo(() => `${baseUrl}/${shortpath}`, [shortpath, baseUrl])
+
+  // NOTE: still copy fullShortpath to avoid 'http://' before 'go'
+  const handleCopy = useClipboard(isExtensionInstalled ? fullShortPath : navigationPath)
 
   const canEdit = useMemo(() => user && (user.admin || link.owner === user.email), [user, link])
 
@@ -71,7 +74,9 @@ export const LinkItem: FC<Props> = ({ link, sx }) => {
             }}
             bold
           >
-            {fullShortPath}
+            <Link href={navigationPath} target='_blank' rel='noreferrer'>
+              {fullShortPath}
+            </Link>
           </InfoBox>
           <IconButton
             onClick={handleCopy}

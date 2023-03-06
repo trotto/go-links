@@ -16,24 +16,10 @@ interface NotificationState {
   message: string
 }
 
-interface TrottoMetaElement extends HTMLElement {
-  content: string
-}
-
 export const useLinkList = () => {
   const [notificationState, setNotificationState] = useState<NotificationState>()
   const [filterValue, setFilterValue] = useState('')
-  const [extensionInstalled, setExtensionInstalled] = useState(false)
   const { links, mutate, isLoading } = useGetLinkList()
-
-  useEffect(() => {
-    const crxInstalledTag = document.getElementsByName(
-      'trotto:crxInstalled',
-    ) as NodeListOf<TrottoMetaElement>
-    const extensionIsInstalled = crxInstalledTag.length > 0 && crxInstalledTag[0].content === 'true'
-
-    setExtensionInstalled(extensionIsInstalled)
-  }, [])
 
   const onSave = useCallback(
     async ({
@@ -74,7 +60,6 @@ export const useLinkList = () => {
 
   return {
     notificationState,
-    extensionInstalled,
     filterValue,
     setFilterValue,
     links,

@@ -9,13 +9,12 @@ import {
   ResponseContainer,
   Search,
 } from 'app/components'
-import { useLinkList } from 'app/hooks/links'
+import { useLinkList, useTrotto } from 'app/hooks'
 import { media } from 'app/styles/theme'
 
 export const LinkManagementPage: FC = () => {
   const {
     notificationState,
-    extensionInstalled,
     filterValue,
     setFilterValue,
     displayLinks,
@@ -23,6 +22,8 @@ export const LinkManagementPage: FC = () => {
     linksExists,
     noLinks,
   } = useLinkList()
+
+  const { isExtensionInstalled } = useTrotto()
 
   return (
     <Box
@@ -42,7 +43,7 @@ export const LinkManagementPage: FC = () => {
         },
       }}
     >
-      {!extensionInstalled && <ExtensionNotification />}
+      {!isExtensionInstalled && <ExtensionNotification />}
       <Box>
         <LinkCreationForm onCreate={onSave} />
         {notificationState && <ResponseContainer {...notificationState} />}
