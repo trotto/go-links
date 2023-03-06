@@ -138,7 +138,9 @@ export const UserMenu: FC<Props> = ({ adminLinks }) => {
             },
           }}
         >
-          <MenuLink>{user?.email}</MenuLink>
+          <Box sx={{ pt: 1, pb: 1, px: 3, typography: 'body1', color: '#343aaa' }}>
+            {user?.email}
+          </Box>
           <MenuLink href={navigationLinks.LOGOUT}>Sign Out</MenuLink>
         </Box>
         <Box
