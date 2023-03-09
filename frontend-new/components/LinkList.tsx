@@ -47,7 +47,7 @@ export const LinkList: FC<Props> = ({ links }) => {
   const rows = useVirtual({
     size: displayLinks?.length || 0,
     parentRef: ref,
-    overscan: 5,
+    overscan: 10,
     estimateSize: useCallback(() => rowHeight, [rowHeight]),
   })
 
