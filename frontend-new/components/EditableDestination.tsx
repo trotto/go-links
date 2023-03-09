@@ -1,3 +1,4 @@
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded'
 import { Box, Button, IconButton, TextField, Tooltip } from '@mui/material'
 import { FC, useState, useCallback, FormEvent, ChangeEvent } from 'react'
 
@@ -36,7 +37,7 @@ export const EditableDestination: FC<Props> = ({ id, destinationUrl, disabled })
       <Box
         sx={{
           display: 'flex',
-          alignItems: 'center,',
+          alignItems: 'center',
         }}
       >
         <Box
@@ -88,22 +89,36 @@ export const EditableDestination: FC<Props> = ({ id, destinationUrl, disabled })
             </Button>
           )}
         </Box>
-        <Tooltip title={disabled && 'You don’t have permission to modify this go link'}>
-          <span>
-            <IconButton
-              onClick={handleEdit}
-              sx={{
-                opacity: editable ? 1 : 0.25,
-                '&:disabled': {
-                  opacity: 0.1,
-                },
-              }}
-              disabled={disabled}
-            >
-              <Edit />
-            </IconButton>
-          </span>
-        </Tooltip>
+        {editable ? (
+          <IconButton
+            onClick={handleEdit}
+            sx={{
+              height: 32,
+              [media.TABLET]: {
+                height: 40,
+              },
+            }}
+          >
+            <CloseRoundedIcon sx={{ fill: '#000' }} />
+          </IconButton>
+        ) : (
+          <Tooltip title={disabled && 'You don’t have permission to modify this go link'}>
+            <span>
+              <IconButton
+                onClick={handleEdit}
+                sx={{
+                  opacity: 1,
+                  '&:disabled': {
+                    opacity: 0.1,
+                  },
+                }}
+                disabled={disabled}
+              >
+                <Edit />
+              </IconButton>
+            </span>
+          </Tooltip>
+        )}
       </Box>
     </form>
   )

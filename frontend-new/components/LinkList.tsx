@@ -33,10 +33,11 @@ export const LinkList: FC<Props> = ({ links }) => {
         },
         ...(overflowed
           ? {
-              boxShadow: 'inset 0px 4px 8px rgba(0, 0, 0, 0.2)',
-              borderWidth: '1px 1px 0px 1px',
-              borderStyle: 'solid',
-              borderColor: '#A3A3A3',
+              boxShadow: 'rgb(0 0 0 / 20%) 0 9px 9px -9px inset',
+              // boxShadow: 'inset 0px 4px 8px rgba(0, 0, 0, 0.2)',
+              // borderWidth: '1px 1px 0px 1px',
+              // borderStyle: 'solid',
+              // borderColor: '#A3A3A3',
             }
           : {}),
       }}
