@@ -14,6 +14,7 @@
     "@emotion/styled": "^11.10.5",
     "@mui/icons-material": "^5.11.0",
     "@mui/material": "^5.11.0",
+    "@tanstack/react-virtual": "^3.0.0-alpha.0",
     "lodash": "^4.17.21",
     "next": "13.0.6",
     "notistack": "^2.0.8",
