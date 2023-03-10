@@ -19,8 +19,8 @@ export const LinkManagementPage: FC = () => {
     setFilterValue,
     displayLinks,
     onSave,
-    linksExists,
     noLinks,
+    isLoading,
   } = useLinkList()
 
   const { isExtensionInstalled } = useTrotto()
@@ -50,7 +50,7 @@ export const LinkManagementPage: FC = () => {
         {noLinks && <NoLinksNotification />}
         <Search value={filterValue} onChange={setFilterValue} />
       </Box>
-      {linksExists && <LinkList links={displayLinks} />}
+      <LinkList links={displayLinks} isLoading={isLoading} />
     </Box>
   )
 }

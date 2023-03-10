@@ -1,4 +1,4 @@
-import { Box, BoxProps, IconButton, Link } from '@mui/material'
+import { Box, BoxProps, IconButton, Link, SvgIcon } from '@mui/material'
 import { FC, useContext, useMemo } from 'react'
 
 import { DeleteModal } from 'app/components/DeleteModal'
@@ -141,6 +141,70 @@ export const LinkItem: FC<Props> = ({ link, sx }) => {
         <TransferModal open={transferModal} onClose={closeTransferModal} link={link} />
       )}
       <DeleteModal open={deleteModal} onClose={closeDeleteModal} link={link} />
+    </>
+  )
+}
+
+export const LinkItemDummy: FC = () => {
+  const { isManaged } = useTrotto()
+
+  return (
+    <>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 1,
+          borderBottom: '1px solid #f0f0f0',
+          px: 1,
+          py: 2.5,
+
+          [media.TABLET]: {
+            px: 3,
+            py: 3.25,
+            gap: 2,
+          },
+
+          [media.DESKTOP]: {
+            py: 3.75,
+          },
+        }}
+      >
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: isManaged
+              ? '1fr 2fr 1fr 1fr max-content'
+              : '1fr 2fr 1fr max-content',
+            alignItems: 'center',
+          }}
+        >
+          <InfoBox
+            sx={{
+              [media.TABLET]: {
+                mr: 2,
+                px: 2,
+                height: 32,
+              },
+            }}
+            bold
+          />
+          <div />
+          <InfoBox sx={{ ml: 1 }} />
+          {isManaged && <InfoBox />}
+          <SvgIcon />
+        </Box>
+        <Box
+          sx={{
+            display: 'grid',
+            gridTemplateColumns: 'auto max-content',
+            alignItems: 'center',
+          }}
+        >
+          <InfoBox />
+          <SvgIcon />
+        </Box>
+      </Box>
     </>
   )
 }

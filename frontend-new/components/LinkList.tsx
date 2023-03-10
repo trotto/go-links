@@ -1,17 +1,19 @@
 import { Box, useMediaQuery } from '@mui/material'
 import { useVirtual } from '@tanstack/react-virtual'
+import { range } from 'lodash'
 import { FC, useRef, useEffect, useState, useMemo, useCallback } from 'react'
 
 import { media } from 'app/styles/theme'
 import { Link } from 'app/types'
 
-import { LinkItem } from './LinkItem'
+import { LinkItem, LinkItemDummy } from './LinkItem'
 
 interface Props {
   links?: Link[]
+  isLoading: boolean
 }
 
-export const LinkList: FC<Props> = ({ links }) => {
+export const LinkList: FC<Props> = ({ links, isLoading = false }) => {
   const ref = useRef<HTMLDivElement>(null)
   const [overflowed, setOverflowed] = useState(false)
   const isTablet = useMediaQuery(media.TABLET)
@@ -59,7 +61,7 @@ export const LinkList: FC<Props> = ({ links }) => {
         '&::-webkit-scrollbar': {
           display: 'none',
         },
-        ...(overflowed
+        ...(overflowed || isLoading
           ? {
               boxShadow: 'rgb(0 0 0 / 20%) 0 9px 9px -9px inset',
             }
@@ -67,7 +69,9 @@ export const LinkList: FC<Props> = ({ links }) => {
       }}
       ref={ref}
     >
-      {rows.virtualItems.map(renderRow)}
+      {isLoading
+        ? range(0, 10).map((index) => <LinkItemDummy key={index}></LinkItemDummy>)
+        : rows.virtualItems.map(renderRow)}
     </Box>
   )
 }
