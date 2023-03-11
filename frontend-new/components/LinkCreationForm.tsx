@@ -45,9 +45,10 @@ interface Props {
     link: LinkCreate
     createdResponse: LinkCreateResponse
   }) => void
+  onTyping: (str: string) => void
 }
 
-export const LinkCreationForm: FC<Props> = ({ onCreate }) => {
+export const LinkCreationForm: FC<Props> = ({ onCreate, onTyping }) => {
   const {
     query: { sp },
   } = useRouter()
@@ -63,9 +64,11 @@ export const LinkCreationForm: FC<Props> = ({ onCreate }) => {
   const isTablet = useMediaQuery(media.TABLET)
 
   const handleChange = useCallback(
-    (e: ChangeEvent<HTMLInputElement>) =>
-      setFormState((formState) => ({ ...formState, [e.target.id]: e.target.value })),
-    [],
+    ({ target: { id, value } }: ChangeEvent<HTMLInputElement>) => {
+      setFormState((formState) => ({ ...formState, [id]: value }))
+      onTyping(value)
+    },
+    [onTyping],
   )
 
   const handleSubmit = useCallback(

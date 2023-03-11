@@ -44,7 +44,7 @@ export const LinkManagementPage: FC = () => {
     >
       {!extensionInstalled && <ExtensionNotification />}
       <Box>
-        <LinkCreationForm onCreate={onSave} />
+        <LinkCreationForm onCreate={onSave} onTyping={setFilterValue} />
         {notificationState && <ResponseContainer {...notificationState} />}
         {noLinks && <NoLinksNotification />}
         <Search value={filterValue} onChange={setFilterValue} />
