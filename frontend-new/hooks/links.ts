@@ -1,5 +1,6 @@
-import { find } from 'lodash'
-import { useCallback, useMemo, useState, useEffect } from 'react'
+import { find, some } from 'lodash'
+import { map, pipe, includes } from 'lodash/fp'
+import { useCallback, useMemo, useState } from 'react'
 
 import { Link, LinkCreate, LinkCreateResponse } from 'app/types'
 
@@ -16,24 +17,10 @@ interface NotificationState {
   message: string
 }
 
-interface TrottoMetaElement extends HTMLElement {
-  content: string
-}
-
 export const useLinkList = () => {
   const [notificationState, setNotificationState] = useState<NotificationState>()
   const [filterValue, setFilterValue] = useState('')
-  const [extensionInstalled, setExtensionInstalled] = useState(false)
   const { links, mutate, isLoading } = useGetLinkList()
-
-  useEffect(() => {
-    const crxInstalledTag = document.getElementsByName(
-      'trotto:crxInstalled',
-    ) as NodeListOf<TrottoMetaElement>
-    const extensionIsInstalled = crxInstalledTag.length > 0 && crxInstalledTag[0].content === 'true'
-
-    setExtensionInstalled(extensionIsInstalled)
-  }, [])
 
   const onSave = useCallback(
     async ({
@@ -65,16 +52,23 @@ export const useLinkList = () => {
     [mutate, links, setNotificationState],
   )
 
-  const displayLinks = useMemo(() => {
-    return links?.filter((link) => link.shortpath.includes(filterValue)) || []
-  }, [links, filterValue])
+  const displayLinks = useMemo(
+    () =>
+      links?.filter(
+        pipe(
+          ({ shortpath, destination_url, owner }) => [shortpath, destination_url, owner],
+          map(includes(filterValue)),
+          some,
+        ),
+      ),
+    [links, filterValue],
+  )
 
   const linksExists = useMemo(() => !isLoading && links && !!links.length, [isLoading, links])
   const noLinks = useMemo(() => !isLoading && !(links && links.length), [isLoading, links])
 
   return {
     notificationState,
-    extensionInstalled,
     filterValue,
     setFilterValue,
     links,
@@ -82,6 +76,7 @@ export const useLinkList = () => {
     onSave,
     linksExists,
     noLinks,
+    isLoading,
   }
 }
 

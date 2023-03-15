@@ -1,13 +1,13 @@
 import { Link, Box, Typography } from '@mui/material'
 import { FC, useContext } from 'react'
 
+import { navigationLinks } from 'app/config'
 import { Context } from 'app/context'
 import { useGetAdminLinks } from 'app/hooks'
 import { TrottoLogo } from 'app/icons'
 import { media } from 'app/styles/theme'
 
 import { UserMenu } from './UserMenu'
-import { navigationLinks } from 'app/config'
 
 export const NavBar: FC = () => {
   const { user } = useContext(Context)
@@ -71,11 +71,16 @@ export const NavBar: FC = () => {
               },
             }}
           >
-            <Link href={navigationLinks.DOCUMENTATION} typography='h2' sx={{ fontWeight: 400 }}>
+            <Link
+              href={navigationLinks.DOCUMENTATION}
+              typography='h2'
+              sx={{ fontWeight: 400 }}
+              target='_blank'
+            >
               Documentation
             </Link>
             {adminLinks?.map(({ url, text }) => (
-              <Link href={url} key={url}>
+              <Link href={url} key={url} target='_blank'>
                 {text}
               </Link>
             ))}
