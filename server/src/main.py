@@ -216,8 +216,4 @@ def static_files(path):
 @app.route('/_next_static/<path:path>')
 def static_next_files(path: str):
   """Handle next.js assets separately"""
-
-  sub_dir = '/'.join(path.split('/')[:-1])
-  file = path.split('/')[-1]
-
-  return send_from_directory(f'static/templates/_next_static/{sub_dir}', file)
+  return send_from_directory('static/templates/%s' % (request.path.split('/')[1]), path)
