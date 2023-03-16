@@ -1,9 +1,9 @@
 export const navigationLinks = {
   ROOT: '/',
-  PRICING: '/pricing',
-  PRIVACY: '/privacy',
-  TERMS: '/terms',
-  CONTACT: '/contact',
+  PRICING: 'https://www.trot.to/pricing',
+  PRIVACY: 'https://www.trot.to/privacy',
+  TERMS: 'https://www.trot.to/terms',
+  CONTACT: 'https://www.trot.to/contact',
   GITHUB: 'https://github.com/trotto/go-links',
   DOCUMENTATION: 'https://www.trot.to/docs/use/creating-a-go-link',
   LOGIN_GOOGLE: '/_/auth/login/google?redirect_to=https%3A%2F%2Ftrot.to',

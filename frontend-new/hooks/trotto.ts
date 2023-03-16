@@ -39,7 +39,7 @@ export const useTrotto: () => TrottoCfg = () => {
       return setBaseUrl('http://localhost:9095')
     }
 
-    return setBaseUrl(location.host)
+    return setBaseUrl(location.origin)
   }, [isExtensionInstalled])
 
   return {
