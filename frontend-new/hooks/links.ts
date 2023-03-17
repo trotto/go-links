@@ -73,13 +73,15 @@ export const useLinkList = () => {
 
   const displayLinks = useMemo(
     () =>
-      links?.filter(
-        pipe(
-          ({ shortpath, destination_url, owner }) => [shortpath, destination_url, owner],
-          map(includes(filterValue)),
-          some,
-        ),
-      ),
+      links
+        ?.filter(
+          pipe(
+            ({ shortpath, destination_url, owner }) => [shortpath, destination_url, owner],
+            map(includes(filterValue)),
+            some,
+          ),
+        )
+        .sort((a, b) => b.visits_count - a.visits_count),
     [links, filterValue],
   )
 

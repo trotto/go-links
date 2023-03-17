@@ -31,23 +31,18 @@ export const LinkList: FC<Props> = ({ links, isLoading = false }) => {
     return 97
   }, [isTablet, isDesktop])
 
-  const displayLinks = useMemo(
-    () => links?.sort((a, b) => b.visits_count - a.visits_count),
+  const renderRow = useCallback(
+    ({ index }: { index: number }) =>
+      links && <LinkItem key={links[index].id} link={links[index]} />,
     [links],
   )
 
-  const renderRow = useCallback(
-    ({ index }: { index: number }) =>
-      displayLinks && <LinkItem key={displayLinks[index].id} link={displayLinks[index]} />,
-    [displayLinks],
-  )
-
   useEffect(() => {
-    setOverflowed((ref.current?.clientHeight || 0) - rowHeight * (displayLinks?.length || 0) < 0)
-  }, [ref, displayLinks, rowHeight])
+    setOverflowed((ref.current?.clientHeight || 0) - rowHeight * (links?.length || 0) < 0)
+  }, [ref, links, rowHeight])
 
   const rows = useVirtual({
-    size: displayLinks?.length || 0,
+    size: links?.length || 0,
     parentRef: ref,
     overscan: 10,
     estimateSize: useCallback(() => rowHeight, [rowHeight]),
