@@ -32,6 +32,20 @@ export const useSaveLink = () => {
   )
 }
 
+export const useGetSuggestedLinks = () => {
+  const quantity = 5
+  const similarityThreshold = 0.5
+
+  return useCallback(
+    (similarTo: string) =>
+      fetcher<Link[]>(
+        `${LINKS_API}?similar_to=${similarTo}&limit=${quantity}&similarity_threshold=${similarityThreshold}`,
+        { method: 'GET' },
+      ),
+    [quantity, similarityThreshold],
+  )
+}
+
 export const useUpdateLink = () => {
   const { mutate } = useSWRConfig()
   const { enqueueSnackbar } = useSnackbar()

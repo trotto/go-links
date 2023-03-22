@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect } from 'react'
 
 const BASE_DOMAIN = 'trot.to'
 
@@ -39,7 +39,7 @@ export const useTrotto: () => TrottoCfg = () => {
       return setBaseUrl('http://localhost:9095')
     }
 
-    return setBaseUrl(location.host)
+    return setBaseUrl(location.origin)
   }, [isExtensionInstalled])
 
   return {
