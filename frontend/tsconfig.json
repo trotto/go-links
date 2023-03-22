@@ -2,7 +2,7 @@
   "compilerOptions": {
     "baseUrl": "..",
     "paths": {
-      "app/*": ["frontend-new/*"]
+      "app/*": ["frontend/*"]
     },
     "target": "es5",
     "lib": [
