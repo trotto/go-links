@@ -95,14 +95,14 @@ From the `server/` directory, run:
 
 ### Start the frontend development server
 
-In a separate terminal, from the `frontend/` directory, run:
+In a separate terminal, from the `frontend-new/` directory, run:
 
 ```
 yarn install
-./start_dev_server.sh
+yarn dev
 ```
 
-Now, you can access the local instance at http://localhost:5007.
+Now, you can access the local instance at http://localhost:3000.
 
 ### Making changes
 

@@ -1,4 +1,4 @@
-FROM python:3.9-buster
+FROM python:3.9-bullseye
 
 WORKDIR /usr/src/app
 COPY server server
