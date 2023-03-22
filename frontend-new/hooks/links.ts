@@ -1,10 +1,11 @@
 import { find, some } from 'lodash'
 import { map, pipe, includes } from 'lodash/fp'
-import { useCallback, useMemo, useState } from 'react'
+import { useRouter } from 'next/router'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { Link, LinkCreate, LinkCreateResponse } from 'app/types'
 
-import { useGetLinkList } from './linksApi'
+import { useGetLinkList, useGetSuggestedLinks } from './linksApi'
 
 enum ResponseType {
   SUCCESS = 'success',
@@ -21,6 +22,24 @@ export const useLinkList = () => {
   const [notificationState, setNotificationState] = useState<NotificationState>()
   const [filterValue, setFilterValue] = useState('')
   const { links, mutate, isLoading } = useGetLinkList()
+  const getSuggestedLinks = useGetSuggestedLinks()
+  const [suggestedLinks, setSuggestedLinks] = useState<Link[]>([])
+
+  const {
+    query: { sp },
+  } = useRouter()
+
+  useEffect(() => {
+    if (typeof sp === 'string') {
+      getSuggestedLinks(sp).then(setSuggestedLinks)
+    }
+  }, [sp, getSuggestedLinks])
+
+  useEffect(() => {
+    if (filterValue) {
+      setSuggestedLinks([])
+    }
+  }, [filterValue])
 
   const onSave = useCallback(
     async ({
@@ -54,13 +73,15 @@ export const useLinkList = () => {
 
   const displayLinks = useMemo(
     () =>
-      links?.filter(
-        pipe(
-          ({ shortpath, destination_url, owner }) => [shortpath, destination_url, owner],
-          map(includes(filterValue)),
-          some,
-        ),
-      ),
+      links
+        ?.filter(
+          pipe(
+            ({ shortpath, destination_url, owner }) => [shortpath, destination_url, owner],
+            map(includes(filterValue)),
+            some,
+          ),
+        )
+        .sort((a, b) => b.visits_count - a.visits_count),
     [links, filterValue],
   )
 
@@ -72,7 +93,7 @@ export const useLinkList = () => {
     filterValue,
     setFilterValue,
     links,
-    displayLinks,
+    displayLinks: suggestedLinks.length ? suggestedLinks : displayLinks,
     onSave,
     linksExists,
     noLinks,
