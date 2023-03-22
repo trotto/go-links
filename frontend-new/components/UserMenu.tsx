@@ -1,6 +1,6 @@
 import PersonIcon from '@mui/icons-material/Person'
 import { Avatar, Box, IconButton, Menu, MenuItem, MenuItemProps, Link } from '@mui/material'
-import { MouseEvent, useState, FC, PropsWithChildren, useContext } from 'react'
+import { MouseEvent, useState, FC, PropsWithChildren, useContext, useMemo } from 'react'
 
 import { navigationLinks } from 'app/config'
 import { Context } from 'app/context'
@@ -27,6 +27,8 @@ const MenuLink: FC<MLProps> = ({ sx, children, href }) => (
 
 export const UserMenu: FC<Props> = ({ adminLinks }) => {
   const { user } = useContext(Context)
+  const feedbackLink = useMemo(() => user && navigationLinks.SHARE_FEEDBACK(user.email), [user])
+
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
   const handleClick = (event: MouseEvent<HTMLElement>) => {
@@ -167,6 +169,7 @@ export const UserMenu: FC<Props> = ({ adminLinks }) => {
           <MenuLink href={navigationLinks.PRIVACY}>Privacy</MenuLink>
           <MenuLink href={navigationLinks.TERMS}>Terms</MenuLink>
           <MenuLink href={navigationLinks.CONTACT}>Contact us</MenuLink>
+          <MenuLink href={feedbackLink}>Share feedback</MenuLink>
         </Box>
       </Menu>
     </>

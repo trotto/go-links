@@ -1,11 +1,15 @@
 import { Box, Link } from '@mui/material'
-import { FC } from 'react'
+import { FC, useContext, useMemo } from 'react'
 
+import { navigationLinks } from 'app/config'
+import { Context } from 'app/context'
 import { GithubLogo } from 'app/icons'
 import { media } from 'app/styles/theme'
-import { navigationLinks } from 'app/config'
 
 export const Footer: FC = () => {
+  const { user } = useContext(Context)
+  const feedbackLink = useMemo(() => user && navigationLinks.SHARE_FEEDBACK(user.email), [user])
+
   return (
     <Box
       sx={{
@@ -30,6 +34,7 @@ export const Footer: FC = () => {
       <Link href={navigationLinks.PRIVACY}>Privacy</Link>
       <Link href={navigationLinks.TERMS}>Terms</Link>
       <Link href={navigationLinks.CONTACT}>Contact us</Link>
+      <Link href={feedbackLink}>Share feedback</Link>
     </Box>
   )
 }
