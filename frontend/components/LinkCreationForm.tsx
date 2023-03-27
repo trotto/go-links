@@ -3,8 +3,9 @@ import EastRoundedIcon from '@mui/icons-material/EastRounded'
 import { Button, TextField, Typography, Box, useMediaQuery } from '@mui/material'
 import { useRouter } from 'next/router'
 import { ChangeEvent, FormEvent, useCallback, useMemo, useState } from 'react'
-import { useEffect, useRef, FC } from 'react'
+import { useEffect, useRef, useContext, FC } from 'react'
 
+import { Context } from 'app/context'
 import { useSaveLink } from 'app/hooks'
 import { media } from 'app/styles/theme'
 import { LinkCreate, LinkCreateResponse } from 'app/types'
@@ -58,6 +59,12 @@ export const LinkCreationForm: FC<Props> = ({ onCreate, onTyping }) => {
     namespace: 'go',
   })
   const saveLink = useSaveLink()
+  const { user } = useContext(Context)
+
+  const keywordRegEx = useMemo(
+    () => (user && user.keywords_validation_regex) || '[^0-9a-zA-Z-/%]',
+    [user],
+  )
 
   const shortInpuRef = useRef<HTMLInputElement>(null)
   const destInpuRef = useRef<HTMLInputElement>(null)
@@ -69,6 +76,20 @@ export const LinkCreationForm: FC<Props> = ({ onCreate, onTyping }) => {
       onTyping(value)
     },
     [onTyping],
+  )
+
+  const handleKeyword = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      return handleChange({
+        ...e,
+        target: {
+          ...e.target,
+          id: e.target.id,
+          value: e.target.value.replace(new RegExp(keywordRegEx, 'g'), ''),
+        },
+      })
+    },
+    [handleChange, keywordRegEx],
   )
 
   const handleSubmit = useCallback(
@@ -116,9 +137,9 @@ export const LinkCreationForm: FC<Props> = ({ onCreate, onTyping }) => {
           </Circle>
           <TextField
             id='shortpath'
-            placeholder='Keyword'
+            placeholder='keyword'
             value={formState.shortpath}
-            onChange={handleChange}
+            onChange={handleKeyword}
             inputRef={shortInpuRef}
             sx={{
               flexGrow: 1,
