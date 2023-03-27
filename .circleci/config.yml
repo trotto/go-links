@@ -80,7 +80,6 @@ jobs:
       - run: echo $DEPLOYER_CLIENT_SECRETS | base64 --decode > ${HOME}/deployer_client_secrets.json
       - run: cd ${SERVER_CODE_ROOT} && bash run_tests/run.sh
       - <<: *install_node_tooling
-      - <<: *build_frontend
       - run: gcloud auth activate-service-account --key-file ${HOME}/deployer_client_secrets.json
       - run: gcloud config set project $GCLOUD_PROJECT
       - run: gcloud app deploy --no-promote --project $GCLOUD_PROJECT -q -v $NEW_TROTTO_VERSION_ID ${SERVER_SRC_ROOT}/app.yaml ${SERVER_SRC_ROOT}/index.yaml
