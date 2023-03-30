@@ -1,4 +1,7 @@
-FROM python:3.9-bullseye
+FROM python:3.10.10-slim-bullseye
+
+ENV CLOUDSDK_PYTHON=/usr/local/bin/python
+RUN apt-get update && apt-get install curl gnupg2 libpq-dev gcc -y
 
 WORKDIR /usr/src/app
 COPY server server
