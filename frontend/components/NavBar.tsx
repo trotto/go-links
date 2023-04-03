@@ -80,7 +80,7 @@ export const NavBar: FC = () => {
               Documentation
             </Link>
             {adminLinks?.map(({ url, text }) => (
-              <Link href={url} key={url} target='_blank'>
+              <Link href={url} key={url} target='_blank' typography='h2'>
                 {text}
               </Link>
             ))}

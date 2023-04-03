@@ -4,6 +4,7 @@ export const navigationLinks = {
   PRIVACY: 'https://www.trot.to/privacy',
   TERMS: 'https://www.trot.to/terms',
   CONTACT: 'https://www.trot.to/contact',
+  SHARE_FEEDBACK: (email: string) => `https://7kgyyjm8iyj.typeform.com/to/CIwBEGSN#email=${email}`,
   GITHUB: 'https://github.com/trotto/go-links',
   DOCUMENTATION: 'https://www.trot.to/docs/use/creating-a-go-link',
   LOGIN_GOOGLE: '/_/auth/login/google?redirect_to=https%3A%2F%2Ftrot.to',

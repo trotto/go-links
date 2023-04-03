@@ -25,9 +25,19 @@ export const useSaveLink = () => {
       fetcher<LinkCreateResponse>(LINKS_API, {
         method: 'POST',
         body: JSON.stringify(link),
-      }).catch(() => {
-        enqueueSnackbar('Something went wrong. Link was not created.', { variant: 'error' })
-      }),
+      })
+        .then((res) => {
+          if (res && res.error && !res.error.startsWith('That go link already exists.')) {
+            enqueueSnackbar(res.error, { variant: 'error' })
+
+            return
+          }
+
+          return res
+        })
+        .catch(() => {
+          enqueueSnackbar('Something went wrong. Link was not created.', { variant: 'error' })
+        }),
     [enqueueSnackbar],
   )
 }

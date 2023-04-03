@@ -6,7 +6,6 @@
 
 _(See the guide [here](https://www.trot.to/docs/deploy/deploy-to-heroku) to deploy to Heroku in minutes.)_
 
-
 Reliable and battle-tested continuously in production since 2017, this [go links](https://www.trot.to/go-links) solution
 is used by companies all around the world daily as the core of [Trotto](https://www.trot.to).
 
@@ -15,12 +14,12 @@ matching [open-source browser extension](https://github.com/trotto/browser-exten
 
 If you'd rather use the fully-managed instance of Trotto, visit [www.trot.to](https://www.trot.to).
 
-----
+---
 
 Don't hesitate to reach out to us through help@trot.to, a GitHub issue, or live chat
 at https://www.trot.to.
 
-----
+---
 
 ## Features
 
@@ -95,7 +94,7 @@ From the `server/` directory, run:
 
 ### Start the frontend development server
 
-In a separate terminal, from the `frontend-new/` directory, run:
+In a separate terminal, from the `frontend/` directory, run:
 
 ```
 yarn install
