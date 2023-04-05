@@ -39,7 +39,7 @@ export const ExtensionNotification: FC = () => {
         Installing the Chrome extension is the best and easiest way to use go links. Install the
         extension now:
       </Typography>
-      <LinkIconButton href={navigationLinks.EXTENSION} icon={<Chrome />}>
+      <LinkIconButton href={navigationLinks.EXTENSION} icon={<Chrome />} target='_blank'>
         Add the Chrome Extension
       </LinkIconButton>
       <IconButton

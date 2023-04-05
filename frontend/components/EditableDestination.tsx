@@ -1,6 +1,6 @@
 import CloseRoundedIcon from '@mui/icons-material/CloseRounded'
 import { Box, Button, IconButton, TextField, Tooltip } from '@mui/material'
-import { FC, useState, useCallback, FormEvent, ChangeEvent } from 'react'
+import { FC, useState, useCallback, FormEvent, ChangeEvent, useRef, useEffect } from 'react'
 
 import { useUpdateLink } from 'app/hooks'
 import { Edit } from 'app/icons'
@@ -15,6 +15,7 @@ interface Props {
 export const EditableDestination: FC<Props> = ({ id, destinationUrl, disabled }) => {
   const [destination, setDestination] = useState(destinationUrl)
   const [editable, setEditable] = useState(false)
+  const destInpuRef = useRef<HTMLInputElement>(null)
 
   const updateLink = useUpdateLink()
 
@@ -22,6 +23,14 @@ export const EditableDestination: FC<Props> = ({ id, destinationUrl, disabled })
     (e: ChangeEvent<HTMLInputElement>) => setDestination(e.target.value),
     [],
   )
+
+  useEffect(() => {
+    if (!editable) {
+      return
+    }
+    destInpuRef?.current?.focus()
+  }, [editable])
+
   const handleEdit = useCallback(() => setEditable((editable) => !editable), [setEditable])
 
   const handleSave = useCallback(
@@ -60,6 +69,7 @@ export const EditableDestination: FC<Props> = ({ id, destinationUrl, disabled })
             value={destination}
             onChange={handleDestinationChange}
             disabled={!editable}
+            inputRef={destInpuRef}
             sx={{
               height: 24,
               flexGrow: 1,
