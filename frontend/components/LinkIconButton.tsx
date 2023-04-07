@@ -1,5 +1,5 @@
 import { Box, Button, ButtonProps } from '@mui/material'
-import { FC, ReactNode, PropsWithChildren } from 'react'
+import { FC, ReactNode, PropsWithChildren, HTMLAttributeAnchorTarget } from 'react'
 
 import { media } from 'app/styles/theme'
 
@@ -7,13 +7,14 @@ interface Props extends PropsWithChildren {
   href?: string
   icon: ReactNode
   sx?: ButtonProps['sx']
+  target?: HTMLAttributeAnchorTarget
 }
 
-export const LinkIconButton: FC<Props> = ({ href = '#', icon, children, sx }) => {
+export const LinkIconButton: FC<Props> = ({ href = '#', icon, children, sx, ...props }) => {
   return (
     <Button
       href={href}
-      target='_blank'
+      {...props}
       sx={{
         backgroundColor: '#FB815B',
         height: 48,

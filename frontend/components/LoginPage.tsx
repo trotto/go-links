@@ -2,9 +2,9 @@ import { Box, Typography, Link } from '@mui/material'
 import { FC } from 'react'
 
 import { LinkIconButton } from 'app/components'
+import { navigationLinks } from 'app/config'
 import { Google, Microsoft } from 'app/icons'
 import { media } from 'app/styles/theme'
-import { navigationLinks } from 'app/config'
 
 export const LoginPage: FC = () => {
   return (

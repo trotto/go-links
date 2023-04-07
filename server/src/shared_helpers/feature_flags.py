@@ -1,9 +1,10 @@
 import ldclient
-from ldclient import Context, LDClient
+from ldclient import Context, LDClient, ContextBuilder
 from ldclient.config import Config
 from werkzeug.local import LocalProxy
 
 from shared_helpers import config
+from modules.data.abstract.users import User
 
 class Provider:
   """
@@ -35,7 +36,15 @@ class Provider:
     if ldclient.get().is_initialized():
       self.launchdarkly_initialized = True
 
-  def get(self, feature_flag_key: str, user: LocalProxy = None) -> bool:
+  def _get_context_builder(self, user: User) -> ContextBuilder:
+    if not user:
+      return Context.builder('anonymus-user').anonymous(True)
+    elif user.organization and '@' not in user.organization:
+      return Context.builder(str(user.id)).set('organization', user.organization)
+    else:
+      return Context.builder('any-user-key')
+
+  def get(self, feature_flag_key: str, user: User = None) -> bool:
     """
     Gets value of specified feature flag
 
@@ -48,12 +57,8 @@ class Provider:
     """
     if not self.launchdarkly_initialized:
       return self.default_feature_flags.get(feature_flag_key, False)
-
-    has_organization = user and user.organization and '@' not in user.organization
-
-    context = Context.builder(str(user.id)) \
-      .set('organization', user.organization) \
-      .build() if has_organization else Context.builder('any-user-key').build()
+    
+    context = self._get_context_builder(user).build()
     return ldclient.get().variation(feature_flag_key, context, False)
       
 

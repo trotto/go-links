@@ -1,4 +1,4 @@
-import { find, some } from 'lodash'
+import { find, some, toLower } from 'lodash'
 import { map, pipe, includes } from 'lodash/fp'
 import { useRouter } from 'next/router'
 import { useCallback, useEffect, useMemo, useState } from 'react'
@@ -77,7 +77,8 @@ export const useLinkList = () => {
         ?.filter(
           pipe(
             ({ shortpath, destination_url, owner }) => [shortpath, destination_url, owner],
-            map(includes(filterValue)),
+            map(toLower),
+            map(includes(toLower(filterValue))),
             some,
           ),
         )

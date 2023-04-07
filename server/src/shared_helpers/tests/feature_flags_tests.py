@@ -49,7 +49,7 @@ class TestFunctions(unittest.TestCase):
     provider = feature_flags.Provider(config)
 
     self.assertEqual(provider.get('new_frontend'), False)
-    context_builder.assert_called_once_with('any-user-key')
+    context_builder.assert_called_once_with('anonymus-user')
 
 
   def test_get_without_ld(self):
