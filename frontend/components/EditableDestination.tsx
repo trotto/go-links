@@ -28,6 +28,7 @@ export const EditableDestination: FC<Props> = ({ id, destinationUrl, disabled })
     if (!editable) {
       return
     }
+    destInpuRef?.current?.select()
     destInpuRef?.current?.focus()
   }, [editable])
 
@@ -65,7 +66,7 @@ export const EditableDestination: FC<Props> = ({ id, destinationUrl, disabled })
         >
           <TextField
             id='destination'
-            placeholder='Keyword'
+            placeholder='Paste the link to a resource here'
             value={destination}
             onChange={handleDestinationChange}
             disabled={!editable}
