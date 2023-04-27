@@ -45,6 +45,7 @@ def init_app_without_routes(disable_csrf=False):
     app.config['SQLALCHEMY_BINDS'] = {'commercial': config.get_config()['postgres']['commercial_url']}
 
   app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+  app.config['SESSION_COOKIE_SECURE'] = True
 
   global db
   class SQLAlchemy(_BaseSQLAlchemy):
@@ -95,6 +96,12 @@ def init_app_without_routes(disable_csrf=False):
       except Exception as e:
         logging.error(e)
         logout_user()
+
+  @app.after_request
+  def apply_csp(response):
+    response.headers['Content-Security-Policy'] = "default-src 'self' data:; style-src 'self' fonts.googleapis.com 'unsafe-inline'; font-src fonts.gstatic.com"
+
+    return response
 
   @app.route('/_/health_check')
   def health_check():
