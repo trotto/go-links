@@ -5,7 +5,7 @@ import os
 import traceback
 
 import jinja2
-from flask import Flask, send_from_directory, redirect, render_template, request, jsonify, session
+from flask import Flask, send_from_directory, redirect, render_template, request, jsonify, session, make_response
 from flask_login import LoginManager, current_user, logout_user
 from flask_sqlalchemy import SQLAlchemy as _BaseSQLAlchemy
 from flask_migrate import Migrate, upgrade as upgrade_db
@@ -45,6 +45,7 @@ def init_app_without_routes(disable_csrf=False):
     app.config['SQLALCHEMY_BINDS'] = {'commercial': config.get_config()['postgres']['commercial_url']}
 
   app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+  app.config['SESSION_COOKIE_SECURE'] = True
 
   global db
   class SQLAlchemy(_BaseSQLAlchemy):
@@ -95,6 +96,18 @@ def init_app_without_routes(disable_csrf=False):
       except Exception as e:
         logging.error(e)
         logout_user()
+
+  @app.after_request
+  def apply_csp(response):
+    if not 'Content-Security-Policy' in response.headers:
+      response.headers['Content-Security-Policy'] = (
+        "default-src 'self' data:; "
+        "style-src 'self' fonts.googleapis.com 'unsafe-inline'; "
+        "font-src fonts.gstatic.com; "
+        "base-uri 'self'"
+      )
+
+    return response
 
   @app.route('/_/health_check')
   def health_check():
@@ -166,14 +179,27 @@ def home():
   namespaces = config.get_organization_config(current_user.organization).get('namespaces', [])
   admin_links = get_org_settings(current_user.organization).get('admin_links', [])
 
-  new_frontend = feature_flags.provider.get('new_frontend', current_user)
-  template = '_next_static/index.html' if new_frontend else 'index.html'
+  if feature_flags.provider.get('new_frontend', current_user):
+    return render_template('_next_static/index.html')
+  
+  nonce = os.urandom(16).hex()
 
-  return render_template(template,
-                         csrf_token=generate_csrf(),
-                         default_namespace=config.get_default_namespace(current_user.organization),
-                         namespaces=json.dumps(namespaces),
-                         admin_links=json.dumps(admin_links))
+  response = render_template('index.html',
+                      csrf_token=generate_csrf(),
+                      default_namespace=config.get_default_namespace(current_user.organization),
+                      namespaces=json.dumps(namespaces),
+                      admin_links=json.dumps(admin_links),
+                      nonce=nonce)
+  response = make_response(response)
+  response.headers['Content-Security-Policy'] = (
+    "default-src 'self'; "
+    f"script-src 'self' maxcdn.bootstrapcdn.com ajax.googleapis.com 'nonce-{nonce}'; "
+    "style-src 'self' fonts.googleapis.com maxcdn.bootstrapcdn.com 'unsafe-inline'; "
+    "font-src fonts.gstatic.com maxcdn.bootstrapcdn.com; "
+    "base-uri 'self';"
+  )
+
+  return response
 
 
 @app.route('/_csrf_token')

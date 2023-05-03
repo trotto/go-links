@@ -2,7 +2,7 @@ import jwt
 import logging
 from urllib.parse import urlencode
 
-from flask import Blueprint, Response, abort, redirect, render_template, request, session, url_for
+from flask import Blueprint, Response, abort, redirect, render_template, request, session, url_for, make_response
 from flask_login import logout_user
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
@@ -57,12 +57,23 @@ def login():
     error_message = errors.get_error_message_from_code(request.args.get('e', None))
 
   if error_message or len(LOGIN_METHODS) > 1:
-    new_frontend = feature_flags.provider.get('new_frontend')
-    template = '_next_static/login.html' if new_frontend else 'auth/login_selector.html'
-    return render_template(template,
+    if feature_flags.provider.get('new_frontend'):
+      return render_template('_next_static/login.html')
+
+    response = render_template('auth/login_selector.html',
                            login_methods=LOGIN_METHODS,
                            redirect_to=urlencode({'redirect_to': redirect_to}),
                            error_message=error_message)
+    response = make_response(response)
+    response.headers['Content-Security-Policy'] = (
+      "default-src 'self'; "
+      "script-src 'self' ajax.googleapis.com; "
+      "style-src 'self' fonts.googleapis.com maxcdn.bootstrapcdn.com 'unsafe-inline'; "
+      "font-src fonts.gstatic.com maxcdn.bootstrapcdn.com; "
+      "base-uri 'self';"
+    )
+
+    return response
 
   return redirect(f"/_/auth/login/google?{urlencode({'redirect_to': redirect_to})}")
 
