@@ -17,5 +17,13 @@ export const fetcher = async <T>(url: string, config: RequestInit = {}): Promise
   }
   const res = await fetch(url, config)
 
-  return await res.json()
+  if (res.status >= 400) {
+    throw new Error((await res.json()).error)
+  }
+
+  try {
+    return await res.json()
+  } catch (error) {
+    return null as T
+  }
 }
