@@ -25,7 +25,7 @@ export const TransferConfirmModal: FC<Props> = ({ open, onClose, link, transferT
   }, [confirmTransfer, onClose])
 
   return (
-    <Modal.Base open={open} onClose={onClose}>
+    <Modal.Base open={open} onClose={onClose} fitContent>
       <Typography>
         Would you like to take ownership of <b>{fullShortPath}</b>?
       </Typography>
