@@ -10,6 +10,7 @@ export const Search: FC = () => {
         color: '#000',
         width: 10,
         height: 10,
+        fill: 'none',
 
         [media.TABLET]: {
           width: 12,
