@@ -9,6 +9,7 @@ export const Delete: FC = () => {
       sx={{
         width: 12,
         height: 12,
+        fill: 'none',
 
         [media.TABLET]: {
           height: 16,

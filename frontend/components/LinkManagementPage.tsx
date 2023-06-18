@@ -1,5 +1,6 @@
 import { Box } from '@mui/material'
-import { FC } from 'react'
+import { useRouter } from 'next/router'
+import { FC, useCallback } from 'react'
 
 import {
   ExtensionNotification,
@@ -8,6 +9,7 @@ import {
   NoLinksNotification,
   ResponseContainer,
   Search,
+  TransferConfirmModal,
 } from 'app/components'
 import { useLinkList, useTrotto } from 'app/hooks'
 import { media } from 'app/styles/theme'
@@ -21,7 +23,14 @@ export const LinkManagementPage: FC = () => {
     onSave,
     noLinks,
     isLoading,
+    transferState,
   } = useLinkList()
+
+  const router = useRouter()
+
+  const handleClose = useCallback(() => {
+    router.push(router.pathname, undefined, { shallow: true })
+  }, [router])
 
   const { isExtensionInstalled } = useTrotto()
 
@@ -44,6 +53,14 @@ export const LinkManagementPage: FC = () => {
       }}
     >
       {!isExtensionInstalled && <ExtensionNotification />}
+      {transferState?.link && transferState?.token && (
+        <TransferConfirmModal
+          link={transferState?.link}
+          open={!!transferState?.link}
+          onClose={handleClose}
+          transferToken={transferState.token}
+        />
+      )}
       <Box>
         <LinkCreationForm onCreate={onSave} onTyping={setFilterValue} />
         {notificationState && <ResponseContainer {...notificationState} />}

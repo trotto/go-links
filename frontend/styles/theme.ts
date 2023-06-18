@@ -128,7 +128,7 @@ export const theme = createTheme({
         root: {
           width: '16px',
           height: '16px',
-          fill: 'none',
+          // fill: 'none',
           [media.TABLET]: {
             width: '24px',
             height: '24px',

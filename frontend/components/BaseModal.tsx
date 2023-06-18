@@ -8,6 +8,8 @@ const Buttons = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: space-between;
+  gap: 20px;
+  white-space: nowrap;
 `
 
 const Container = styled.div`
@@ -19,9 +21,10 @@ const Container = styled.div`
 interface Props extends PropsWithChildren {
   open: boolean
   onClose: () => void
+  fitContent?: boolean
 }
 
-const Base: FC<Props> = ({ open, onClose, children }) => {
+const Base: FC<Props> = ({ open, onClose, children, fitContent = false }) => {
   return (
     <Container>
       <MuiModal
@@ -55,13 +58,23 @@ const Base: FC<Props> = ({ open, onClose, children }) => {
               gap: 2,
               px: 7,
               py: 4,
-              width: 596,
+              ...(!fitContent && {
+                width: 596,
+              }),
             },
             [media.DESKTOP]: {
-              width: 648,
+              ...(!fitContent && {
+                width: 648,
+              }),
               py: 5,
               px: 8,
             },
+
+            ...(fitContent && {
+              width: 'fit-content',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+            }),
           }}
         >
           {children}

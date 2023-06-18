@@ -18,6 +18,32 @@ interface NotificationState {
   message: string
 }
 
+interface TransferState {
+  link?: Link
+  token?: string
+}
+
+const initialTransferState = {
+  link: undefined,
+  token: undefined,
+}
+
+const useTransferState = (transfer?: string | string[], links?: Link[]): TransferState => {
+  return useMemo(() => {
+    if (typeof transfer !== 'string') {
+      return initialTransferState
+    }
+    try {
+      const tokenPayload = JSON.parse(atob(atob(transfer).split('.')[1]))
+      const linkIdActual = tokenPayload.sub.slice('link:'.length)
+      const linkToTransfer = find(links, ['id', linkIdActual])
+      return { link: linkToTransfer, token: transfer }
+    } catch (e) {
+      return initialTransferState
+    }
+  }, [transfer, links])
+}
+
 export const useLinkList = () => {
   const [notificationState, setNotificationState] = useState<NotificationState>()
   const [filterValue, setFilterValue] = useState('')
@@ -26,8 +52,10 @@ export const useLinkList = () => {
   const [suggestedLinks, setSuggestedLinks] = useState<Link[]>([])
 
   const {
-    query: { sp },
+    query: { sp, transfer },
   } = useRouter()
+
+  const transferState = useTransferState(transfer, links)
 
   useEffect(() => {
     if (typeof sp === 'string') {
@@ -99,6 +127,7 @@ export const useLinkList = () => {
     linksExists,
     noLinks,
     isLoading,
+    transferState,
   }
 }
 
