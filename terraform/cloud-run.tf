@@ -10,6 +10,7 @@ resource "google_cloud_run_v2_service" "this" {
   location     = var.region
   launch_stage = "BETA"
 
+
   template {
     containers {
       image = "${var.region}-docker.pkg.dev/${var.project}/${var.app-name}/${var.app-name}:${local.version}"
@@ -26,7 +27,10 @@ resource "google_cloud_run_v2_service" "this" {
         value = data.google_secret_manager_secret_version_access.basic.secret_data
       }
     }
-    timeout = "10s"
+    scaling {
+      min_instances = 1
+    }
+    timeout = "15s"
     vpc_access {
       network_interfaces {
         network = google_compute_network.private_network.name
