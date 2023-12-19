@@ -14,6 +14,12 @@ variable "gcp_oauth_secret_name" {
   description = "The name of the secret on GCP containing the oauth credentials. Must already exist."
 }
 
+variable "min_instances" {
+  description = "The minimum number of Cloud Run instances. Useful for reducing cold starts."
+  type        = number
+  default     = 1
+}
+
 variable "deploy" {
   description = "Whether to upload the image to gcr.io"
   type        = bool
