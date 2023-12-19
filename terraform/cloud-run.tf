@@ -28,7 +28,7 @@ resource "google_cloud_run_v2_service" "this" {
       }
     }
     scaling {
-      min_instances = var.min_instances
+      min_instance_count = var.min_instances
     }
     timeout = "15s"
     vpc_access {

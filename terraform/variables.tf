@@ -17,7 +17,6 @@ variable "gcp_oauth_secret_name" {
 variable "min_instances" {
   description = "The minimum number of Cloud Run instances. Useful for reducing cold starts."
   type        = number
-  default     = 1
 }
 
 variable "deploy" {
