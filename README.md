@@ -1,6 +1,6 @@
 # Trotto Go Links
 
-[![CircleCI](https://dl.circleci.com/status-badge/img/circleci/Wp5qWwVchXp4teudjvx2zq/3F8UyJs2UMqV9cR5YLdip9/tree/main.svg?style=svg&circle-token=e11b309a8cc25ff91e115a460caf8d015aaaa9f4)](https://dl.circleci.com/status-badge/redirect/circleci/Wp5qWwVchXp4teudjvx2zq/3F8UyJs2UMqV9cR5YLdip9/tree/main)
+[![CircleCI](https://dl.circleci.com/status-badge/img/circleci/Wp5qWwVchXp4teudjvx2zq/3F8UyJs2UMqV9cR5YLdip9/tree/master.svg?style=svg&circle-token=5eb7268ab9c1eb72a0991609d3c7292340397c25)](https://dl.circleci.com/status-badge/redirect/circleci/Wp5qWwVchXp4teudjvx2zq/3F8UyJs2UMqV9cR5YLdip9/tree/master)
 
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/trotto/go-links)
 
