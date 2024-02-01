@@ -56,7 +56,7 @@ export const LinkCreationForm: FC<Props> = ({ onCreate, onTyping }) => {
   const [formState, setFormState] = useState<LinkCreate>({
     shortpath: '',
     destination: '',
-    namespace: 'go',
+    namespace: 'bo',
   })
   const saveLink = useSaveLink()
   const { user } = useContext(Context)
