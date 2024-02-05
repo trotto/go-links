@@ -14,7 +14,7 @@ class Provider:
   Fallbacks to default_feature_flags if Launch Darkly was not set up
   """
   default_feature_flags: dict[str, bool] = {
-    'new_frontend': False,
+    'new_frontend': True,
   }
   launchdarkly_initialized = False
   sdk_key: str
