@@ -50,7 +50,7 @@ export const NavBar: FC = () => {
             },
           }}
         >
-          Trotto
+          BoLinks
         </Typography>
       </Link>
       {!!user && (

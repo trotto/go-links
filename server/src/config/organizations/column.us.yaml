@@ -1,0 +1,5 @@
+{
+  "default_namespace": "bo",
+  "admins": ["yazan@column.us", "leo@column.us"],
+  "namespaces": ["bo"]
+}

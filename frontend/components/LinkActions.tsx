@@ -31,7 +31,7 @@ export const LinkActions: FC<Props> = ({ onDelete, onTransfer, disabled }) => {
 
   return (
     <Box sx={{ display: 'inline-flex' }}>
-      <Tooltip title={disabled && 'You don’t have permission to modify this go link'}>
+      <Tooltip title={disabled && 'You don’t have permission to modify this bo link'}>
         <span>
           <IconButton
             id='basic-button'
