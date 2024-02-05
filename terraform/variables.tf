@@ -10,6 +10,10 @@ variable "region" {
   description = "The region to deploy to"
 }
 
+variable "package_version" {
+  description = "The sha1 git hash. Used to trigger replacement of Cloud Run on code changes."
+}
+
 variable "gcp_oauth_secret_name" {
   description = "The name of the secret on GCP containing the oauth credentials. Must already exist."
 }

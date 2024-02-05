@@ -10,6 +10,10 @@ resource "google_cloud_run_v2_service" "this" {
   location     = var.region
   launch_stage = "BETA"
 
+  labels = {
+    package_version = var.package_version
+  }
+
 
   template {
     containers {
