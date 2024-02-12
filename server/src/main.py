@@ -3,6 +3,7 @@ import json
 import logging
 import os
 import traceback
+import jwt
 
 import jinja2
 from flask import Flask, send_from_directory, redirect, render_template, request, jsonify, session, make_response
@@ -67,6 +68,8 @@ def init_app_without_routes(disable_csrf=False):
 
   login_manager = LoginManager()
   login_manager.init_app(app)
+
+  app.before_request(authentication.check_api_token)
 
   global csrf_protect
 
@@ -148,6 +151,7 @@ def add_routes():
   from modules.links.handlers import routes as link_routes
   from modules.routing.handlers import routes as follow_routes
   from modules.users.handlers import routes as user_routes
+  from modules.api_tokens.handlers import routes as api_tokens_routes
   try:
     from commercial.blueprints import COMMERCIAL_BLUEPRINTS
     from commercial.middleware import COMMERCIAL_MIDDLEWARE
@@ -158,6 +162,7 @@ def add_routes():
   app.register_blueprint(base_routes)
   app.register_blueprint(link_routes)
   app.register_blueprint(user_routes)
+  app.register_blueprint(api_tokens_routes)
   for blueprint in COMMERCIAL_BLUEPRINTS:
     app.register_blueprint(blueprint)
   app.register_blueprint(follow_routes)  # must be registered last since it matches any URL

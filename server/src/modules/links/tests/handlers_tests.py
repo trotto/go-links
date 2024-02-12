@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Type
 import base64
 from copy import deepcopy
 from dataclasses import dataclass
@@ -11,11 +11,14 @@ import jwt
 from mock import patch, call
 
 from modules.data import get_models
+from modules.data.abstract import api_tokens, links, users
 from modules.links import handlers
+from shared_helpers.utils import generate_secret
 from testing import TrottoTestCase
 
-ShortLink = get_models('links').ShortLink
-User = get_models('users').User
+ShortLink: Type[links.ShortLink] = get_models('links').ShortLink
+User: Type[users.User] = get_models('users').User
+ApiToken: Type[api_tokens.ApiToken] = get_models('api_tokens').ApiToken
 
 
 class TestHandlers(TrottoTestCase):
@@ -918,3 +921,158 @@ class TestKeywordPunctuationSensitivityConfig(TrottoTestCase):
     self.assertEqual(1, len(response.json))
 
     self.assertEqual(self.TEST_KEYWORD, response.json[0]['shortpath'])
+
+
+
+BASE_URL = '/_/api/links'
+
+
+@patch(
+  'shared_helpers.config.get_config',
+  return_value={'encryption_key': 'secret', 'admins': ['sam@googs.com']},
+)
+class TestHandlersPublicAPI(TrottoTestCase):
+  """Testing only additional behaviour for public API"""
+  blueprints_under_test = [handlers.routes]
+
+  def setUp(self):
+    super().setUp()
+
+    self.token = ApiToken(
+      key=generate_secret(64),
+      organization='test_org',
+    )
+
+    self.token.put()
+
+  def test_unathorized(self, _):
+    """Tests all API endpoint with non-admin user"""
+    for url, method in (
+      (BASE_URL, 'POST'),
+      (f'{BASE_URL}/1', 'PUT'),
+      (f'{BASE_URL}/1', 'DELETE'),
+      (BASE_URL, 'GET'),
+    ):
+      with self.subTest():
+        response = self.testapp.request(
+          url,
+          method=method,
+          expect_errors=True,
+        )
+        self.assertEqual(401, response.status_int)
+
+  def test_invalid_token(self, _):
+    """Tests all API endpoint with non-admin user"""
+    for url, method in (
+      (BASE_URL, 'POST'),
+      (f'{BASE_URL}/1', 'PUT'),
+      (f'{BASE_URL}/1', 'DELETE'),
+      (BASE_URL, 'GET'),
+    ):
+      with self.subTest():
+        response = self.testapp.request(
+          url,
+          method=method,
+          headers={'Authorization': 'invalid'},
+          expect_errors=True,
+        )
+        self.assertEqual(401, response.status_int)
+
+  def test_create_link(self, _):
+    response = self.testapp.post_json(
+      BASE_URL,
+      {
+        'shortpath': 'there',
+        'destination': 'http://example.com/there',
+        'owner': 'john.doe@te.st',
+      },
+      headers={'Authorization': self.token.key},
+    )
+
+    self.assertEqual(201, response.status_int)
+
+  def test_create_without_owner(self, _):
+    response = self.testapp.post_json(
+      BASE_URL,
+      {
+        'shortpath': 'there',
+        'destination': 'http://example.com/there',
+      },
+      headers={'Authorization': self.token.key},
+      expect_errors=True,
+    )
+
+    self.assertEqual(400, response.status_int)
+
+  def test_get_list(self, _):
+    """Testing successfull get for token_list"""
+    link_list = [ShortLink(
+      organization='test_org',
+      owner='kay@googs.com',
+      namespace='go',
+      shortpath=f'there{index}',
+      shortpath_prefix='there',
+      destination_url='http://drive.com'
+    ) for index in range(10)]
+    for link in link_list:
+      link.put()
+
+    response = self.testapp.get(
+      BASE_URL,
+      headers={'Authorization': self.token.key},
+    )
+
+    self.assertEqual(200, response.status_int)
+    response = json.loads(response.text)
+    self.assertEqual(
+      {link.id for link in link_list},
+      {int(res_link['id']) for res_link in response}
+    )
+
+  def test_update_destination(self, _):
+    existed_link = ShortLink(
+      organization='test_org',
+      owner='kay@googs.com',
+      namespace='go',
+      shortpath='existing',
+      shortpath_prefix='there',
+      destination_url='http://drive.com'
+    )
+    existed_link.put()
+    response = self.testapp.put_json(
+      f'{BASE_URL}/{existed_link.id}',
+      {
+        'destination': 'http://to.survive',
+      },
+      headers={'Authorization': self.token.key},
+    )
+
+    self.assertEqual(200, response.status_int)
+    response = json.loads(response.text)
+    self.assertEqual(existed_link.shortpath, response['shortpath'])
+    self.assertEqual('http://to.survive', response['destination_url'])
+
+  def test_delete(self, _):
+    existed_link = ShortLink(
+      organization='test_org',
+      owner='kay@googs.com',
+      namespace='go',
+      shortpath='existing',
+      shortpath_prefix='there',
+      destination_url='http://drive.com'
+    )
+    existed_link.put()
+    response = self.testapp.delete(
+      f'{BASE_URL}/{existed_link.id}',
+      headers={'Authorization': self.token.key},
+    )
+
+    self.assertEqual(200, response.status_int)
+
+    response = self.testapp.get(
+      BASE_URL,
+      headers={'Authorization': self.token.key},
+    )
+    response = json.loads(response.text)
+
+    self.assertNotIn(existed_link.id, {int(res_link['id']) for res_link in response})

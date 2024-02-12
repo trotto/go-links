@@ -268,7 +268,7 @@ def upsert_short_link(acting_user, organization, owner, namespace, shortpath, de
 
   check_namespaces(organization, namespace, shortpath)
 
-  if (not (organization == acting_user.organization and owner == acting_user.email)
+  if acting_user and (not (organization == acting_user.organization and owner == acting_user.email)
       and organization != get_organization_id_for_email(owner)):
     raise LinkCreationException("The go link's owner must be in the go link's organization")
 

@@ -10,6 +10,7 @@ from flask_login import current_user, login_required
 from jellyfish import levenshtein_distance
 import jwt
 
+from modules.base.authentication import login_or_api_token_required, public_auth
 from modules.links import helpers
 from modules.data import get_models
 from modules.organizations.helpers import get_org_edit_mode
@@ -55,16 +56,20 @@ def link_mutation_permission_required(f):
 
 
 def check_mutate_authorization(link_id, user_id=None):
-  if user_id:
-    user = user_helpers.get_user_by_id(user_id)
-  else:
-    user = current_user
   try:
     existing_link = models.ShortLink.get_by_id(link_id)
   except Exception as e:
     logging.warning(str(e))
 
     return False
+
+  if public_auth():
+    return existing_link
+
+  if user_id:
+    user = user_helpers.get_user_by_id(user_id)
+  else:
+    user = current_user
 
   if not existing_link:
     return False
@@ -107,18 +112,26 @@ def _order_links_by_similarity(
   return sorted(links, key=lambda link:distances[link['id']])
 
 
+def _get_organization() -> str:
+  """Gets organization based on auth type"""
+  if token := public_auth():
+    return token.organization
+  return current_user.organization
+
+
 @routes.route('/_/api/links', methods=['GET'])
-@login_required
+@login_or_api_token_required
 def get_links():
   similar_to = request.args.get('similar_to')
   limit = request.args.get('limit', type=int)
   similarity_threshold = request.args.get('similarity_threshold', type=float)
 
   links = [_get_link_response(entity)
-           for entity in helpers.get_all_shortlinks_for_org(current_user.organization)]
+           for entity in helpers.get_all_shortlinks_for_org(_get_organization())]
 
-  for link in links:
-    link['mine'] = link['owner'] == current_user.email
+  if not public_auth():
+    for link in links:
+      link['mine'] = link['owner'] == current_user.email
 
   if similar_to:
     links = _order_links_by_similarity(links, similar_to, similarity_threshold)
@@ -130,18 +143,27 @@ def get_links():
 
 
 @routes.route('/_/api/links', methods=['POST'])
-@login_required
+@login_or_api_token_required
 def post_link():
   object_data = request.json
 
-  if 'owner' in object_data and not user_helpers.is_user_admin(current_user):
-    abort(403)
+  owner = object_data.get('owner')
+  acting_user = current_user
+
+  if public_auth():
+    if not owner:
+      abort(400)
+    acting_user = None
+  else:
+    if owner and not user_helpers.is_user_admin(current_user):
+      abort(403)
+    owner = owner or current_user.email
 
   try:
-    new_link = helpers.create_short_link(current_user,
-                                         current_user.organization,
-                                         object_data.get('owner', current_user.email),
-                                         object_data.get('namespace', get_default_namespace(current_user.organization)),
+    new_link = helpers.create_short_link(acting_user,
+                                         _get_organization(),
+                                         owner,
+                                         object_data.get('namespace', get_default_namespace(_get_organization())),
                                          object_data['shortpath'],
                                          object_data['destination'],
                                          request.args.get('validation', helpers.SIMPLE_VALIDATION_MODE))
@@ -150,7 +172,7 @@ def post_link():
       'error': str(e)
     })
 
-  logging.info(f'{current_user.email} created go link with ID {new_link.id}')
+  logging.info(f'{acting_user.email if acting_user else _get_organization()} created go link with ID {new_link.id}')
 
   return jsonify(
     _get_link_response(new_link)
@@ -158,8 +180,8 @@ def post_link():
 
 
 @routes.route('/_/api/links/<link_id>', methods=['PUT'])
+@login_or_api_token_required
 @link_mutation_permission_required
-@login_required
 def put(link_id):
   existing_link = g.link
 
@@ -167,8 +189,10 @@ def put(link_id):
 
   existing_link.destination_url = object_data['destination']
 
+  acting_user = current_user if not public_auth() else None
+
   try:
-    return jsonify(_get_link_response(helpers.update_short_link(current_user, existing_link)))
+    return jsonify(_get_link_response(helpers.update_short_link(acting_user, existing_link)))
   except helpers.LinkCreationException as e:
     return jsonify({
       'error': str(e),
@@ -177,8 +201,8 @@ def put(link_id):
 
 
 @routes.route('/_/api/links/<link_id>', methods=['DELETE'])
+@login_or_api_token_required
 @link_mutation_permission_required
-@login_required
 def delete(link_id):
   existing_link = g.link
 
