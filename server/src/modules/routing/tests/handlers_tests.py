@@ -19,7 +19,7 @@ class TestRedirectHandlerWithoutLogin(TrottoTestCase):
     response = self.testapp.get('/benefits?s=crx')
 
     self.assertEqual(302, response.status_int)
-    self.assertEqual('http://localhost/_/auth/login?redirect_to=%2Fbenefits%3Fs%3Dcrx', response.location)
+    self.assertEqual('/_/auth/login?redirect_to=%2Fbenefits%3Fs%3Dcrx', response.location)
 
   def test_get__not_logged_in__http_bare_host_request_coming_from_browser_extension(self):
     response = self.testapp.get('/benefits?s=crx&sc=http')
@@ -80,7 +80,15 @@ class TestRedirectHandler(TrottoTestCase):
                 namespace='go',
                 shortpath='drive',
                 shortpath_prefix='drive',
-                destination_url='http://drive3.com')
+                destination_url='http://drive3.com'),
+
+      # unlisted shortlink
+      ShortLink(organization='1.com',
+                owner='bay@1.com',
+                namespace='go',
+                shortpath='unlisted',
+                shortpath_prefix='unlisted',
+                destination_url='https://unlisted.drive.com'),
     ]
 
     for link in test_shortlinks:
@@ -183,6 +191,16 @@ class TestRedirectHandler(TrottoTestCase):
     self.assertEqual(302, response.status_int)
 
     self.assertEqual('http://wiki.com', response.headers['Location'])
+
+  def test_redirect__unlisted_go_link(self):
+    for user in ['bay@1.com',  # link owner
+                 'may@1.com']:
+      response = self.testapp.get('/unlisted',
+                                  headers={'TROTTO_USER_UNDER_TEST': user})
+
+      self.assertEqual(302, response.status_int)
+
+      self.assertEqual('https://unlisted.drive.com', response.headers['Location'])
 
 class RoutingTestCase(TrottoTestCase):
   blueprints_under_test = [handlers.routes, links_handlers.routes]
@@ -292,6 +310,32 @@ class TestAlternativeKeywordResolutionMode(RoutingTestCase):
     ]:
       with patch('shared_helpers.config.get_organization_config',
                  return_value={'keywords': {'resolution_mode': test_case.resolution_mode}}):
+        self.assertEqual(test_case.expected_redirect, self._get_redirect(test_case.requested_keyword))
+
+  def test_alternative_keyword_resolution_mode__extra_path_parts__with_punctuation_while_punctuation_insensitive(self):
+    TEST_KEYWORD = 'example-dot-com'
+    TEST_DESTINATION = 'https://example.com/'
+
+    self._create_test_link(TEST_KEYWORD.replace('-', ''), TEST_DESTINATION)
+
+    TEST_KEYWORD_WITH_EXTRA_PARTS = TEST_KEYWORD+'/extra-1/extra-2'
+
+    for test_case in [
+      self.TestCase(resolution_mode=None, requested_keyword=TEST_KEYWORD, expected_redirect=TEST_DESTINATION),
+      self.TestCase(resolution_mode=None,
+                    requested_keyword=TEST_KEYWORD_WITH_EXTRA_PARTS,
+                    expected_redirect='http://localhost:5007/?'+parse.urlencode({'sp': TEST_KEYWORD_WITH_EXTRA_PARTS})),
+      self.TestCase(resolution_mode='alternative', requested_keyword=TEST_KEYWORD, expected_redirect=TEST_DESTINATION),
+      self.TestCase(resolution_mode='alternative',
+                    requested_keyword=TEST_KEYWORD_WITH_EXTRA_PARTS,
+                    expected_redirect=TEST_DESTINATION+'extra-1/extra-2'),
+      # test case using different punctuation for punctuation-insensitive link
+      self.TestCase(resolution_mode='alternative',
+                    requested_keyword=TEST_KEYWORD.replace('-', '_')+'/extra-1',
+                    expected_redirect=TEST_DESTINATION+'extra-1')
+    ]:
+      with patch('shared_helpers.config.get_organization_config',
+                 return_value={'keywords': {'resolution_mode': test_case.resolution_mode, 'punctuation_sensitive': False}}):
         self.assertEqual(test_case.expected_redirect, self._get_redirect(test_case.requested_keyword))
 
   def test_alternative_keyword_resolution_mode__programmatic_link_without_provided_params(self):

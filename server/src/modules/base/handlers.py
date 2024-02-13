@@ -3,7 +3,7 @@ import logging
 from urllib.parse import urlencode
 
 from flask import Blueprint, Response, abort, redirect, render_template, request, session, url_for, make_response
-from flask_login import logout_user
+from flask_login import logout_user, current_user
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
 
@@ -48,6 +48,9 @@ def get_google_login_url(oauth_redirect_uri=None, redirect_to_after_oauth=None):
 
 @routes.route('/_/auth/login')
 def login():
+  if current_user.is_authenticated:
+    return redirect('/')
+
   redirect_to = authentication.get_host_for_request(request)
   if request.args.get('redirect_to', None):
     redirect_to += request.args.get('redirect_to', None)

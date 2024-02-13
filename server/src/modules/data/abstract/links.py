@@ -6,6 +6,7 @@ from modules.data.abstract.base import BaseModel
 class ShortLink(BaseModel):
   organization = str
   owner = str
+  unlisted = bool
   namespace = str
   display_shortpath = str
   shortpath = str

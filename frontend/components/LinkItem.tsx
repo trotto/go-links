@@ -1,4 +1,4 @@
-import { Box, BoxProps, IconButton, Link, SvgIcon } from '@mui/material'
+import {Box, BoxProps, IconButton, Link, SvgIcon, Tooltip} from '@mui/material'
 import { FC, useContext, useMemo } from 'react'
 
 import { DeleteModal } from 'app/components/DeleteModal'
@@ -12,6 +12,7 @@ import { Link as ILink } from 'app/types'
 import { EditableDestination } from './EditableDestination'
 import { InfoBox } from './InfoBox'
 import { LinkActions } from './LinkActions'
+import {VisibilityOffOutlined} from "@mui/icons-material";
 
 interface Props {
   link: ILink
@@ -20,7 +21,7 @@ interface Props {
 
 export const LinkItem: FC<Props> = ({ link, sx }) => {
   const { user } = useContext(Context)
-  const { id, destination_url, owner, visits_count, shortpath } = link
+  const { id, destination_url, owner, visits_count, shortpath, unlisted } = link
   const fullShortPath = useFullShortPath(link)
   const { isManaged, baseUrl, isExtensionInstalled } = useTrotto()
 
@@ -60,7 +61,7 @@ export const LinkItem: FC<Props> = ({ link, sx }) => {
         <Box
           sx={{
             display: 'grid',
-            gridTemplateColumns: 'max-content auto 1fr minmax(68px, max-content) max-content auto',
+            gridTemplateColumns: 'max-content auto auto 1fr minmax(68px, max-content) max-content auto',
             alignItems: 'center',
           }}
         >
@@ -90,6 +91,19 @@ export const LinkItem: FC<Props> = ({ link, sx }) => {
           >
             <Copy />
           </IconButton>
+          {!unlisted ? <div /> : (
+            <Box sx={{ml: 2, display: 'flex'}}>
+              <Tooltip
+                title={<Box fontSize='12px'>This unlisted go link can be used by any team member who knows the keyword, but only the owner and administrators can see it in the Trotto directory</Box>}
+                arrow
+                placement="right-start"
+              >
+                <Box sx={{cursor: 'help', display: 'flex', alignItems: 'center'}}>
+                  <VisibilityOffOutlined />
+                </Box>
+              </Tooltip>
+            </Box>
+          )}
           <div />
           <InfoBox sx={{ ml: 1 }}>{owner}</InfoBox>
           {isManaged && (

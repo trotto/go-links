@@ -37,6 +37,8 @@ class ShortLink(db.Model, links.ShortLink):
                            nullable=False)
   owner = db.Column(db.String(120),
                     nullable=False)
+  unlisted = db.Column(db.Boolean,
+                       nullable=True)
   _ns = db.Column('namespace',
                   db.String(30),
                   nullable=True)

@@ -51,6 +51,7 @@ class TestHandlers(TrottoTestCase):
                       'created': '2018-10-01 00:00:00',
                       'modified': '2018-11-01 00:00:00',
                       'owner': 'kay@googs.com',
+                      'unlisted': False,
                       'namespace': 'go',
                       'shortpath': 'there',
                       'destination_url': 'http://example.com/there',
@@ -59,7 +60,7 @@ class TestHandlers(TrottoTestCase):
                      json.loads(response.text))
 
     self.assertEqual(list(args_deep_copy),
-                     [User.get_by_email_and_org('kay@googs.com', 'googs.com'), 'googs.com', 'kay@googs.com', 'go', 'there', 'http://example.com/there', 'simple'])
+                     [User.get_by_email_and_org('kay@googs.com', 'googs.com'), 'googs.com', 'kay@googs.com', 'go', 'there', 'http://example.com/there', 'simple', False])
 
   def test_create_link__no_patching__no_namespace_specified(self):
     self.testapp.post_json('/_/api/links',
@@ -225,6 +226,7 @@ class TestHandlers(TrottoTestCase):
                             'modified': str(modified_datetime),
                             'mine': True,
                             'owner': 'kay@googs.com',
+                            'unlisted': False,
                             'namespace': 'go',
                             'shortpath': 'there',
                             'destination_url': 'http://example.com',
@@ -235,6 +237,7 @@ class TestHandlers(TrottoTestCase):
                             'modified': str(modified_datetime),
                             'mine': False,
                             'owner': 'jay@googs.com',
+                            'unlisted': False,
                             'namespace': 'go',
                             'shortpath': 'here',
                             'destination_url': 'http://gmail.com',
@@ -245,6 +248,7 @@ class TestHandlers(TrottoTestCase):
                             'modified': str(modified_datetime),
                             'mine': False,
                             'owner': 'jay@googs.com',
+                            'unlisted': False,
                             'namespace': 'eng',
                             'shortpath': '1',
                             'destination_url': 'http://1.com',
@@ -275,6 +279,7 @@ class TestHandlers(TrottoTestCase):
           'modified': str(modified_datetime),
           'mine': True,
           'owner': 'kay@googs.com',
+          'unlisted': False,
           'namespace': 'go',
           'shortpath': shortpath,
           'destination_url': 'http://example.com',
@@ -619,6 +624,7 @@ class TestHandlers(TrottoTestCase):
                                                 'id': '7',
                                                 'visits_count': 0,
                                                 'owner': 'kay@googs.com',
+                                                'unlisted': False,
                                                 'namespace': 'go',
                                                 'destination_url': 'http://drive.com',
                                                 'type': None})
@@ -861,13 +867,13 @@ class TestLinkTransferHandlers(TrottoTestCase):
                                 headers={'TROTTO_USER_UNDER_TEST': 'joe@googs.com'})
 
     self.assertEqual(302, response.status_int)
-    self.assertEqual('http://localhost/?transfer=my_token', response.location)
+    self.assertEqual('/?transfer=my_token', response.location)
 
   def test_redirect_transfer_url__not_signed_in(self, _):
     response = self.testapp.get('/_transfer/my_token')
 
     self.assertEqual(302, response.status_int)
-    self.assertEqual('http://localhost/_/auth/login?redirect_to=%2F_transfer%2Fmy_token%3F',
+    self.assertEqual('/_/auth/login?redirect_to=%2F_transfer%2Fmy_token%3F',
                      response.location)
 
 
@@ -918,3 +924,130 @@ class TestKeywordPunctuationSensitivityConfig(TrottoTestCase):
     self.assertEqual(1, len(response.json))
 
     self.assertEqual(self.TEST_KEYWORD, response.json[0]['shortpath'])
+
+
+class TestUnlistedLinks(TrottoTestCase):
+
+  blueprints_under_test = [handlers.routes]
+
+  TEST_LINKS = [
+    {
+      'owner': 'joe@googs.com',
+      'shortpath': 'listed-link',
+      'destination': 'https://www.trot.to',
+      'unlisted': False,
+    },
+    {
+      'owner': 'kay@googs.com',
+      'shortpath': 'kay-unlisted',
+      'destination': 'https://kay.trot.to',
+      'unlisted': True,
+    },
+    {
+      'owner': 'sam@googs.com',
+      'shortpath': 'sam-unlisted',
+      'destination': 'https://sam.trot.to',
+      'unlisted': True,
+    },
+  ]
+
+  def _add_test_links(self):
+    shortpath_to_id = {}
+
+    for link in self.TEST_LINKS:
+      link_body = deepcopy(link)
+      del link_body['owner']
+
+      response = self.testapp.post_json('/_/api/links',
+                                        link_body,
+                                        headers={'TROTTO_USER_UNDER_TEST': link['owner']})
+
+      shortpath_to_id[link['shortpath']] = response.json['id']
+
+    return shortpath_to_id
+
+
+  def test_list_links_filtering(self):
+    self._add_test_links()
+
+    # kay@googs.com
+    response = self.testapp.get('/_/api/links',
+                                headers={'TROTTO_USER_UNDER_TEST': 'kay@googs.com'})
+
+    links_listed = response.json
+
+    self.assertEqual(2, len(links_listed))
+    self.assertCountEqual(['listed-link', 'kay-unlisted'], [link['shortpath'] for link in links_listed])
+    self.assertCountEqual([False, True], [link['unlisted'] for link in links_listed])
+
+    # sam@googs.com
+    response = self.testapp.get('/_/api/links',
+                                headers={'TROTTO_USER_UNDER_TEST': 'sam@googs.com'})
+
+    links_listed = response.json
+
+    self.assertEqual(2, len(links_listed))
+    self.assertCountEqual(['listed-link', 'sam-unlisted'], [link['shortpath'] for link in links_listed])
+
+    # joe@googs.com
+    response = self.testapp.get('/_/api/links',
+                                headers={'TROTTO_USER_UNDER_TEST': 'joe@googs.com'})
+
+    links_listed = response.json
+
+    self.assertEqual(1, len(links_listed))
+    self.assertCountEqual(['listed-link'], [link['shortpath'] for link in links_listed])
+
+  @patch('shared_helpers.config.get_config', return_value={'sessions_secret': 'the_secret',
+                                                           'admins': ['may@googs.com']})
+  def test_list_links_filtering__admin(self, _):
+    self._add_test_links()
+
+    response = self.testapp.get('/_/api/links',
+                                headers={'TROTTO_USER_UNDER_TEST': 'may@googs.com'})
+
+    links_listed = response.json
+
+    self.assertEqual(3, len(links_listed))
+
+  def test_unlisted_status_durability(self):
+    shortpath_to_id = self._add_test_links()
+
+    self.testapp.put_json(f'/_/api/links/{shortpath_to_id["kay-unlisted"]}',
+                          {'destination': 'http://boop.com'},
+                          headers={'TROTTO_USER_UNDER_TEST': 'kay@googs.com'})
+
+    # kay@googs.com
+    response = self.testapp.get('/_/api/links',
+                                headers={'TROTTO_USER_UNDER_TEST': 'kay@googs.com'})
+
+    links_listed = response.json
+
+    self.assertEqual(2, len(links_listed))
+    self.assertCountEqual(['listed-link', 'kay-unlisted'], [link['shortpath'] for link in links_listed])
+    self.assertCountEqual(['https://www.trot.to', 'http://boop.com'], [link['destination_url'] for link in links_listed])
+    self.assertCountEqual([False, True], [link['unlisted'] for link in links_listed])
+
+    # joe@googs.com
+    response = self.testapp.get('/_/api/links',
+                                headers={'TROTTO_USER_UNDER_TEST': 'joe@googs.com'})
+
+    links_listed = response.json
+
+    self.assertEqual(1, len(links_listed))
+    self.assertCountEqual(['listed-link'], [link['shortpath'] for link in links_listed])
+
+  def test_links_default_listed(self):
+    self.testapp.post_json('/_/api/links',
+                           {'shortpath': 'my-link',
+                            'destination': 'https://www.trot.to'},
+                           headers={'TROTTO_USER_UNDER_TEST': 'joe@googs.com'})
+
+    for user in ['joe@googs.com', 'sam@googs.com']:
+      response = self.testapp.get('/_/api/links',
+                                  headers={'TROTTO_USER_UNDER_TEST': user})
+
+      links_listed = response.json
+
+      self.assertEqual(1, len(links_listed))
+      self.assertCountEqual(['my-link'], [link['shortpath'] for link in links_listed])

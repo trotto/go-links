@@ -1,6 +1,6 @@
 # Trotto Go Links
 
-[![CircleCI](https://dl.circleci.com/status-badge/img/circleci/Wp5qWwVchXp4teudjvx2zq/3F8UyJs2UMqV9cR5YLdip9/tree/master.svg?style=svg&circle-token=5eb7268ab9c1eb72a0991609d3c7292340397c25)](https://dl.circleci.com/status-badge/redirect/circleci/Wp5qWwVchXp4teudjvx2zq/3F8UyJs2UMqV9cR5YLdip9/tree/master)
+[![CircleCI](https://circleci.com/gh/trotto/go-links.svg?style=svg)](https://circleci.com/gh/trotto/go-links)
 
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/trotto/go-links)
 
@@ -107,3 +107,26 @@ Now, you can access the local instance at http://localhost:3000.
 
 Most server-side and frontend changes should be picked up automatically, thanks to the Flask dev server and
 [React Hot Loader](https://github.com/gaearon/react-hot-loader).
+
+### Database migrations
+
+- update a table model file, e.g., `server/src/modules/data/implementations/postgres/links.py`
+- created a revision file, e.g., `./scripts/create_revision.sh "Add unlisted column"`
+- review the generated file in `server/src/migrations/versions`
+- reload the app to apply the migration
+
+### Running tests
+
+#### Python
+
+All tests:
+
+```
+./run_tests/run.sh
+```
+
+Subset of tests:
+
+```
+./run_tests/run.sh modules.links.tests.handlers_tests:TestUnlistedLinks
+```

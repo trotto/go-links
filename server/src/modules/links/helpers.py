@@ -4,7 +4,6 @@ import string
 from urllib.parse import urlparse, urlencode, urlunparse
 
 import validators
-from validators.utils import ValidationFailure
 
 from modules.data import get_models
 from modules.organizations.utils import get_organization_id_for_email
@@ -90,11 +89,12 @@ def get_shortlink(organization, keywords_punctuation_sensitive, alternative_reso
 
   if alternative_resolution_mode:
     keyword_parts = canonical_keyword.split('/')
+    non_canonical_keyword_parts = keyword.split('/')
     if len(keyword_parts) > 1:
       perfect_prefix_match = models.ShortLink.get_by_full_path(organization, namespace, keyword_parts[0])
 
       if perfect_prefix_match:
-        return perfect_prefix_match, perfect_prefix_match.destination_url+'/'.join(keyword_parts[1:])
+        return perfect_prefix_match, perfect_prefix_match.destination_url+'/'.join(non_canonical_keyword_parts[1:])
     else:
       # search for prefix match and, if found, resolve with empty string for placeholders
       prefix_matches = models.ShortLink.get_by_prefix(organization, namespace, keyword_parts[0])
@@ -137,8 +137,8 @@ def find_conflicting_link(organization, namespace, shortpath):
   return None
 
 
-def create_short_link(acting_user, organization, owner, namespace, shortpath, destination, validation_mode):
-  return upsert_short_link(acting_user, organization, owner, namespace, shortpath, destination, None, validation_mode)
+def create_short_link(acting_user, organization, owner, namespace, shortpath, destination, validation_mode, unlisted=False):
+  return upsert_short_link(acting_user, organization, owner, namespace, shortpath, destination, None, validation_mode, unlisted=unlisted)
 
 
 def update_short_link(acting_user, link_object):
@@ -183,7 +183,7 @@ def validate_shortpath(organization, shortpath, validation_mode):
     if shortpath != re.sub(validation_regex, '', shortpath):
       raise LinkCreationException(PATH_RESTRICTIONS_ERROR_SIMPLE)
   elif validation_mode == EXPANDED_VALIDATION_MODE:
-    if type(validators.url('https://trot.to/'+shortpath)) is ValidationFailure:
+    if not validators.url('https://trot.to/'+shortpath):
       raise LinkCreationException(PATH_RESTRICTIONS_ERROR_EXPANDED)
   else:
     raise ValueError(f'Unsupported validation mode {validation_mode}')
@@ -207,7 +207,7 @@ def _is_valid_bare_hostname_destination(destination):
 
   with_tld = urlunparse(url_parts)
 
-  return type(validators.url(with_tld)) is not ValidationFailure
+  return validators.url(with_tld)
 
 """Returns whether or not the provided destination is a valid URL using double hyphen, like `https://double--hyphen.example.com/some/path`.
 
@@ -216,10 +216,16 @@ This function is used to work around a limitation of the `validators` package wh
 def _is_valid_idn_destination(destination):
   clean_url = re.sub('\-\-+', '-', destination)
 
-  return type(validators.url(clean_url)) is not ValidationFailure
+  return validators.url(clean_url)
 
 def _validate_destination(destination):
-  if type(validators.url(destination)) is ValidationFailure and not _is_valid_bare_hostname_destination(destination) and not _is_valid_idn_destination(destination):
+  # only validate the base URL, and let anything go in path/fragment
+  # TODO: maybe tighten this up again
+  url_parts = urlparse(destination)
+
+  destination_base = f'{url_parts.scheme}://{url_parts.netloc}'
+
+  if not validators.url(destination_base) and not _is_valid_bare_hostname_destination(destination_base) and not _is_valid_idn_destination(destination_base):
     raise LinkCreationException('You must provide a valid destination URL')
 
 
@@ -247,7 +253,7 @@ def get_canonical_keyword(punctuation_sensitive, keyword):
   return keyword if punctuation_sensitive else _remove_punctuation(keyword)
 
 
-def upsert_short_link(acting_user, organization, owner, namespace, shortpath, destination, updated_link_object, validation_mode=EXPANDED_VALIDATION_MODE):
+def upsert_short_link(acting_user, organization, owner, namespace, shortpath, destination, updated_link_object, validation_mode=EXPANDED_VALIDATION_MODE, unlisted=False):
   shortpath = shortpath.strip().lower().strip('/')
   destination = destination.strip()
 
@@ -337,7 +343,9 @@ def upsert_short_link(acting_user, organization, owner, namespace, shortpath, de
                    'display_shortpath': display_shortpath,
                    'shortpath': shortpath,
                    'destination_url': destination,
-                   'shortpath_prefix': shortpath.split('/')[0]}
+                   'shortpath_prefix': shortpath.split('/')[0],
+                   'unlisted': unlisted,
+                   }
     link = models.ShortLink(**link_kwargs)
 
   link.put()

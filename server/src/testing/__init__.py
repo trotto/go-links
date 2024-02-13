@@ -11,6 +11,8 @@ import yaml
 
 import main
 
+from db import db
+
 multiprocessing.set_start_method('fork')
 
 LIVE_APP_HOST = 'http://localhost:5010'
@@ -18,9 +20,6 @@ LIVE_APP_HOST = 'http://localhost:5010'
 class TrottoTestCase(unittest.TestCase):
 
   def setUp(self):
-    main.db.close_all_sessions()
-    main.db.engine.dispose()
-
     subprocess.run(['bash', os.getenv('CLEAR_POSTGRES_DB_SCRIPT')], stdout=subprocess.DEVNULL)
 
     self.init_app()
@@ -44,6 +43,9 @@ class TrottoTestCase(unittest.TestCase):
           pass
 
   def tearDown(self):
+    db.close_all_sessions()
+    db.engine.dispose()
+    self.app_ctxt.pop()
     if getattr(self, 'start_live_app', False):
       if self.prior_trotto_config:
         os.environ['TROTTO_CONFIG'] = self.prior_trotto_config
@@ -57,7 +59,9 @@ class TrottoTestCase(unittest.TestCase):
     importlib.reload(main)
 
     self.realapp = main.init_app_without_routes(disable_csrf=True)
-
+    self.app_ctxt = self.realapp.app_context()
+    self.app_ctxt.push()
+  
     for blueprint in getattr(self, 'blueprints_under_test', []):
       self.realapp.register_blueprint(blueprint)
 

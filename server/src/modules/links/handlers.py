@@ -5,7 +5,7 @@ import logging
 from typing import Any, Optional
 from urllib.parse import urlencode
 
-from flask import Blueprint, request, redirect, jsonify, abort, g
+from flask import Blueprint, request, redirect, jsonify, abort, g, current_app
 from flask_login import current_user, login_required
 from jellyfish import levenshtein_distance
 import jwt
@@ -28,7 +28,7 @@ models = get_models('links')
 
 
 PUBLIC_KEYS = ['id', 'created', 'modified', 'owner', 'namespace',
-               'shortpath', 'destination_url', 'type', 'visits_count']
+               'shortpath', 'destination_url', 'type', 'visits_count', 'unlisted']
 
 
 def get_field_conversion_fns():
@@ -36,7 +36,8 @@ def get_field_conversion_fns():
     'id': lambda id: str(id),
     'visits_count': (lambda count: count or 0),
     'created': (lambda created: str(created).split('+')[0]),
-    'modified': (lambda created: str(created).split('+')[0])
+    'modified': (lambda created: str(created).split('+')[0]),
+    'unlisted': (lambda unlisted: bool(unlisted))
   }
 
 
@@ -117,6 +118,11 @@ def get_links():
   links = [_get_link_response(entity)
            for entity in helpers.get_all_shortlinks_for_org(current_user.organization)]
 
+  if not user_helpers.is_user_admin(current_user):
+    # filter out unlisted links the user doesn't own
+    # TODO: use the SQL query to do this filtering instead
+    links = [link for link in links if not link['unlisted'] or link['owner'] == current_user.email]
+
   for link in links:
     link['mine'] = link['owner'] == current_user.email
 
@@ -144,7 +150,8 @@ def post_link():
                                          object_data.get('namespace', get_default_namespace(current_user.organization)),
                                          object_data['shortpath'],
                                          object_data['destination'],
-                                         request.args.get('validation', helpers.SIMPLE_VALIDATION_MODE))
+                                         request.args.get('validation', helpers.SIMPLE_VALIDATION_MODE),
+                                         object_data.get('unlisted', False))
   except helpers.LinkCreationException as e:
     return jsonify({
       'error': str(e)
