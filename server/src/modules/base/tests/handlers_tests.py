@@ -84,14 +84,14 @@ class TestHandlers(AuthenticationTestCase):
     response = self.testapp.get('/_/auth/login')
 
     self.assertEqual(302, response.status_int)
-    self.assertEqual(f"http://localhost/_/auth/login/google?{urlencode({'redirect_to': 'http://localhost'})}",
+    self.assertEqual(f"/_/auth/login/google?{urlencode({'redirect_to': 'http://localhost'})}",
                      response.headers['Location'])
 
   def test_login_endpoint__single_login_method__with_redirect_to(self):
     response = self.testapp.get('/_/auth/login?redirect_to=%2Froadmap')
 
     self.assertEqual(302, response.status_int)
-    self.assertEqual(f"http://localhost/_/auth/login/google?{urlencode({'redirect_to': 'http://localhost/roadmap'})}",
+    self.assertEqual(f"/_/auth/login/google?{urlencode({'redirect_to': 'http://localhost/roadmap'})}",
                      response.headers['Location'])
 
   @patch('modules.base.handlers.LOGIN_METHODS', MULTIPLE_LOGIN_METHODS)
@@ -212,7 +212,7 @@ class TestAuthenticationControls(AuthenticationTestCase):
     self.assertEqual(302,
                      response.status_int)
 
-    self.assertEqual('http://localhost/_/auth/login?e=account_disabled',
+    self.assertEqual('/_/auth/login?e=account_disabled',
                      response.headers.get('Location'))
 
   def test_enabled_status__none(self):
@@ -281,7 +281,7 @@ class TestAuthenticationControls(AuthenticationTestCase):
 
     self._assert_authentication_status(login_response, False)
 
-    self.assertEqual('http://localhost/_/auth/login?e=auth_not_allowed-google',
+    self.assertEqual('/_/auth/login?e=auth_not_allowed-google',
                      login_response.headers.get('Location'))
 
 

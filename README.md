@@ -107,3 +107,26 @@ Now, you can access the local instance at http://localhost:3000.
 
 Most server-side and frontend changes should be picked up automatically, thanks to the Flask dev server and
 [React Hot Loader](https://github.com/gaearon/react-hot-loader).
+
+### Database migrations
+
+- update a table model file, e.g., `server/src/modules/data/implementations/postgres/links.py`
+- created a revision file, e.g., `./scripts/create_revision.sh "Add unlisted column"`
+- review the generated file in `server/src/migrations/versions`
+- reload the app to apply the migration
+
+### Running tests
+
+#### Python
+
+All tests:
+
+```
+./run_tests/run.sh
+```
+
+Subset of tests:
+
+```
+./run_tests/run.sh modules.links.tests.handlers_tests:TestUnlistedLinks
+```

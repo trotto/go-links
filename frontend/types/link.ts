@@ -9,6 +9,7 @@ export interface Link {
   shortpath: string
   type?: string
   visits_count: number
+  unlisted: boolean
 }
 
 export interface LinkCreateResponse extends Link {

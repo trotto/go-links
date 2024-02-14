@@ -43,6 +43,7 @@ run_e2e_tests: &run_e2e_tests
         cd e2e_tests &&
         nvm install && nvm use &&
         yarn install &&
+        yarn playwright install &&
         yarn test
 jobs:
   build_and_deploy:

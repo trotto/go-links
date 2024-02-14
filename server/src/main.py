@@ -7,14 +7,13 @@ import traceback
 import jinja2
 from flask import Flask, send_from_directory, redirect, render_template, request, jsonify, session, make_response
 from flask_login import LoginManager, current_user, logout_user
-from flask_sqlalchemy import SQLAlchemy as _BaseSQLAlchemy
 from flask_migrate import Migrate, upgrade as upgrade_db
 from flask_wtf.csrf import generate_csrf
 import sentry_sdk
 from werkzeug.routing import BaseConverter
 
 from shared_helpers import config, feature_flags
-
+from db import db
 
 sentry_config = config.get_config_by_key_path(['monitoring', 'sentry'])
 if sentry_config:
@@ -46,13 +45,6 @@ def init_app_without_routes(disable_csrf=False):
 
   app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
   app.config['SESSION_COOKIE_SECURE'] = True
-
-  global db
-  class SQLAlchemy(_BaseSQLAlchemy):
-    def apply_pool_defaults(self, app, options):
-        super(SQLAlchemy, self).apply_pool_defaults(app, options)
-        options["pool_pre_ping"] = True
-  db = SQLAlchemy(app)
 
   from modules.base import authentication
 
@@ -112,6 +104,8 @@ def init_app_without_routes(disable_csrf=False):
   @app.route('/_/health_check')
   def health_check():
     return 'OK'
+
+  db.init_app(app)
 
   return app
 
@@ -233,13 +227,30 @@ def layout_config():
   return f"window._trotto = window._trotto || {{}}; window._trotto.layout = {json.dumps(_config.get('layout', {}))};"
 
 
+def _is_safe_path(base_path, user_input):
+  # Resolve the absolute path
+  base_path = os.path.abspath(base_path)
+  user_path = os.path.abspath(os.path.join(base_path, user_input))
+
+  # Ensure the base path is still the prefix of the resolved absolute path
+  return user_path.startswith(base_path)
+
 @app.route('/_styles/<path:path>')
 @app.route('/_scripts/<path:path>')
 @app.route('/_images/<path:path>')
 def static_files(path):
-  return send_from_directory('static/%s' % (request.path.split('/')[1]), path)
+  prefix = request.path.split('/')[1]
+
+  if prefix not in ['_styles', '_scripts', '_images']:
+    return 'Invalid path', 400
+  if not _is_safe_path(prefix, path):
+    return 'Invalid path', 400
+
+  return send_from_directory('static/%s' % prefix, path)
 
 @app.route('/_next_static/<path:path>')
 def static_next_files(path: str):
   """Handle next.js assets separately"""
-  return send_from_directory('static/templates/%s' % (request.path.split('/')[1]), path)
+  if not _is_safe_path('/_next_static', path):
+    return 'Invalid path', 400
+  return send_from_directory('static/templates/_next_static', path)

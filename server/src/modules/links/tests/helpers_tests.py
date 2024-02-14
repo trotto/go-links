@@ -53,6 +53,11 @@ class TestUtilityFunctions(TrottoTestCase):
   def test__validate_destination__valid__ip(self):
     helpers._validate_destination('http://142.251.33.14/search?q=trotto')
 
+  def test__validate_destination__valid__assorted(self):
+    helpers._validate_destination('https://trot.to/#/folder/Dash?:mid=7')
+
+    helpers._validate_destination('https://trot.to/folder/[Dash]/7')
+
   def test__validate_destination__bare_hostname(self):
     helpers._validate_destination('http://go/directory')
 

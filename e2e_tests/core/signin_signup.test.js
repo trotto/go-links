@@ -1,5 +1,3 @@
-const expect = require('expect');
-
 const {
   testDomains
 } = require('../constants');
@@ -14,10 +12,10 @@ const {
 let browser;
 let page;
 
+jest.setTimeout(30 * 1000);
+
 
 beforeAll(async () => {
-  jest.setTimeout(30 * 1000);
-
   browser = await getBrowser();
 });
 
