@@ -236,17 +236,28 @@ def _is_safe_path(base_path, user_input):
   return user_path.startswith(base_path)
 
 @app.route('/_styles/<path:path>')
+def static_style_files(path):
+  """Old frontend styles"""
+  if not _is_safe_path('/_styles', path):
+    return 'Invalid path', 400
+
+  return send_from_directory('static/_styles', path)
+
 @app.route('/_scripts/<path:path>')
+def static_script_files(path):
+  """Old frontend scripts"""
+  if not _is_safe_path('/_scripts', path):
+    return 'Invalid path', 400
+
+  return send_from_directory('static/_scripts', path)
+
 @app.route('/_images/<path:path>')
-def static_files(path):
-  prefix = request.path.split('/')[1]
-
-  if prefix not in ['_styles', '_scripts', '_images']:
-    return 'Invalid path', 400
-  if not _is_safe_path(prefix, path):
+def static_image_files(path):
+  """Images route, used by various clients"""
+  if not _is_safe_path('/_images', path):
     return 'Invalid path', 400
 
-  return send_from_directory('static/%s' % prefix, path)
+  return send_from_directory('static/_images', path)
 
 @app.route('/_next_static/<path:path>')
 def static_next_files(path: str):

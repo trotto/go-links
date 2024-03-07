@@ -1,6 +1,6 @@
 import datetime
 import logging
-from urllib.parse import urljoin
+from urllib.parse import urljoin, unquote
 
 import jwt
 import requests
@@ -65,10 +65,11 @@ def validate_internal_request(request):
 
     raise InvalidInternalToken('expired')
 
-  if request.url != decoded_data['url']:
+  unquoted_request_url = unquote(decoded_data['url'])
+  if request.url != unquoted_request_url:
     logging.warning('Someone attempted to use an internal token with the'
                     ' wrong URL. Token URL: %s. Request URL: %s. Token: %s',
-                    decoded_data['url'], request.url, internal_token)
+                    unquoted_request_url, request.url, internal_token)
 
     raise InvalidInternalToken('mismatched URL')
 

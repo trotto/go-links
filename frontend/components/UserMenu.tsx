@@ -165,11 +165,8 @@ export const UserMenu: FC<Props> = ({ adminLinks }) => {
           ))}
 
           <MenuLink href={navigationLinks.GITHUB}>Github</MenuLink>
-          <MenuLink href={navigationLinks.PRICING}>Pricing</MenuLink>
-          <MenuLink href={navigationLinks.PRIVACY}>Privacy</MenuLink>
-          <MenuLink href={navigationLinks.TERMS}>Terms</MenuLink>
+          <MenuLink href={navigationLinks.PRIVACY}>Privacy & Terms</MenuLink>
           <MenuLink href={navigationLinks.CONTACT}>Contact us</MenuLink>
-          <MenuLink href={feedbackLink}>Share feedback</MenuLink>
         </Box>
       </Menu>
     </>
