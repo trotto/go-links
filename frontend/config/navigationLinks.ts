@@ -1,7 +1,7 @@
 export const navigationLinks = {
   ROOT: '/',
   PRICING: 'https://www.trot.to/pricing',
-  PRIVACY: 'https://www.trot.to/privacy',
+  PRIVACY: 'https://www.trot.to/terms-privacy',
   TERMS: 'https://www.trot.to/terms',
   CONTACT: 'https://www.trot.to/contact',
   SHARE_FEEDBACK: (email: string) => `https://7kgyyjm8iyj.typeform.com/to/CIwBEGSN#email=${email}`,

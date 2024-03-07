@@ -30,11 +30,8 @@ export const Footer: FC = () => {
       <Link href={navigationLinks.GITHUB}>
         <GithubLogo />
       </Link>
-      <Link href={navigationLinks.PRICING}>Pricing</Link>
-      <Link href={navigationLinks.PRIVACY}>Privacy</Link>
-      <Link href={navigationLinks.TERMS}>Terms</Link>
-      <Link href={navigationLinks.CONTACT}>Contact us</Link>
-      <Link href={feedbackLink}>Share feedback</Link>
+      <Link href={navigationLinks.PRIVACY}>Privacy & Terms</Link>
+      <Link href={navigationLinks.CONTACT}>Contact Us</Link>
     </Box>
   )
 }

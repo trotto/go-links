@@ -80,14 +80,9 @@ export const LinkCreationForm: FC<Props> = ({ onCreate, onTyping }) => {
 
   const handleKeyword = useCallback(
     (e: ChangeEvent<HTMLInputElement>) => {
-      return handleChange({
-        ...e,
-        target: {
-          ...e.target,
-          id: e.target.id,
-          value: e.target.value.replace(new RegExp(keywordRegEx, 'g'), ''),
-        },
-      })
+      if (e.target.value.replace(new RegExp(keywordRegEx, 'g'), '') === e.target.value) {
+        return handleChange(e)
+      }
     },
     [handleChange, keywordRegEx],
   )
@@ -171,6 +166,26 @@ export const LinkCreationForm: FC<Props> = ({ onCreate, onTyping }) => {
               },
             }}
           />
+          <Button
+            variant='contained'
+            type='submit'
+            disabled={isDisabled}
+            sx={{
+              height: 48,
+              display: 'none',
+              px: 4,
+              typography: 'h3',
+
+              [media.TABLET]: {
+                display: 'flex',
+              },
+              [media.DESKTOP]: {
+                height: 64,
+              },
+            }}
+          >
+            Create
+          </Button>
         </Group>
         <Button
           variant='contained'
@@ -183,13 +198,7 @@ export const LinkCreationForm: FC<Props> = ({ onCreate, onTyping }) => {
             typography: 'h3',
 
             [media.TABLET]: {
-              height: 48,
-              position: 'absolute',
-              right: 80,
-            },
-            [media.DESKTOP]: {
-              height: 64,
-              right: 200,
+              display: 'none',
             },
           }}
         >

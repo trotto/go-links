@@ -64,7 +64,7 @@ Python 3.8 [virtualenv](https://docs.python.org/3/library/venv.html) and install
 
 ```
 cd go-links/server
-python3 -m venv .virtualenv
+python3.11 -m venv .virtualenv
 source .virtualenv/bin/activate
 pip install -r src/requirements.txt
 ```
