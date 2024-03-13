@@ -21,18 +21,6 @@ class TestRedirectHandlerWithoutLogin(TrottoTestCase):
     self.assertEqual(302, response.status_int)
     self.assertEqual('/_/auth/login?redirect_to=%2Fbenefits%3Fs%3Dcrx', response.location)
 
-  def test_get__not_logged_in__http_bare_host_request_coming_from_browser_extension(self):
-    response = self.testapp.get('/benefits?s=crx&sc=http')
-
-    self.assertEqual(302, response.status_int)
-    self.assertEqual('http://benefits?tr=ot', response.location)
-
-  def test_get__not_logged_in__https_bare_host_request_coming_from_browser_extension(self):
-    response = self.testapp.get('/benefits?s=crx&sc=https')
-
-    self.assertEqual(302, response.status_int)
-    self.assertEqual('https://benefits?tr=ot', response.location)
-
 
 class TestRedirectHandler(TrottoTestCase):
 

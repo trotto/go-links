@@ -10,7 +10,7 @@
   },
   "devDependencies": {
     "jest": "^29.7.0",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.2",
     "playwright": "^1.41.2",
     "yaml": "^2.2.2"
   }
