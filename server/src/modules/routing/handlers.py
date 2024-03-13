@@ -42,19 +42,11 @@ def queue_event(org_id, followed_at, shortlink_id, destination, accessed_via, em
                 timestamp=followed_at)
 
 
-def force_to_original_url():
-  return redirect(str('%s://%s?tr=ot' % (request.args.get('sc'), request.path[1:])))
-
-
 @routes.route('/<path:path>', methods=['GET'])
 def get_go_link(path):
   requested_at = time.time()
 
   if not getattr(current_user, 'email', None):
-    if request.args.get('s') == 'crx' and request.args.get('sc'):
-      # see: go/484356182846856
-      return force_to_original_url()
-
     return redirect('/_/auth/login?%s' % parse.urlencode({'redirect_to': request.full_path}))
 
   provided_shortpath = parse.unquote(path.strip('/'))
@@ -81,8 +73,6 @@ def get_go_link(path):
                 destination,
                 request.args.get('s') or 'other')
     return redirect(str(destination))
-  elif request.args.get('s') == 'crx' and request.args.get('sc'):
-    return force_to_original_url()
   else:
     for router in ROUTERS:
       response = router(current_user.organization, namespace, shortpath)
