@@ -25,8 +25,13 @@ def get_config():
     return yaml.load(base64.b64decode(os.getenv('TROTTO_CONFIG')), Loader=yaml.SafeLoader)
 
   if os.getenv('DATABASE_URL') and os.getenv('FLASK_SECRET'):
-    return {'postgres': {'url': os.getenv('DATABASE_URL')},
-            'sessions_secret': os.getenv('FLASK_SECRET')}
+    return {
+      'postgres': {
+        'url': os.getenv('DATABASE_URL')
+      },
+      'sessions_secret': os.getenv('FLASK_SECRET'),
+      'google_auth_hosted_domain': os.getenv('GOOGLE_AUTH_HOSTED_DOMAIN') or None
+    }
 
   config_file_name = 'secrets.yaml'
 

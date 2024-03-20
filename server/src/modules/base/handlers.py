@@ -40,7 +40,12 @@ def get_google_login_url(oauth_redirect_uri=None, redirect_to_after_oauth=None):
 
   session['oauth_state'] = utils.generate_secret(32)
   try:
-    return str(flow.step1_get_authorize_url(state=session['oauth_state']))
+    url = str(flow.step1_get_authorize_url(state=session["oauth_state"]))
+    hosted_domain = get_config().get('google_auth_hosted_domain', None)
+    if hosted_domain:
+      return f'{url}&hd={hosted_domain}'
+    else:
+      return url
   except TypeError:
     # TODO: Fix breakage only appearing in tests.
     return str(flow.step1_get_authorize_url())
