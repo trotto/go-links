@@ -46,6 +46,10 @@ def init_app_without_routes(disable_csrf=False):
   app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
   app.config['SESSION_COOKIE_SECURE'] = True
 
+  app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+    'pool_pre_ping': True
+  }
+
   from modules.base import authentication
 
   if os.getenv('ENVIRONMENT') == 'test_env':
@@ -175,7 +179,7 @@ def home():
 
   if feature_flags.provider.get('new_frontend', current_user):
     return render_template('_next_static/index.html')
-  
+
   nonce = os.urandom(16).hex()
 
   response = render_template('index.html',
