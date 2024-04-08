@@ -54,7 +54,6 @@ export const LinkList: FC<Props> = ({ links, isLoading = false }) => {
     <Box
       sx={{
         height: '100%',
-        overflow: 'scroll',
         '& .ReactVirtualized__List': {
           '&::-webkit-scrollbar': {
             display: 'none',

@@ -1,5 +1,5 @@
 import { Box, InputAdornment, TextField } from '@mui/material'
-import { ChangeEvent, FC, useCallback } from 'react'
+import { ChangeEvent, FC, useCallback, useRef } from 'react'
 
 import { Search as SearchIcon } from 'app/icons'
 import { media } from 'app/styles/theme'
@@ -14,10 +14,12 @@ export const Search: FC<Props> = ({ value, onChange }) => {
     (e: ChangeEvent<HTMLInputElement>) => onChange(e.target.value),
     [onChange],
   )
+  const inputRef = useRef<HTMLInputElement>(null)
   return (
     <Box
       sx={{
         display: 'flex',
+        cursor: 'text',
         justifyContent: 'space-around',
         alignItems: 'center',
         mt: 3,
@@ -35,8 +37,10 @@ export const Search: FC<Props> = ({ value, onChange }) => {
           height: 64,
         },
       }}
+      onClick={() => inputRef.current?.focus()}
     >
       <TextField
+        inputRef={inputRef}
         className='input'
         placeholder='Search keyword, domain or username'
         value={value}

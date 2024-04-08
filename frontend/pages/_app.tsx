@@ -5,7 +5,7 @@ import type { AppProps } from 'next/app'
 import Head from 'next/head'
 import { SnackbarProvider } from 'notistack'
 
-import { Footer, NavBar } from 'app/components'
+import { NavBar } from 'app/components'
 import { Context } from 'app/context'
 import { useGetMe } from 'app/hooks'
 import { theme, globalStyles } from 'app/styles'
@@ -25,7 +25,6 @@ export default function App({ Component, pageProps }: AppProps) {
             <Box sx={{ overflow: 'hidden', flexGrow: 1 }}>
               <Component {...pageProps} />
             </Box>
-            <Footer />
           </Box>
         </SnackbarProvider>
       </ThemeProvider>

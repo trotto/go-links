@@ -1,6 +1,6 @@
 import PersonIcon from '@mui/icons-material/Person'
 import { Avatar, Box, IconButton, Menu, MenuItem, MenuItemProps, Link } from '@mui/material'
-import { MouseEvent, useState, FC, PropsWithChildren, useContext, useMemo } from 'react'
+import { MouseEvent, useState, FC, PropsWithChildren, useContext } from 'react'
 
 import { navigationLinks } from 'app/config'
 import { Context } from 'app/context'
@@ -18,8 +18,8 @@ interface MLProps extends PropsWithChildren {
 }
 
 const MenuLink: FC<MLProps> = ({ sx, children, href }) => (
-  <MenuItem sx={{ pt: 1, pb: 1, px: 3, typography: 'body1', ...sx }}>
-    <Link variant='body1' href={href} sx={{ color: '#343aaa' }}>
+  <MenuItem sx={{ p: 0, typography: 'body1', ...sx }}>
+    <Link variant='body1' href={href} sx={{ width: '100%', py: 1, px: 3, color: '#343aaa' }}>
       {children}
     </Link>
   </MenuItem>
@@ -27,7 +27,6 @@ const MenuLink: FC<MLProps> = ({ sx, children, href }) => (
 
 export const UserMenu: FC<Props> = ({ adminLinks }) => {
   const { user } = useContext(Context)
-  const feedbackLink = useMemo(() => user && navigationLinks.SHARE_FEEDBACK(user.email), [user])
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
   const open = Boolean(anchorEl)
@@ -133,16 +132,10 @@ export const UserMenu: FC<Props> = ({ adminLinks }) => {
         <Box
           sx={{
             py: 2,
-            '& .MuiMenuItem-root': {
-              px: 3,
-              color: '#343aaa',
-              typography: 'body1',
-            },
           }}
         >
-          <Box sx={{ pt: 1, pb: 1, px: 3, typography: 'body1', color: '#343aaa' }}>
-            {user?.email}
-          </Box>
+          <Box sx={{ py: 1, px: 3, typography: 'body1', color: '#343aaa' }}>{user?.email}</Box>
+          <MenuLink href={navigationLinks.PRIVACY}>Privacy & Terms</MenuLink>
           <MenuLink href={navigationLinks.LOGOUT}>Sign Out</MenuLink>
         </Box>
         <Box
