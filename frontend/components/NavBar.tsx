@@ -79,11 +79,20 @@ export const NavBar: FC = () => {
             >
               Documentation
             </Link>
-            {user?.admin && adminLinks?.map(({ url, text }) => (
-              <Link href={url} key={url} target='_blank' typography='h2' sx={{ fontWeight: 400 }}>
-                {text}
-              </Link>
-            ))}
+            <Link 
+              href={navigationLinks.CONTACT} 
+              typography='h2' 
+              sx={{ fontWeight: 400 }}
+              target='_blank'
+            >
+              Contact Us
+            </Link>
+            {user?.admin &&
+              adminLinks?.map(({ url, text }) => (
+                <Link href={url} key={url} target='_blank' typography='h2' sx={{ fontWeight: 400 }}>
+                  {text}
+                </Link>
+              ))}
           </Box>
           <Box>
             <UserMenu adminLinks={adminLinks} />
