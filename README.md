@@ -1,7 +1,5 @@
 # Trotto Go Links
 
-* Apr 3, 2025 *
-
 After careful consideration, we've made the decision to sunset the open source browser extension and we will no longer be updating the open source version of Trotto go links. Trotto was started in 2017 and we have had a wonderful journey as go links have become a beloved productivity tool for many. There are many open source go link options but we’re proud to say that Trotto is one of the best, with valuable features and proven stability. 
 
 However, with the recent changes requested by Chrome’s Manifest v3, continuing ongoing maintenance, and a robust product roadmap of features we’d like to work on, it is no longer sustainable to try to maintain the open source version of Trotto. 
@@ -47,3 +45,4 @@ and programmatic links, which are go links containing placeholders that map onto
 URL (ex: `go/gh/%s` pointing to `https://github.com/my_org/%s`).
 
 ```
+
