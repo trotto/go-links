@@ -1,25 +1,38 @@
 # Trotto Go Links
 
-[![CircleCI](https://dl.circleci.com/status-badge/img/circleci/Wp5qWwVchXp4teudjvx2zq/3F8UyJs2UMqV9cR5YLdip9/tree/master.svg?style=svg&circle-token=5eb7268ab9c1eb72a0991609d3c7292340397c25)](https://dl.circleci.com/status-badge/redirect/circleci/Wp5qWwVchXp4teudjvx2zq/3F8UyJs2UMqV9cR5YLdip9/tree/master)
+After careful consideration, we've made the decision to sunset the open source browser extension and we will no longer be updating the open source version of Trotto go links. Trotto was started in 2017 and we have had a wonderful journey as go links have become a beloved productivity tool for many. There are many open source go link options but we’re proud to say that Trotto is one of the best, with valuable features and proven stability. 
 
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/trotto/go-links)
+However, with the recent changes requested by Chrome’s Manifest v3, continuing ongoing maintenance, and a robust product roadmap of features we’d like to work on, it is no longer sustainable to try to maintain the open source version of Trotto. 
 
-_(See the guide [here](https://www.trot.to/docs/deploy/deploy-to-heroku) to deploy to Heroku in minutes.)_
+We believed that the open source version would lead more customers to eventually adopt the SaaS version but that has been proven not to work these past 7 years. 
+
+What this means:
+
+- The browser extension repository has been taken down
+- No new features will be added
+- No bug fixes will be implemented
+- Issues and pull requests will be closed
+- For those using the open source Chrome browser extension, Chrome will dictate how long they will continue to allow private Manifest v2 extensions
+
+For those actively using this project, we would love if you would consider using the SaaS version of Trotto. There are a number of benefits of the SaaS version:
+
+- Updated UI
+- SSO integration
+- Updated admin controls including analytics
+- Available Slack app
+- Manifest v3 compliant browser extension
+- SOC 2 Type 2 audited
+- ‘Featured’ go links
+
+We’re grateful for everything we've learned through maintaining this project, thank you for being part of this journey.
+
+
+## Trotto go links
+
 
 Reliable and battle-tested continuously in production since 2017, this [go links](https://www.trot.to/go-links) solution
 is used by companies all around the world daily as the core of [Trotto](https://www.trot.to).
 
-Try out the latest build at [latest-master.trotto.dev](https://latest-master.trotto.dev) and also check out the
-matching [open-source browser extension](https://github.com/trotto/browser-extension).
-
-If you'd rather use the fully-managed instance of Trotto, visit [www.trot.to](https://www.trot.to).
-
----
-
-Don't hesitate to reach out to us through help@trot.to, a GitHub issue, or live chat
-at https://www.trot.to.
-
----
 
 ## Features
 
@@ -27,106 +40,6 @@ Trotto provides all the baseline functionality you'd expect from a go links solu
 create, use, and modify go links that are shared with your organization—and with nobody else.
 
 Trotto also includes powerful features above and beyond a basic go links implementation, including a searchable go
-links directory, a [browser extension](https://github.com/trotto/browser-extension) that makes go links work instantly,
+links directory, a browser extension that makes go links work instantly,
 and programmatic links, which are go links containing placeholders that map onto the destination
 URL (ex: `go/gh/%s` pointing to `https://github.com/my_org/%s`).
-
-For a full list of Trotto's features, check out https://www.trot.to/how-it-works.
-
-## Authentication
-
-At the moment, the open-source app solely supports authentication using a Google account,
-but we plan to add support for additional identity providers upon request. So if you need support
-for another provider, submit a GitHub issue, and we'll help you out!
-
-## Deploy the app
-
-See our deployment docs:
-
-- [Deploy to Heroku](http://www.trot.to/docs/deploy/deploy-to-heroku)
-- [Deploy with Docker](http://www.trot.to/docs/deploy/deploy-with-docker)
-
-## Local development
-
-You can bring up a local instance of Trotto within a few minutes.
-
-### Clone this repository
-
-```
-git clone git@github.com:trotto/go-links.git
-cd go-links
-```
-
-### Create a virtualenv
-
-Inside the `go-links/server` directory, create and enter a
-Python 3.8 [virtualenv](https://docs.python.org/3/library/venv.html) and install dependencies:
-
-```
-cd go-links/server
-python3.11 -m venv .virtualenv
-source .virtualenv/bin/activate
-pip install -r src/requirements.txt
-```
-
-You can use `pyenv` as well.
-
-### Add an app.yml file
-
-Add a file at `server/src/config/app.yml` with this format:
-
-```yaml
-sessions_secret: any_secret
-postgres:
-  url: "postgresql://username:password@host/database"
-```
-
-`postgres.url` should be the connection string for a Postgres 12 database. The server
-startup script will add the tables Trotto needs.
-
-### Start the backend server
-
-From the `server/` directory, run:
-
-```
-./run_local.sh
-```
-
-### Start the frontend development server
-
-In a separate terminal, from the `frontend/` directory, run:
-
-```
-yarn install
-yarn dev
-```
-
-Now, you can access the local instance at http://localhost:3000.
-
-### Making changes
-
-Most server-side and frontend changes should be picked up automatically, thanks to the Flask dev server and
-[React Hot Loader](https://github.com/gaearon/react-hot-loader).
-
-### Database migrations
-
-- update a table model file, e.g., `server/src/modules/data/implementations/postgres/links.py`
-- created a revision file, e.g., `./scripts/create_revision.sh "Add unlisted column"`
-- review the generated file in `server/src/migrations/versions`
-- reload the app to apply the migration
-
-### Running tests
-
-#### Python
-
-All tests:
-
-```
-./run_tests/run.sh
-```
-
-Subset of tests:
-
-```
-./run_tests/run.sh modules.links.tests.handlers_tests:TestUnlistedLinks
-```
