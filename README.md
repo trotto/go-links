@@ -43,6 +43,3 @@ Trotto also includes powerful features above and beyond a basic go links impleme
 links directory, a browser extension that makes go links work instantly,
 and programmatic links, which are go links containing placeholders that map onto the destination
 URL (ex: `go/gh/%s` pointing to `https://github.com/my_org/%s`).
-
-```
-
