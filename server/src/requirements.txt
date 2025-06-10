@@ -8,7 +8,7 @@ oauth2client==4.1.2
 oauthlib==2.0.6
 psycopg2-binary==2.9.9
 python-dateutil==2.8.1
-requests==2.31.0
+requests==2.32.4
 Flask==3.0.2
 Flask-Login==0.6.3
 Flask-Migrate==3.1.0
