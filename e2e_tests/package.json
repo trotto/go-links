@@ -11,7 +11,7 @@
   "devDependencies": {
     "jest": "^29.7.0",
     "jsonwebtoken": "^9.0.2",
-    "playwright": "^1.41.2",
+    "playwright": "^1.55.1",
     "yaml": "^2.2.2"
   }
 }
