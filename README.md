@@ -1,40 +1,50 @@
 # Trotto Go Links
 
-After careful consideration, we've made the decision to sunset the open source browser extension and we will no longer be updating the open source version of Trotto go links. Trotto was started in 2017 and we have had a wonderful journey as go links have become a beloved productivity tool for many. There are many open source go link options but we’re proud to say that Trotto is one of the best, with valuable features and proven stability. 
+> **Trotto is an active, supported product.** For go links at your company, use the hosted version at
+> [trot.to](https://www.trot.to). It's free for up to 10 users, with Chrome and Firefox extensions, Google and
+> Microsoft sign-in (Okta and OneLogin on Enterprise), a Slack app, and SOC 2 Type II.
+> [Get started](https://www.trot.to/getting-started) · [Pricing](https://www.trot.to/pricing) · [Docs](https://docs.trot.to)
 
-However, with the recent changes requested by Chrome’s Manifest v3, continuing ongoing maintenance, and a robust product roadmap of features we’d like to work on, it is no longer sustainable to try to maintain the open source version of Trotto. 
+This repository is the **legacy open-source edition** of Trotto's go links server. It is no longer maintained.
+The hosted Trotto product is separate and is still actively developed.
 
-We believed that the open source version would lead more customers to eventually adopt the SaaS version but that has been proven not to work these past 7 years. 
+## About this repository
 
-What this means:
+Trotto started in 2017. In April 2025 we stopped maintaining this open-source edition. The reasons
+were Chrome's Manifest v3 changes, the ongoing maintenance cost, and our roadmap for the hosted product. For this
+repository, that means:
 
-- The browser extension repository has been taken down
 - No new features will be added
 - No bug fixes will be implemented
 - Issues and pull requests will be closed
-- For those using the open source Chrome browser extension, Chrome will dictate how long they will continue to allow private Manifest v2 extensions
+- The *open-source* browser extension repository has been taken down. If you still run it, Chrome decides how long
+  it will keep allowing private Manifest v2 extensions.
 
-For those actively using this project, we would love if you would consider using the SaaS version of Trotto. There are a number of benefits of the SaaS version:
+**This applies only to the open-source edition.** The hosted Trotto browser extension is maintained and Manifest v3
+compliant, and it's available on the
+[Chrome Web Store](https://chromewebstore.google.com/detail/trotto-go-links/nkeoojidblilnkcbbmfhaeebndapehjk) and
+[Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/trotto-go-links/).
 
-- Updated UI
+## Moving to hosted Trotto
+
+If you run this project yourself, we'd love for you to try hosted Trotto. You also get:
+
+- An updated UI
 - SSO integration
-- Updated admin controls including analytics
-- Available Slack app
-- Manifest v3 compliant browser extension
-- SOC 2 Type 2 audited
-- ‘Featured’ go links
+- Admin controls, including analytics
+- A Slack app
+- A Manifest v3 browser extension
+- SOC 2 Type II audits
+- "Featured" go links
 
-We’re grateful for everything we've learned through maintaining this project, thank you for being part of this journey.
+Questions about moving over? Email [help@trot.to](mailto:help@trot.to).
 
-
-## Trotto go links
-
-
-Reliable and battle-tested continuously in production since 2017, this [go links](https://www.trot.to/go-links) solution
-is used by companies all around the world daily as the core of [Trotto](https://www.trot.to).
-
+We're grateful for everything we learned maintaining this project, and thank you for being part of this journey.
 
 ## Features
+
+This [go links](https://www.trot.to/go-links) solution has run in production continuously since 2017, and it is
+still the core of [Trotto](https://www.trot.to).
 
 Trotto provides all the baseline functionality you'd expect from a go links solution, including the ability to
 create, use, and modify go links that are shared with your organization—and with nobody else.
